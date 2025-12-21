@@ -1,22 +1,28 @@
-import adapter from '@sveltejs/adapter-auto';
+// 1. adapter-auto 대신 adapter-static을 불러옵니다.
+import adapter from '@sveltejs/adapter-static';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
-import { mdsvex } from 'mdsvex'; // 1. mdsvex 불러오기
+import { mdsvex } from 'mdsvex';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-	// 2. preprocess 배열 안에 mdsvex 실행 함수 넣기
 	preprocess: [
 		vitePreprocess(),
 		mdsvex({
-			extensions: ['.md'] // .md 확장자 처리 설정
+			extensions: ['.md']
 		})
 	],
 
 	kit: {
-		adapter: adapter()
+		// 2. 어댑터 설정: 모든 파일을 'build' 폴더로 내보냅니다.
+		adapter: adapter({
+			pages: 'build',
+			assets: 'build',
+			fallback: null,
+			precompress: false,
+			strict: true
+		})
 	},
 
-	// 3. extensions 배열에 .md 추가
 	extensions: ['.svelte', '.md']
 };
 
