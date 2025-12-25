@@ -8,7 +8,10 @@ const config = {
 	preprocess: [
 		vitePreprocess(),
 		mdsvex({
-			extensions: ['.md']
+			extensions: ['.md'],
+			layout: {
+        _: "./src/lib/layouts/PostLayout.svelte" 
+      }
 		})
 	],
 

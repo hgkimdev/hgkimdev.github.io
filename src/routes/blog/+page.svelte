@@ -1,5 +1,6 @@
 <script>
   export let data;
+  import Comment from "$lib/components/Comment.svelte";
 </script>
 
 <div class="max-w-2xl mx-auto py-20 px-4">
