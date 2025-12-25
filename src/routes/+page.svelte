@@ -1,12 +1,13 @@
 <script>
   import { fade } from 'svelte/transition';
+  import Typewriter from "$lib/components/Typewriter.svelte";
 </script>
 
 <div class="max-w-2xl mx-auto px-4 pt-20 pb-16" in:fade={{ duration: 500 }}>
   <div class="mb-12">
     <h1 class="text-3xl md:text-4xl font-bold mb-6 tracking-tight
                text-gray-900 dark:text-white">
-      안녕하세요, 김형근입니다.
+      안녕하세요, <Typewriter text="김형근입니다." speed={150} />
     </h1>
     
     <div class="prose prose-lg leading-relaxed
@@ -15,7 +16,8 @@
         Ruby on Rails와 SvelteKit을 즐겨 사용하는 초보 개발자입니다.
         <br/>
         복잡한 문제를 단순하게 해결하는 것을 좋아하며, 
-        배운 것을 글로 남기는 과정을 통해 성장합니다.
+        <br/>
+        만들면서 배우는 탑다운 학습 방식을 선호합니다.
       </p>
       <p>
         현재는 1인 SaaS 개발과 모던 웹 기술에 관심이 많습니다.
