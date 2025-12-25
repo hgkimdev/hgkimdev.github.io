@@ -2,6 +2,23 @@
   import "./layout.css"; 
   import ThemeToggle from "$lib/components/ThemeToggle.svelte";
   import ProgressBar from "$lib/components/ProgressBar.svelte";
+	import { onMount } from 'svelte';
+  import { page } from '$app/stores';
+
+	// ★ GA 추적 로직 추가
+  onMount(() => {
+    // page store가 변할 때(즉, URL이 바뀔 때)마다 실행
+    const unsubscribe = page.subscribe((url) => {
+      // gtag 함수가 있고, 로컬호스트가 아닐 때만 전송
+      if (typeof gtag !== 'undefined' && window.location.hostname !== 'localhost') {
+        gtag('config', 'G-XXXXXXXXXX', {
+          page_path: url.url.pathname + url.url.search,
+          page_title: document.title
+        });
+      }
+    });
+    return () => unsubscribe();
+  });
 </script>
 
 <ProgressBar />
