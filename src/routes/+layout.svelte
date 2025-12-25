@@ -11,7 +11,7 @@
     const unsubscribe = page.subscribe((url) => {
       // gtag 함수가 있고, 로컬호스트가 아닐 때만 전송
       if (typeof gtag !== 'undefined' && window.location.hostname !== 'localhost') {
-        gtag('config', 'G-ZS4WDL9BFE', {
+        gtag('config', 'G-1DNST49PPK', {
           page_path: url.url.pathname + url.url.search,
           page_title: document.title
         });
