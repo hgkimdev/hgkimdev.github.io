@@ -13,7 +13,7 @@
     <div class="prose prose-lg leading-relaxed
                 text-gray-600 dark:text-gray-300 dark:prose-invert">
       <p>
-        Ruby on Rails와 SvelteKit을 즐겨 사용하는 초보 개발자입니다.
+        Ruby on Rails를 즐겨 사용하는 초보 개발자입니다.
         <br/>
         완벽주의보다는 실용주의를, 오버엔지니어링보다는 심플한 해결책을 지향합니다.
         <br/>
