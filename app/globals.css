@@ -129,13 +129,25 @@
   }
 }
 
-::view-transition-old(root) {
-  animation: none;
+/* Navigation: a plain full-viewport crossfade (the browser's default
+   old/new animations, just shortened). Only the root snapshot is involved,
+   and root snapshots are viewport-sized, so a scroll-position difference
+   between the two pages can never show up as movement. This applies
+   uniformly to every navigation — zone switcher, header links,
+   back/forward — with no per-link state to set or clean up. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 200ms;
 }
 
-::view-transition-new(root) {
-  animation: none;
-  clip-path: inset(0 0 0 0);
+/* React auto-assigns a view-transition-name to the PageTransition wrapper,
+   which would lift the page content out of the root snapshot and give it a
+   geometry-morphing group of its own — that morph is what used to play as a
+   fake scroll-to-top. Void the name; the <ViewTransition> boundary only
+   exists to activate the transition on navigation (see
+   components/page-transition.tsx). */
+.page-vt {
+  view-transition-name: none !important;
 }
 
 @keyframes theme-wipe-up {
@@ -156,10 +168,58 @@
   }
 }
 
-.dark::view-transition-new(root) {
+/* Theme toggle: the new theme wipes vertically over the frozen old page.
+   Scoped to data-transition-kind="theme" (set by ThemeToggle right before
+   startViewTransition, removed when it finishes) so navigations keep their
+   crossfade. Note: the "correct" way to scope this would be `types` on
+   startViewTransition + :active-view-transition-type() in CSS, but that
+   pseudo-class doesn't actually match in this environment — verified the
+   rule silently never applies. A plain attribute is what actually works. */
+:root[data-transition-kind="theme"]::view-transition-old(root) {
+  animation: none;
+}
+:root[data-transition-kind="theme"]::view-transition-new(root) {
+  animation: none;
+  clip-path: inset(0 0 0 0);
+}
+:root[data-transition-kind="theme"].dark::view-transition-new(root) {
   animation: theme-wipe-up 0.5s ease-in-out;
 }
-
-:root:not(.dark)::view-transition-new(root) {
+:root[data-transition-kind="theme"]:not(.dark)::view-transition-new(root) {
   animation: theme-wipe-down 0.5s ease-in-out;
+}
+
+/* The header uses backdrop-blur, which the browser can't capture correctly
+   when it's flattened into the single full-page root snapshot — it briefly
+   renders without the blur, so text behind shows through. Pulling it into
+   its own named group (only during the theme transition, so navigation's
+   root crossfade is untouched) makes it its own compositing layer, which
+   captures the blur correctly. */
+:root[data-transition-kind="theme"] .site-header {
+  view-transition-name: site-header;
+}
+/* The delay has to match which way the root wipe is going: wipe-up (→dark)
+   reveals from the bottom and only reaches the header, at the very top,
+   near the end of the 0.5s — so the header should hold its old color until
+   then. wipe-down (→light) reveals from the top and reaches the header
+   immediately, so it should recolor with no delay. Without this split, one
+   direction always looks off by ~0.35s. */
+:root[data-transition-kind="theme"].dark::view-transition-old(site-header),
+:root[data-transition-kind="theme"].dark::view-transition-new(site-header) {
+  animation-duration: 0.15s;
+  animation-delay: 0.35s;
+}
+:root[data-transition-kind="theme"]:not(.dark)::view-transition-old(site-header),
+:root[data-transition-kind="theme"]:not(.dark)::view-transition-new(site-header) {
+  animation-duration: 0.15s;
+  animation-delay: 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
 }

@@ -14,6 +14,7 @@ type Dictionary = {
   themeToggleLabel: string;
   menuLabel: string;
   readMore: string;
+  zoneLabels: { intro: string; blog: string };
   footer: (year: number) => string;
 };
 
@@ -46,6 +47,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
     themeToggleLabel: "테마 전환",
     menuLabel: "메뉴 열기",
     readMore: "자세히 보기",
+    zoneLabels: { intro: "Intro", blog: "Blog" },
     footer: (year) => `© ${year} hgkim. Built with Next.js.`,
   },
   en: {
@@ -54,10 +56,14 @@ export const dictionaries: Record<Locale, Dictionary> = {
     nav: {
       about: { label: "About Me", description: "My story and values" },
       now: { label: "Now", description: "What I'm learning and focused on" },
-      projects: { label: "Projects", description: "Projects and dev experience" },
+      projects: {
+        label: "Projects",
+        description: "Projects and dev experience",
+      },
       life: {
         label: "Life",
-        description: "Travel, books & movies, language learning — life outside work",
+        description:
+          "Travel, books & movies, language learning — life outside work",
       },
       blog: { label: "Blog", description: "Thoughts and things I've learned" },
       timeline: {
@@ -76,6 +82,79 @@ export const dictionaries: Record<Locale, Dictionary> = {
     themeToggleLabel: "Toggle theme",
     menuLabel: "Open menu",
     readMore: "Read more",
+    zoneLabels: { intro: "Intro", blog: "Blog" },
+    footer: (year) => `© ${year} hgkim. Built with Next.js.`,
+  },
+  fr: {
+    brand: "hgkim",
+    metaDescription: "Un espace pour me présenter",
+    nav: {
+      about: { label: "About Me", description: "Mon histoire et mes valeurs" },
+      now: {
+        label: "Now",
+        description: "Ce que j'apprends et sur quoi je me concentre",
+      },
+      projects: {
+        label: "Projects",
+        description: "Projets et expérience de développement",
+      },
+      life: {
+        label: "Life",
+        description:
+          "Voyages, livres et films, apprentissage des langues — la vie en dehors du travail",
+      },
+      blog: { label: "Blog", description: "Réflexions et choses apprises" },
+      timeline: {
+        label: "Timeline",
+        description: "Liste de rêves et chronologie de vie",
+      },
+      contact: { label: "Contact", description: "Me contacter" },
+    },
+    home: {
+      greeting: "Salut, je suis hgkim 👋",
+      heading: "Je construis un espace qui me présente, naturellement.",
+      intro:
+        "En ce moment, je construis ce site lui-même. Jetez un œil aux sections ci-dessous.",
+    },
+    comingSoon: "Bientôt disponible.",
+    themeToggleLabel: "Changer de thème",
+    menuLabel: "Ouvrir le menu",
+    readMore: "En savoir plus",
+    zoneLabels: { intro: "Intro", blog: "Blog" },
+    footer: (year) => `© ${year} hgkim. Créé avec Next.js.`,
+  },
+  ja: {
+    brand: "hgkim",
+    metaDescription: "私を紹介する空間",
+    nav: {
+      about: { label: "About Me", description: "私の物語と価値観" },
+      now: {
+        label: "Now",
+        description: "今学んでいること、力を入れていること",
+      },
+      projects: { label: "Projects", description: "プロジェクトと開発経験" },
+      life: {
+        label: "Life",
+        description: "旅行、本や映画、語学学習など仕事以外の生活",
+      },
+      blog: { label: "Blog", description: "考えたことと学んだこと" },
+      timeline: {
+        label: "Timeline",
+        description: "バケットリストと人生年表",
+      },
+      contact: { label: "Contact", description: "お問い合わせ" },
+    },
+    home: {
+      greeting: "こんにちは、hgkimです 👋",
+      heading: "自分らしさを自然に伝える場所を作っています。",
+      intro:
+        "今はこのサイト自体を作っている最中です。下のセクションをひとつずつご覧ください。",
+    },
+    comingSoon: "準備中です。",
+    themeToggleLabel: "テーマ切り替え",
+    menuLabel: "メニューを開く",
+    readMore: "詳しく見る",
+    zoneLabels: { intro: "Intro", blog: "Blog" },
     footer: (year) => `© ${year} hgkim. Built with Next.js.`,
   },
 };

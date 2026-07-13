@@ -1,4 +1,4 @@
-export const locales = ["ko", "en"] as const;
+export const locales = ["ko", "en", "fr", "ja"] as const;
 
 export type Locale = (typeof locales)[number];
 
@@ -6,7 +6,7 @@ export const defaultLocale: Locale = "ko";
 
 export function localizeHref(path: string, locale: Locale): string {
   if (locale === defaultLocale) return path;
-  return path === "/" ? "/en" : `/en${path}`;
+  return path === "/" ? `/${locale}` : `/${locale}${path}`;
 }
 
 export function localizeAnchor(id: string, locale: Locale): string {

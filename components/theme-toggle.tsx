@@ -41,7 +41,19 @@ export function ThemeToggle({ label }: { label: string }) {
       return;
     }
 
-    document.startViewTransition(applyTheme);
+    // `types` on startViewTransition + `:active-view-transition-type()` in
+    // CSS would be the "proper" way to scope this, but that pseudo-class
+    // isn't actually matching in this environment (verified: the rule gets
+    // dropped/never matches). Use a plain attribute instead, same approach
+    // as ZoneSwitcher's data-zone-nav.
+    document.documentElement.dataset.transitionKind = "theme";
+    const transition = document.startViewTransition(applyTheme);
+    // Clear the attribute once the wipe is done, otherwise the theme-scoped
+    // rules keep matching on later navigations and the header stays merged
+    // into the root snapshot (see .site-header in globals.css).
+    transition.finished.finally(() => {
+      delete document.documentElement.dataset.transitionKind;
+    });
   }
 
   return (

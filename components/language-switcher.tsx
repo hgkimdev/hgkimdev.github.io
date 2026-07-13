@@ -1,58 +1,78 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { motion } from "motion/react";
+import { usePathname, useRouter } from "next/navigation";
+import { Languages } from "lucide-react";
 
-import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { defaultLocale, locales, type Locale } from "@/lib/i18n/config";
+
+const localeShortLabels: Record<Locale, string> = {
+  ko: "KO",
+  en: "EN",
+  fr: "FR",
+  ja: "JA",
+};
+
+const localeNativeLabels: Record<Locale, string> = {
+  ko: "한국어",
+  en: "English",
+  fr: "Français",
+  ja: "日本語",
+};
+
+function getCurrentLocale(pathname: string): Locale {
+  return (
+    locales.find(
+      (locale) =>
+        locale !== defaultLocale &&
+        (pathname === `/${locale}` || pathname.startsWith(`/${locale}/`))
+    ) ?? defaultLocale
+  );
+}
 
 export function LanguageSwitcher() {
+  const router = useRouter();
   const pathname = usePathname();
-  const isEn = pathname === "/en" || pathname.startsWith("/en/");
-  const basePath = isEn ? pathname.replace(/^\/en/, "") || "/" : pathname;
-  const koHref = basePath;
-  const enHref = basePath === "/" ? "/en" : `/en${basePath}`;
+  const currentLocale = getCurrentLocale(pathname);
+  const basePath =
+    currentLocale === defaultLocale
+      ? pathname
+      : pathname.replace(new RegExp(`^/${currentLocale}`), "") || "/";
+
+  function handleValueChange(locale: Locale | null) {
+    if (!locale) return;
+    const href =
+      locale === defaultLocale
+        ? basePath
+        : basePath === "/"
+          ? `/${locale}`
+          : `/${locale}${basePath}`;
+    router.push(href);
+  }
 
   return (
-    <div className="relative inline-flex items-center rounded-full border border-border bg-muted/50 p-0.5 text-xs font-medium">
-      <Link
-        href={koHref}
-        aria-current={!isEn}
-        className={cn(
-          "relative z-10 rounded-full px-2.5 py-1 transition-[color,transform] hover:scale-105 active:scale-95",
-          !isEn ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-        )}
-      >
-        {!isEn && (
-          <motion.span
-            layout
-            initial={{ scale: 0.6, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 500, damping: 22 }}
-            className="absolute inset-0 -z-10 rounded-full bg-background shadow-sm"
-          />
-        )}
-        KO
-      </Link>
-      <Link
-        href={enHref}
-        aria-current={isEn}
-        className={cn(
-          "relative z-10 rounded-full px-2.5 py-1 transition-[color,transform] hover:scale-105 active:scale-95",
-          isEn ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-        )}
-      >
-        {isEn && (
-          <motion.span
-            layout
-            initial={{ scale: 0.6, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 500, damping: 22 }}
-            className="absolute inset-0 -z-10 rounded-full bg-background shadow-sm"
-          />
-        )}
-        EN
-      </Link>
-    </div>
+    <Select
+      items={localeShortLabels}
+      value={currentLocale}
+      onValueChange={handleValueChange}
+    >
+      <SelectTrigger aria-label="Change language">
+        <Languages className="size-4" />
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent align="end">
+        {locales.map((locale) => (
+          <SelectItem key={locale} value={locale}>
+            {localeNativeLabels[locale]}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }

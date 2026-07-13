@@ -4,14 +4,14 @@ import { motion } from "motion/react";
 
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
-import { navKeys } from "@/lib/nav";
+import { homeSectionKeys } from "@/lib/nav";
 
 export function HomeSections({ locale }: { locale: Locale }) {
   const dict = getDictionary(locale);
 
   return (
     <div>
-      {navKeys.map((key, index) => (
+      {homeSectionKeys.map((key, index) => (
         <motion.section
           key={key}
           id={key}
@@ -23,7 +23,7 @@ export function HomeSections({ locale }: { locale: Locale }) {
         >
           <span className="font-mono text-sm text-muted-foreground">
             {String(index + 1).padStart(2, "0")} /{" "}
-            {String(navKeys.length).padStart(2, "0")}
+            {String(homeSectionKeys.length).padStart(2, "0")}
           </span>
           <h2 className="text-4xl font-bold tracking-tight sm:text-6xl">
             {dict.nav[key].label}
