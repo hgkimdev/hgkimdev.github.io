@@ -49,6 +49,7 @@
 }
 
 :root {
+  --header-height: 65px;
   --background: #faf9f6;
   --foreground: #2b2926;
   --card: #ffffff;

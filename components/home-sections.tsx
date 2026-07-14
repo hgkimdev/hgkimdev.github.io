@@ -19,19 +19,21 @@ export function HomeSections({ locale }: { locale: Locale }) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.4 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="flex min-h-[80vh] scroll-mt-20 flex-col justify-center gap-4 border-t border-border/60"
+          className="relative left-1/2 flex min-h-[calc(100vh-var(--header-height))] w-screen -translate-x-1/2 scroll-mt-20 flex-col justify-center border-t border-border/60"
         >
-          <span className="font-mono text-sm text-muted-foreground">
-            {String(index + 1).padStart(2, "0")} /{" "}
-            {String(homeSectionKeys.length).padStart(2, "0")}
-          </span>
-          <h2 className="text-4xl font-bold tracking-tight sm:text-6xl">
-            {dict.nav[key].label}
-          </h2>
-          <p className="max-w-md text-lg text-muted-foreground">
-            {dict.nav[key].description}
-          </p>
-          <p className="text-sm text-muted-foreground">{dict.comingSoon}</p>
+          <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4">
+            <span className="font-mono text-sm text-muted-foreground">
+              {String(index + 1).padStart(2, "0")} /{" "}
+              {String(homeSectionKeys.length).padStart(2, "0")}
+            </span>
+            <h2 className="text-4xl font-bold tracking-tight sm:text-6xl">
+              {dict.nav[key].label}
+            </h2>
+            <p className="max-w-md text-lg text-muted-foreground">
+              {dict.nav[key].description}
+            </p>
+            <p className="text-sm text-muted-foreground">{dict.comingSoon}</p>
+          </div>
         </motion.section>
       ))}
     </div>

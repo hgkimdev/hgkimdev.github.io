@@ -39,9 +39,8 @@ export const dictionaries: Record<Locale, Dictionary> = {
     },
     home: {
       greeting: "Hi, I'm hgkim 👋",
-      heading: "나라는 사람을 자연스럽게 소개하는 공간을 만들고 있어요.",
-      intro:
-        "지금은 이 사이트 자체를 만드는 중이에요. 아래 섹션들을 하나씩 둘러보세요.",
+      heading: "호기심 많은 프로덕트 빌더입니다.",
+      intro: "AI 에이전트와 함께 이것저것 만들어보고 있어요.",
     },
     comingSoon: "준비 중입니다.",
     themeToggleLabel: "테마 전환",
