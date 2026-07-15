@@ -35,7 +35,7 @@ export function ZoneSwitcher({
             key={zone}
             href={hrefs[zone]}
             aria-current={isActive}
-            onClick={() => {
+            onClick={(event) => {
               // Force scroll-to-top synchronously, before Next.js processes
               // the navigation. Without this, if you switch zones while
               // scrolled deep into a long page, the sticky header can
@@ -45,7 +45,19 @@ export function ZoneSwitcher({
               // transient rect and springs the pill in from there,
               // making it look like it flies up from the bottom of the
               // page instead of sliding sideways.
-              if (!isActive) {
+              //
+              // Modified clicks (cmd/ctrl/shift/alt, non-primary button)
+              // open in a new tab/window — the current page doesn't
+              // navigate, so it must not scroll either.
+              if (
+                !isActive &&
+                !event.defaultPrevented &&
+                event.button === 0 &&
+                !event.metaKey &&
+                !event.ctrlKey &&
+                !event.shiftKey &&
+                !event.altKey
+              ) {
                 // `behavior: "instant"` matters here — <html> has
                 // scroll-smooth (see app/layout.tsx), so a plain
                 // window.scrollTo(0, 0) would itself animate, drifting
