@@ -4,7 +4,6 @@ import { usePathname } from "next/navigation";
 import { Mail } from "lucide-react";
 import { SiGithub, SiInstagram } from "@icons-pack/react-simple-icons";
 
-import { getDictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
 import { getZone } from "@/lib/nav";
 
@@ -32,8 +31,13 @@ const socialLinks = [
   },
 ] as const;
 
-export function SiteFooter({ locale }: { locale: Locale }) {
-  const dict = getDictionary(locale);
+export function SiteFooter({
+  locale,
+  footerText,
+}: {
+  locale: Locale;
+  footerText: string;
+}) {
   const pathname = usePathname();
   const zone = getZone(pathname, locale);
 
@@ -55,7 +59,7 @@ export function SiteFooter({ locale }: { locale: Locale }) {
             ))}
           </div>
         )}
-        <p>{dict.footer(new Date().getFullYear())}</p>
+        <p>{footerText}</p>
       </div>
     </footer>
   );

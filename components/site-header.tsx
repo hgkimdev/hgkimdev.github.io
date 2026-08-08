@@ -16,13 +16,32 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { getDictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
 import { localizeHref } from "@/lib/i18n/config";
-import { blogNavItems, getZone, introNavItems, navItemHref } from "@/lib/nav";
+import {
+  blogNavItems,
+  getZone,
+  introNavItems,
+  navItemHref,
+  type NavKey,
+  type Zone,
+} from "@/lib/nav";
 
-export function SiteHeader({ locale }: { locale: Locale }) {
-  const dict = getDictionary(locale);
+export function SiteHeader({
+  locale,
+  brand,
+  navLabels,
+  zoneLabels,
+  themeToggleLabel,
+  menuLabel,
+}: {
+  locale: Locale;
+  brand: string;
+  navLabels: Record<NavKey, string>;
+  zoneLabels: Record<Zone, string>;
+  themeToggleLabel: string;
+  menuLabel: string;
+}) {
   const pathname = usePathname();
   const zone = getZone(pathname, locale);
   const navItems = zone === "intro" ? introNavItems : blogNavItems;
@@ -34,7 +53,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
           href={localizeHref("/", locale)}
           className="flex items-baseline gap-1 text-lg font-semibold tracking-tight"
         >
-          {dict.brand}
+          {brand}
           {zone === "blog" && (
             <span className="hidden text-sm font-normal text-muted-foreground sm:inline">
               /blog
@@ -49,15 +68,15 @@ export function SiteHeader({ locale }: { locale: Locale }) {
               href={navItemHref(item, locale)}
               className="transition-colors hover:text-foreground"
             >
-              {dict.nav[item.key].label}
+              {navLabels[item.key]}
             </Link>
           ))}
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <ZoneSwitcher locale={locale} labels={dict.zoneLabels} />
+          <ZoneSwitcher locale={locale} labels={zoneLabels} />
           <LanguageSwitcher />
-          <ThemeToggle label={dict.themeToggleLabel} />
+          <ThemeToggle label={themeToggleLabel} />
 
           <Sheet>
             <SheetTrigger
@@ -65,7 +84,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  aria-label={dict.menuLabel}
+                  aria-label={menuLabel}
                   className="sm:hidden"
                 />
               }
@@ -74,7 +93,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
             </SheetTrigger>
             <SheetContent side="right">
               <SheetHeader>
-                <SheetTitle>{dict.brand}</SheetTitle>
+                <SheetTitle>{brand}</SheetTitle>
               </SheetHeader>
               <nav className="flex flex-col gap-1 px-2">
                 {navItems.map((item) => (
@@ -84,7 +103,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
                     render={<Link href={navItemHref(item, locale)} />}
                     className="rounded-md px-2 py-2 text-sm text-foreground transition-colors hover:bg-muted"
                   >
-                    {dict.nav[item.key].label}
+                    {navLabels[item.key]}
                   </SheetClose>
                 ))}
               </nav>

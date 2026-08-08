@@ -1,6 +1,7 @@
 import { HomeSections } from "@/components/home-sections";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
+import { homeSectionKeys } from "@/lib/nav";
 import ShinyText from "@/components/ShinyText";
 import TextType from "@/components/TextType";
 
@@ -11,6 +12,11 @@ export function HomeContent({ locale }: { locale: Locale }) {
   const introParts = dict.home.intro.includes(AI_AGENT_MARKER)
     ? dict.home.intro.split(AI_AGENT_MARKER)
     : null;
+  const sections = homeSectionKeys.map((key) => ({
+    key,
+    label: dict.nav[key].label,
+    description: dict.nav[key].description,
+  }));
 
   return (
     <div className="flex flex-col">
@@ -49,7 +55,7 @@ export function HomeContent({ locale }: { locale: Locale }) {
         </div>
       </section>
 
-      <HomeSections locale={locale} />
+      <HomeSections sections={sections} comingSoonText={dict.comingSoon} />
     </div>
   );
 }

@@ -161,3 +161,14 @@ export const dictionaries: Record<Locale, Dictionary> = {
 export function getDictionary(locale: Locale) {
   return dictionaries[locale];
 }
+
+// Server-only helper: reduces `dict.nav` (label + description per key) down
+// to just the labels the header/mobile-menu nav actually renders, so client
+// components can take this small record as a prop instead of importing the
+// full multi-locale `dictionaries` object themselves.
+export function getNavLabels(locale: Locale): Record<NavKey, string> {
+  const dict = dictionaries[locale];
+  return Object.fromEntries(
+    Object.entries(dict.nav).map(([key, value]) => [key, value.label])
+  ) as Record<NavKey, string>;
+}
