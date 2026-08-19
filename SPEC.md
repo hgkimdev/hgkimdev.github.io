@@ -32,7 +32,7 @@
 Contact는 두 존 헤더 nav 어디에도 없다. Blog nav 안에 텍스트 링크로 두면 다른 항목(Blog/Projects)과 달리 혼자 Intro로 튕겨나가서 어색했기 때문. 대신:
 
 - **Intro 존**: Home 스크롤의 마지막 섹션(`#contact`)이 곧 연락 수단.
-- **Blog 존 푸터**: GitHub·Instagram·Email 아이콘을 상시 노출(`components/site-footer.tsx`, `getZone`으로 판별). Intro 존 푸터에는 넣지 않는다 — 어차피 Home 최하단에 Contact 섹션이 있어서 푸터에 또 두면 중복이기 때문.
+- **Blog 존 푸터**: GitHub·Instagram·Email 아이콘을 상시 노출(`components/site-footer.tsx`, `getZone`으로 판별). Intro 존은 `SiteFooter`가 아예 렌더링되지 않는다(빈 카피라이트 줄도 없음) — 어차피 Home 스크롤의 마지막 슬롯이 Contact라 그 자체로 페이지의 자연스러운 끝이기 때문.
 
 | 헤더/푸터 항목    | 존            | 종류        | 콘텐츠 성격                                           |
 | ----------------- | ------------- | ----------- | ----------------------------------------------------- |

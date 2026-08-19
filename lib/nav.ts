@@ -1,12 +1,6 @@
 import { localizeAnchor, localizeHref, type Locale } from "@/lib/i18n/config";
 
-export const homeSectionKeys = [
-  "about",
-  "now",
-  "life",
-  "timeline",
-  "contact",
-] as const;
+export const homeSectionKeys = ["about", "life", "contact"] as const;
 
 export type HomeSectionKey = (typeof homeSectionKeys)[number];
 export type PageNavKey = "blog" | "projects";

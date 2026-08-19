@@ -24,22 +24,17 @@ export const dictionaries: Record<Locale, Dictionary> = {
     metaDescription: "나라는 사람을 소개하는 공간",
     nav: {
       about: { label: "About Me", description: "나의 이야기와 가치관" },
-      now: { label: "Now", description: "지금 배우고 집중하는 것" },
       projects: { label: "Projects", description: "프로젝트와 개발 경험" },
       life: {
         label: "Life",
         description: "여행, 책과 영화, 외국어 학습 등 일 외의 삶",
       },
       blog: { label: "Blog", description: "생각과 배운 점" },
-      timeline: {
-        label: "Timeline",
-        description: "버킷리스트와 인생 타임라인",
-      },
       contact: { label: "Contact", description: "연락하기" },
     },
     home: {
       greeting: "Hi, I'm hgkim 👋",
-      heading: "호기심 많은 프로덕트 빌더입니다.",
+      heading: "호기심 많은 프로덕트 엔지니어입니다.",
       intro: "AI 에이전트와 함께 이것저것 만들어보고 있어요.",
     },
     comingSoon: "준비 중입니다.",
@@ -54,7 +49,6 @@ export const dictionaries: Record<Locale, Dictionary> = {
     metaDescription: "A space introducing who I am",
     nav: {
       about: { label: "About Me", description: "My story and values" },
-      now: { label: "Now", description: "What I'm learning and focused on" },
       projects: {
         label: "Projects",
         description: "Projects and dev experience",
@@ -65,10 +59,6 @@ export const dictionaries: Record<Locale, Dictionary> = {
           "Travel, books & movies, language learning — life outside work",
       },
       blog: { label: "Blog", description: "Thoughts and things I've learned" },
-      timeline: {
-        label: "Timeline",
-        description: "Bucket list and life timeline",
-      },
       contact: { label: "Contact", description: "Get in touch" },
     },
     home: {
@@ -89,10 +79,6 @@ export const dictionaries: Record<Locale, Dictionary> = {
     metaDescription: "Un espace pour me présenter",
     nav: {
       about: { label: "About Me", description: "Mon histoire et mes valeurs" },
-      now: {
-        label: "Now",
-        description: "Ce que j'apprends et sur quoi je me concentre",
-      },
       projects: {
         label: "Projects",
         description: "Projets et expérience de développement",
@@ -103,10 +89,6 @@ export const dictionaries: Record<Locale, Dictionary> = {
           "Voyages, livres et films, apprentissage des langues — la vie en dehors du travail",
       },
       blog: { label: "Blog", description: "Réflexions et choses apprises" },
-      timeline: {
-        label: "Timeline",
-        description: "Liste de rêves et chronologie de vie",
-      },
       contact: { label: "Contact", description: "Me contacter" },
     },
     home: {
@@ -127,20 +109,12 @@ export const dictionaries: Record<Locale, Dictionary> = {
     metaDescription: "私を紹介する空間",
     nav: {
       about: { label: "About Me", description: "私の物語と価値観" },
-      now: {
-        label: "Now",
-        description: "今学んでいること、力を入れていること",
-      },
       projects: { label: "Projects", description: "プロジェクトと開発経験" },
       life: {
         label: "Life",
         description: "旅行、本や映画、語学学習など仕事以外の生活",
       },
       blog: { label: "Blog", description: "考えたことと学んだこと" },
-      timeline: {
-        label: "Timeline",
-        description: "バケットリストと人生年表",
-      },
       contact: { label: "Contact", description: "お問い合わせ" },
     },
     home: {

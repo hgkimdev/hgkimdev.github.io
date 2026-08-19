@@ -41,24 +41,26 @@ export function SiteFooter({
   const pathname = usePathname();
   const zone = getZone(pathname, locale);
 
+  if (zone === "intro") {
+    return null;
+  }
+
   return (
     <footer className="border-t border-border/60">
       <div className="mx-auto flex max-w-4xl flex-col items-center gap-3 px-4 py-8 text-center text-sm text-muted-foreground">
-        {zone === "blog" && (
-          <div className="flex items-center gap-4">
-            {socialLinks.map(({ key, href, label, Icon, external }) => (
-              <a
-                key={key}
-                href={href}
-                aria-label={label}
-                className="text-muted-foreground transition-colors hover:text-foreground"
-                {...(external ? { target: "_blank", rel: "noreferrer" } : {})}
-              >
-                <Icon size={18} color="currentColor" />
-              </a>
-            ))}
-          </div>
-        )}
+        <div className="flex items-center gap-4">
+          {socialLinks.map(({ key, href, label, Icon, external }) => (
+            <a
+              key={key}
+              href={href}
+              aria-label={label}
+              className="text-muted-foreground transition-colors hover:text-foreground"
+              {...(external ? { target: "_blank", rel: "noreferrer" } : {})}
+            >
+              <Icon size={18} color="currentColor" />
+            </a>
+          ))}
+        </div>
         <p>{footerText}</p>
       </div>
     </footer>
