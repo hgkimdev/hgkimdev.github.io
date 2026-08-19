@@ -35,7 +35,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
     home: {
       greeting: "Hi, I'm hgkim 👋",
       heading: "호기심 많은 프로덕트 엔지니어입니다.",
-      intro: "AI 에이전트와 함께 이것저것 만들어보고 있어요.",
+      intro: "AI 에이전트와 함께 여러 서비스들을 만들어보고 있어요.",
     },
     comingSoon: "준비 중입니다.",
     themeToggleLabel: "테마 전환",
@@ -143,6 +143,6 @@ export function getDictionary(locale: Locale) {
 export function getNavLabels(locale: Locale): Record<NavKey, string> {
   const dict = dictionaries[locale];
   return Object.fromEntries(
-    Object.entries(dict.nav).map(([key, value]) => [key, value.label])
+    Object.entries(dict.nav).map(([key, value]) => [key, value.label]),
   ) as Record<NavKey, string>;
 }
