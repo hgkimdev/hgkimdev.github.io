@@ -2,6 +2,7 @@ import { HomeSections } from "@/components/home-sections";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
 import { homeSectionKeys } from "@/lib/nav";
+import { getAboutContent } from "@/lib/content/about";
 import ShinyText from "@/components/ShinyText";
 import TextType from "@/components/TextType";
 
@@ -16,6 +17,10 @@ export function HomeContent({ locale }: { locale: Locale }) {
     key,
     label: dict.nav[key].label,
     description: dict.nav[key].description,
+    body:
+      key === "about" && locale === "ko"
+        ? getAboutContent().paragraphs
+        : undefined,
   }));
 
   const hero = (
