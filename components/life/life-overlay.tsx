@@ -224,15 +224,27 @@ function CategoryDock({
   onOpenKeyChange: (key: LifeCategoryKey | null) => void;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
+  const pillRef = useRef<HTMLDivElement>(null);
   const startPointerX = useRef(0);
   const startPillX = useRef(0);
   const trackLeft = useRef(0);
   const cellPx = useRef(0);
+  const dragXRef = useRef(0);
+  // 이 두 값은 state가 아니라 ref다. 재렌더를 아끼려는 게 아니라 —
+  // 그 차이는 실측으로 잡히지도 않았다 — handlePointerUp이 이 값들을 읽기
+  // 때문이다.
+  //
+  // state로 두면 pointerup 핸들러의 클로저에 잡히는 건 "마지막으로 커밋된"
+  // 값이다. 메인 스레드가 밀려서 마지막 pointermove의 setState가 커밋되기
+  // 전에 pointerup이 오면, 거기서는 hasDragged가 아직 false다 — 끌었는데도
+  // 탭으로 처리돼 처음 누른 칸이 선택된다. 그리고 메인 스레드가 밀리는
+  // 상황이란 게 이 오버레이의 기본 상태다. 밑에서 영상이 돌고 있다.
+  //
+  // ref는 이벤트 순서 그대로 읽히므로 그 창이 아예 없다.
+  const hasDragged = useRef(false);
 
-  const [dragX, setDragX] = useState(0);
   const [dragIndex, setDragIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  const [hasDragged, setHasDragged] = useState(false);
 
   const count = categories.length;
   const activeIndex = Math.max(
@@ -240,11 +252,29 @@ function CategoryDock({
     categories.findIndex((c) => c.key === openKey),
   );
 
+  // dragXRef가 state가 아니게 된 대가로, 필의 위치는 React가 그려줄 수 없다.
+  // 여기서 DOM에 직접 쓴다.
+  //
+  // transform을 통째로 쓰지 않고 커스텀 속성만 쓰는 게 중요하다. 드래그
+  // 중에도 dragIndex 때문에 렌더가 몇 번 일어나는데, transform을 직접 써
+  // 넣었다면 그 렌더가 React의 style 값으로 덮어써서 필이 시작점으로 튄다.
+  // var()를 사이에 끼우면 React가 쥐고 있는 문자열은 드래그 내내 한 글자도
+  // 변하지 않으므로 덮어쓸 것이 없다.
+  //
+  // 참고로 재렌더가 매 이벤트가 아니라 칸 경계에서만 일어나게 되는 건 이
+  // 구조의 부수 효과일 뿐이다. 실제로 재봤지만(프로덕션 빌드, 드래그당
+  // pointermove 250회/1500회) 차이가 이벤트 수에 비례해 커지지 않았다 —
+  // 노이즈다. 성능을 이유로 이 구조를 지킬 필요는 없다.
+  function setPillX(x: number) {
+    dragXRef.current = x;
+    pillRef.current?.style.setProperty("--pill-x", `${x}px`);
+  }
+
   // 쉴 때 위치는 %로 잡는다. px로 잡으면 폭을 재야 하고, 재는 사이 한 프레임
   // 동안 필이 0번 자리에 있다가 미끄러져 들어오는 게 보인다. 한 칸이 곧 필
   // 자신의 너비라 index * 100%가 정확히 그 자리다.
   const transform = isDragging
-    ? `translateX(${dragX}px)`
+    ? "translateX(var(--pill-x))"
     : `translateX(${activeIndex * 100}%)`;
 
   // 글자 색은 필이 지나가는 즉시 따라온다. 손 뗄 때까지 기다리면 필만 혼자
@@ -261,23 +291,29 @@ function CategoryDock({
     trackLeft.current = track.getBoundingClientRect().left;
     startPointerX.current = e.clientX;
     startPillX.current = activeIndex * cellPx.current;
-    setDragX(startPillX.current);
+    // setIsDragging보다 먼저 써야 한다. transform이 var(--pill-x)로 바뀌는
+    // 첫 렌더 시점에 값이 이미 들어 있어야 필이 0px에서 한 프레임 깜빡이지
+    // 않는다.
+    setPillX(startPillX.current);
+    hasDragged.current = false;
     setDragIndex(activeIndex);
     setIsDragging(true);
-    setHasDragged(false);
   }
 
   function handlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
     if (!isDragging) return;
     const deltaX = e.clientX - startPointerX.current;
-    if (Math.abs(deltaX) > DRAG_THRESHOLD) setHasDragged(true);
+    if (Math.abs(deltaX) > DRAG_THRESHOLD) hasDragged.current = true;
     const maxX = (count - 1) * cellPx.current;
     const next = Math.max(
       -ELASTIC_RANGE,
       Math.min(maxX + ELASTIC_RANGE, startPillX.current + deltaX),
     );
-    setDragX(next);
-    setDragIndex(nearestIndex(next / cellPx.current, count));
+    setPillX(next);
+    // 이 값은 칸 경계를 넘을 때만 바뀌므로 state로 둬도 된다 — 끝에서 끝까지
+    // 끌어도 많아야 네 번이다. 라벨 색이 필을 따라와야 하니 렌더가 필요하다.
+    const index = nearestIndex(next / cellPx.current, count);
+    if (index !== dragIndex) setDragIndex(index);
   }
 
   function handlePointerUp() {
@@ -289,8 +325,8 @@ function CategoryDock({
     // 걸면 뒤따르는 click까지 캡처한 요소로 재조준돼서 버튼에는 영영 닿지
     // 않는다(포인터로 누른 경우만 — 키보드 Enter는 그대로 버튼으로 간다).
     // 그래서 포인터 좌표에서 직접 칸을 계산한다.
-    const index = hasDragged
-      ? dragIndex
+    const index = hasDragged.current
+      ? nearestIndex(dragXRef.current / cellPx.current, count)
       : nearestIndex(
           Math.floor(
             (startPointerX.current - trackLeft.current) / cellPx.current,
@@ -309,7 +345,7 @@ function CategoryDock({
       // 끌고 나서 손을 떼면 click이 뒤따라 온다. 그대로 두면 지나쳐 온
       // 카테고리가 선택돼버리므로 캡처 단계에서 막는다.
       onClickCapture={(e) => {
-        if (hasDragged) {
+        if (hasDragged.current) {
           e.preventDefault();
           e.stopPropagation();
         }
@@ -326,6 +362,7 @@ function CategoryDock({
         {/* 선택 필. 버튼보다 아래에 깔아서 글자가 그 위에 그대로 남는다 —
             필 안에 글자를 넣으면 드래그 중에 밑의 글자와 겹쳐 보인다. */}
         <div
+          ref={pillRef}
           aria-hidden
           className="absolute inset-y-0 left-0 z-0 rounded-full border border-border bg-background shadow-sm"
           style={{
