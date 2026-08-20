@@ -1,8 +1,19 @@
-'use client';
+import type { CSSProperties } from "react";
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { motion, useMotionValue, useAnimationFrame, useTransform } from 'motion/react';
-
+/**
+ * 글자 위를 하이라이트가 훑고 지나가는 효과.
+ *
+ * 구동은 전부 CSS 애니메이션이다. 원래는 `useAnimationFrame`으로 매 프레임
+ * background-position을 직접 써 넣었는데, 그 방식은 브라우저가 멈춰줄 수가
+ * 없다 — JS 루프라 화면 밖이든, opacity 0인 조상 아래에 깔려 있든, 탭을
+ * 보고 있는 한 계속 돈다. 이 사이트에서는 그게 특히 나빴다. 홈의 핀 고정
+ * 스크롤은 모든 레이어를 항상 마운트해 두므로, 히어로가 한참 전에 사라진
+ * 뒤에도 이 루프는 영원히 돌고 있었다.
+ *
+ * CSS로 넘기면 소유권이 브라우저로 간다. 그리지 않는 요소의 애니메이션은
+ * 알아서 건너뛴다. 덤으로 이 파일에는 훅이 하나도 남지 않아 서버 컴포넌트로
+ * 렌더된다.
+ */
 interface ShinyTextProps {
   text: string;
   disabled?: boolean;
@@ -13,7 +24,7 @@ interface ShinyTextProps {
   spread?: number;
   yoyo?: boolean;
   pauseOnHover?: boolean;
-  direction?: 'left' | 'right';
+  direction?: "left" | "right";
   delay?: number;
 }
 
@@ -21,112 +32,64 @@ const ShinyText: React.FC<ShinyTextProps> = ({
   text,
   disabled = false,
   speed = 2,
-  className = '',
-  color = '#b5b5b5',
-  shineColor = '#ffffff',
+  className = "",
+  color = "#b5b5b5",
+  shineColor = "#ffffff",
   spread = 120,
   yoyo = false,
   pauseOnHover = false,
-  direction = 'left',
-  delay = 0
+  direction = "left",
+  delay = 0,
 }) => {
-  const [isPaused, setIsPaused] = useState(false);
-  const progress = useMotionValue(0);
-  const elapsedRef = useRef(0);
-  const lastTimeRef = useRef<number | null>(null);
-  const directionRef = useRef(direction === 'left' ? 1 : -1);
+  // 한 주기 = 훑는 시간 + 끝에서 쉬는 시간. CSS의 animation-delay는 첫 회에만
+  // 걸리므로 반복되는 쉼에는 못 쓴다. 대신 주기를 늘리고 easing으로 뒷부분을
+  // 눌러 붙인다 — linear()가 진행도 1에 먼저 도달한 뒤 그대로 머무르므로,
+  // 그 구간이 곧 쉼이다.
+  const cycle = speed + delay;
+  const timingFunction =
+    delay > 0
+      ? `linear(0 0%, 1 ${((speed / cycle) * 100).toFixed(2)}%, 1 100%)`
+      : "linear";
 
-  const animationDuration = speed * 1000;
-  const delayDuration = delay * 1000;
+  // 방향은 키프레임을 뒤집지 않고 재생 방향으로 준다. yoyo면 왕복(alternate),
+  // 아니면 매번 같은 쪽으로.
+  const animationDirection = yoyo
+    ? direction === "left"
+      ? "alternate"
+      : "alternate-reverse"
+    : direction === "left"
+      ? "normal"
+      : "reverse";
 
-  useAnimationFrame(time => {
-    if (disabled || isPaused) {
-      lastTimeRef.current = null;
-      return;
-    }
-
-    if (lastTimeRef.current === null) {
-      lastTimeRef.current = time;
-      return;
-    }
-
-    const deltaTime = time - lastTimeRef.current;
-    lastTimeRef.current = time;
-
-    elapsedRef.current += deltaTime;
-
-    // Animation goes from 0 to 100
-    if (yoyo) {
-      const cycleDuration = animationDuration + delayDuration;
-      const fullCycle = cycleDuration * 2;
-      const cycleTime = elapsedRef.current % fullCycle;
-
-      if (cycleTime < animationDuration) {
-        // Forward animation: 0 -> 100
-        const p = (cycleTime / animationDuration) * 100;
-        progress.set(directionRef.current === 1 ? p : 100 - p);
-      } else if (cycleTime < cycleDuration) {
-        // Delay at end
-        progress.set(directionRef.current === 1 ? 100 : 0);
-      } else if (cycleTime < cycleDuration + animationDuration) {
-        // Reverse animation: 100 -> 0
-        const reverseTime = cycleTime - cycleDuration;
-        const p = 100 - (reverseTime / animationDuration) * 100;
-        progress.set(directionRef.current === 1 ? p : 100 - p);
-      } else {
-        // Delay at start
-        progress.set(directionRef.current === 1 ? 0 : 100);
-      }
-    } else {
-      const cycleDuration = animationDuration + delayDuration;
-      const cycleTime = elapsedRef.current % cycleDuration;
-
-      if (cycleTime < animationDuration) {
-        // Animation phase: 0 -> 100
-        const p = (cycleTime / animationDuration) * 100;
-        progress.set(directionRef.current === 1 ? p : 100 - p);
-      } else {
-        // Delay phase - hold at end (shine off-screen)
-        progress.set(directionRef.current === 1 ? 100 : 0);
-      }
-    }
-  });
-
-  useEffect(() => {
-    directionRef.current = direction === 'left' ? 1 : -1;
-    elapsedRef.current = 0;
-    progress.set(0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [direction]);
-
-  // Transform: p=0 -> 150% (shine off right), p=100 -> -50% (shine off left)
-  const backgroundPosition = useTransform(progress, p => `${150 - p * 2}% center`);
-
-  const handleMouseEnter = useCallback(() => {
-    if (pauseOnHover) setIsPaused(true);
-  }, [pauseOnHover]);
-
-  const handleMouseLeave = useCallback(() => {
-    if (pauseOnHover) setIsPaused(false);
-  }, [pauseOnHover]);
-
-  const gradientStyle: React.CSSProperties = {
+  const style: CSSProperties = {
     backgroundImage: `linear-gradient(${spread}deg, ${color} 0%, ${color} 35%, ${shineColor} 50%, ${color} 65%, ${color} 100%)`,
-    backgroundSize: '200% auto',
-    WebkitBackgroundClip: 'text',
-    backgroundClip: 'text',
-    WebkitTextFillColor: 'transparent'
+    backgroundSize: "200% auto",
+    // 애니메이션이 꺼져 있을 때 하이라이트가 놓이는 자리. 화면 밖이라 글자는
+    // `color` 단색으로 보인다.
+    backgroundPosition: "150% center",
+    WebkitBackgroundClip: "text",
+    backgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    ...(disabled
+      ? null
+      : {
+          animationName: "shiny-text",
+          animationDuration: `${cycle}s`,
+          animationTimingFunction: timingFunction,
+          animationIterationCount: "infinite",
+          animationDirection,
+        }),
   };
 
   return (
-    <motion.span
-      className={`inline-block ${className}`}
-      style={{ ...gradientStyle, backgroundPosition }}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+    <span
+      className={`inline-block motion-reduce:[animation-name:none] ${
+        pauseOnHover ? "hover:[animation-play-state:paused]" : ""
+      } ${className}`}
+      style={style}
     >
       {text}
-    </motion.span>
+    </span>
   );
 };
 
