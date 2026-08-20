@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { Dialog } from "@base-ui/react/dialog";
 import { AnimatePresence, motion } from "motion/react";
-import { XIcon } from "lucide-react";
+import { Volume2Icon, VolumeXIcon, XIcon } from "lucide-react";
 
 import type { LifeCategory, LifeCategoryKey } from "@/content/life";
 import { LifeMediaBackground } from "@/components/life/life-media";
@@ -58,6 +58,9 @@ export function LifeOverlay({
     key: LifeCategoryKey;
     id: string;
   } | null>(null);
+  // 소리는 늘 꺼진 상태로 시작한다. 닫을 때 되돌리는 것도 같은 이유다 —
+  // 다시 열었을 때 예고편 소리가 곧바로 터지는 것만큼 놀라는 일이 없다.
+  const [muted, setMuted] = useState(true);
 
   const item =
     (selected?.key === openKey
@@ -70,7 +73,10 @@ export function LifeOverlay({
     <Dialog.Root
       open={openKey !== null}
       onOpenChange={(open) => {
-        if (!open) onOpenKeyChange(null);
+        if (!open) {
+          onOpenKeyChange(null);
+          setMuted(true);
+        }
       }}
     >
       <Dialog.Portal>
@@ -87,7 +93,9 @@ export function LifeOverlay({
             그래서 라이트 모드에서는 "덜 진하게"와 "읽히게"가 동시에 성립하지
             않았다. 방향을 뒤집으면 둘 다 성립한다. */}
         <Dialog.Popup className="dark fixed inset-0 z-50 overflow-hidden bg-background text-foreground transition duration-200 data-ending-style:opacity-0 data-starting-style:opacity-0">
-          {item ? <LifeMediaBackground media={item.media} /> : null}
+          {item ? (
+            <LifeMediaBackground media={item.media} muted={muted} />
+          ) : null}
 
           <div className="relative flex h-full flex-col">
             <header className="flex shrink-0 items-center justify-between gap-4 px-5 py-5 sm:px-10">
@@ -161,6 +169,37 @@ export function LifeOverlay({
                   </AnimatePresence>
                 </div>
               </div>
+            ) : null}
+
+            {/* 소리 토글은 영상이 있을 때만. 여행·책·언어는 정지 이미지라
+                끄고 켤 소리가 없다.
+
+                하단 묶음 바깥에 따로 두는 건, 그 묶음이 "어디를 볼지"를 고르는
+                탐색 컨트롤이고 이건 "지금 이걸 어떻게 볼지"라 성격이 다르기
+                때문이다.
+
+                높이는 폭에 따라 갈린다. sm 이상에서는 CategoryDock과 같은
+                줄이다 — 도크가 가운데 정렬이라 오른쪽 끝이 비어 있고, 640px
+                에서도 도크와 98px 떨어진다. 그보다 좁아지면 그 여백이 사라져
+                (실측: 360px에서 7px, 344px에서 -1px, 320px에서 -13px) 도크를
+                파고들므로, ItemStrip 위로 올린다. 스트립은 w-full이라 옆으로
+                피할 수 없고 위로만 피할 수 있다. */}
+            {item?.media.kind === "youtube" ? (
+              <button
+                type="button"
+                onClick={() => setMuted((m) => !m)}
+                aria-pressed={!muted}
+                className="absolute right-5 bottom-32 z-10 flex size-9 items-center justify-center rounded-full border border-border bg-card/85 text-muted-foreground transition-colors hover:text-foreground sm:right-10 sm:bottom-11"
+              >
+                {muted ? (
+                  <VolumeXIcon className="size-4" />
+                ) : (
+                  <Volume2Icon className="size-4" />
+                )}
+                <span className="sr-only">
+                  {muted ? "소리 켜기" : "소리 끄기"}
+                </span>
+              </button>
             ) : null}
 
             {/* 탐색 컨트롤은 전부 아래 한곳에 모은다. 폰에서 화면 위쪽은

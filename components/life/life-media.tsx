@@ -38,12 +38,13 @@ function embedSrc(id: string, start?: number) {
     fs: "0",
     iv_load_policy: "3",
     cc_load_policy: "0",
-    // 재생 위치를 받아보려고 켠다 (usePosterCover).
+    // 재생 위치를 받고(usePosterCover) 음소거를 토글하려고(useMuteCommand)
+    // 켠다.
     //
-    // 짝으로 쓰라는 origin 파라미터는 일부러 뺐다. 그건 남이 우리 플레이어에
-    // 명령을 못 보내게 막는 장치인데 우리는 명령을 보내지 않고 듣기만 하며,
-    // 받는 쪽은 e.origin으로 이미 거른다. 게다가 window.location.origin은
-    // 정적 export의 프리렌더 시점에 없어서 src가 하이드레이션 전후로 갈린다.
+    // 짝으로 쓰라는 origin 파라미터는 뺐다. window.location.origin은 정적
+    // export의 프리렌더 시점에 없어서 src가 하이드레이션 전후로 갈리기
+    // 때문이다. 받는 쪽은 e.origin으로 거르고 있고, 이 플레이어에 남이 명령을
+    // 보내봐야 할 수 있는 건 배경 영상을 음소거하거나 멈추는 정도다.
     enablejsapi: "1",
     ...(start ? { start: String(start) } : {}),
   });
@@ -88,6 +89,35 @@ const HANDSHAKE_PING_MS = 250;
  * 시간 + CHROME_HIDE_AT을 넉넉히 넘겨 잡았다.
  */
 const NO_MESSAGE_FALLBACK_MS = 10000;
+
+/**
+ * 음소거 상태를 플레이어에 반영한다.
+ *
+ * URL의 mute=1은 자동재생을 통과하려고 반드시 필요하므로 영상은 늘 음소거로
+ * 시작한다. 소리를 켜는 건 여기서 명령으로만 한다.
+ *
+ * ready(=iframe load)와 videoId도 같이 의존하는 게 핵심이다. 항목을 바꾸면
+ * 새 iframe이 다시 mute=1로 시작하므로, 사용자가 소리를 켜둔 상태였다면
+ * 새로 올라온 플레이어에 다시 켜줘야 한다.
+ */
+function useMuteCommand(
+  ref: RefObject<HTMLIFrameElement | null>,
+  videoId: string | null,
+  ready: boolean,
+  muted: boolean,
+) {
+  useEffect(() => {
+    if (!videoId || !ready) return;
+    ref.current?.contentWindow?.postMessage(
+      JSON.stringify({
+        event: "command",
+        func: muted ? "mute" : "unMute",
+        args: [],
+      }),
+      EMBED_ORIGIN,
+    );
+  }, [ref, videoId, ready, muted]);
+}
 
 /**
  * 지금 포스터로 덮어야 하는지.
@@ -204,7 +234,13 @@ function usePosterCover(
  * reduced-motion일 때는 영상이 있어도 정지 이미지로 간다 — 자동재생이야말로
  * 그 설정이 피하려는 것이기 때문.
  */
-export function LifeMediaBackground({ media }: { media: LifeMedia }) {
+export function LifeMediaBackground({
+  media,
+  muted = true,
+}: {
+  media: LifeMedia;
+  muted?: boolean;
+}) {
   const prefersReducedMotion = useReducedMotion();
   const useVideo = !prefersReducedMotion;
   const videoId = media.kind === "youtube" && useVideo ? media.id : null;
@@ -212,12 +248,9 @@ export function LifeMediaBackground({ media }: { media: LifeMedia }) {
 
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [loadedId, setLoadedId] = useState<string | null>(null);
-  const covered = usePosterCover(
-    iframeRef,
-    videoId,
-    startAt,
-    loadedId === videoId,
-  );
+  const ready = loadedId === videoId;
+  const covered = usePosterCover(iframeRef, videoId, startAt, ready);
+  useMuteCommand(iframeRef, videoId, ready, muted);
 
   // iframe은 object-fit이 안 먹으므로 16:9 상자를 화면보다 크게 잡아 덮는
   // 고전적인 방법을 쓴다. img는 object-cover 한 줄이면 되므로 같은 트릭을
