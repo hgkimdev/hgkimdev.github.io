@@ -27,12 +27,14 @@ export default function JaLayout({
         navLabels={getNavLabels("ja")}
         zoneLabels={dict.zoneLabels}
         themeToggleLabel={dict.themeToggleLabel}
-        menuLabel={dict.menuLabel}
       />
       <main className="mx-auto w-full max-w-4xl flex-1 px-4">
         <PageTransition>{children}</PageTransition>
       </main>
-      <SiteFooter locale="ja" footerText={dict.footer(new Date().getFullYear())} />
+      <SiteFooter
+        locale="ja"
+        footerText={dict.footer(new Date().getFullYear())}
+      />
     </div>
   );
 }

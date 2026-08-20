@@ -12,7 +12,6 @@ type Dictionary = {
   };
   comingSoon: string;
   themeToggleLabel: string;
-  menuLabel: string;
   readMore: string;
   zoneLabels: { intro: string; blog: string };
   footer: (year: number) => string;
@@ -39,7 +38,6 @@ export const dictionaries: Record<Locale, Dictionary> = {
     },
     comingSoon: "준비 중입니다.",
     themeToggleLabel: "테마 전환",
-    menuLabel: "메뉴 열기",
     readMore: "자세히 보기",
     zoneLabels: { intro: "Intro", blog: "Blog" },
     footer: (year) => `© ${year} hgkim. Built with Next.js.`,
@@ -69,7 +67,6 @@ export const dictionaries: Record<Locale, Dictionary> = {
     },
     comingSoon: "Coming soon.",
     themeToggleLabel: "Toggle theme",
-    menuLabel: "Open menu",
     readMore: "Read more",
     zoneLabels: { intro: "Intro", blog: "Blog" },
     footer: (year) => `© ${year} hgkim. Built with Next.js.`,
@@ -99,7 +96,6 @@ export const dictionaries: Record<Locale, Dictionary> = {
     },
     comingSoon: "Bientôt disponible.",
     themeToggleLabel: "Changer de thème",
-    menuLabel: "Ouvrir le menu",
     readMore: "En savoir plus",
     zoneLabels: { intro: "Intro", blog: "Blog" },
     footer: (year) => `© ${year} hgkim. Créé avec Next.js.`,
@@ -125,7 +121,6 @@ export const dictionaries: Record<Locale, Dictionary> = {
     },
     comingSoon: "準備中です。",
     themeToggleLabel: "テーマ切り替え",
-    menuLabel: "メニューを開く",
     readMore: "詳しく見る",
     zoneLabels: { intro: "Intro", blog: "Blog" },
     footer: (year) => `© ${year} hgkim. Built with Next.js.`,
@@ -137,7 +132,7 @@ export function getDictionary(locale: Locale) {
 }
 
 // Server-only helper: reduces `dict.nav` (label + description per key) down
-// to just the labels the header/mobile-menu nav actually renders, so client
+// to just the labels the header nav actually renders, so client
 // components can take this small record as a prop instead of importing the
 // full multi-locale `dictionaries` object themselves.
 export function getNavLabels(locale: Locale): Record<NavKey, string> {

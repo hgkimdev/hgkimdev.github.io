@@ -27,12 +27,14 @@ export default function EnLayout({
         navLabels={getNavLabels("en")}
         zoneLabels={dict.zoneLabels}
         themeToggleLabel={dict.themeToggleLabel}
-        menuLabel={dict.menuLabel}
       />
       <main className="mx-auto w-full max-w-4xl flex-1 px-4">
         <PageTransition>{children}</PageTransition>
       </main>
-      <SiteFooter locale="en" footerText={dict.footer(new Date().getFullYear())} />
+      <SiteFooter
+        locale="en"
+        footerText={dict.footer(new Date().getFullYear())}
+      />
     </div>
   );
 }

@@ -20,12 +20,14 @@ export default function KoLayout({
         navLabels={getNavLabels("ko")}
         zoneLabels={dict.zoneLabels}
         themeToggleLabel={dict.themeToggleLabel}
-        menuLabel={dict.menuLabel}
       />
       <main className="mx-auto w-full max-w-4xl flex-1 px-4">
         <PageTransition>{children}</PageTransition>
       </main>
-      <SiteFooter locale="ko" footerText={dict.footer(new Date().getFullYear())} />
+      <SiteFooter
+        locale="ko"
+        footerText={dict.footer(new Date().getFullYear())}
+      />
     </div>
   );
 }

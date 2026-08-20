@@ -22,14 +22,14 @@
 
 사이트는 완전히 분리된 두 "존"으로 나뉜다.
 
-- **Intro 존**: Home(`/`) 하나. "나를 소개하는" 3개 섹션(About/Life/Contact)을 앵커로 이어붙인 단일 스크롤 페이지. Now·Timeline은 유지보수 부담과 다른 섹션과의 내용 중복(타임라인은 이력서 형식에 가깝고, Now의 "지금 배우는 것"은 Life의 언어 카테고리와 겹침) 때문에 별도 섹션으로 두지 않기로 함. 버킷리스트는 Life의 여행 카테고리로 흡수.
-- **Blog 존**: `/blog`, `/projects`와 각각의 상세 라우트(`/blog/[slug]`, `/projects/[slug]`). 콘텐츠가 계속 쌓이는 성격이라 Intro에서 완전히 분리했다.
+- **Intro 존**: Home(`/`) 하나. "나를 소개하는" 4개 섹션(About/Projects/Life/Contact)을 앵커로 이어붙인 단일 스크롤 페이지. Projects는 원래 Blog 존의 페이지였지만, 계속 쌓이는 아카이브라기보다 "내가 뭘 만드는 사람인가"를 보여주는 자기소개의 일부라 About과 Life 사이로 옮겼다. Now·Timeline은 유지보수 부담과 다른 섹션과의 내용 중복(타임라인은 이력서 형식에 가깝고, Now의 "지금 배우는 것"은 Life의 언어 카테고리와 겹침) 때문에 별도 섹션으로 두지 않기로 함. 버킷리스트는 Life의 여행 카테고리로 흡수.
+- **Blog 존**: `/blog`와 상세 라우트(`/blog/[slug]`). 콘텐츠가 계속 쌓이는 성격이라 Intro에서 완전히 분리했다.
 
-두 존은 **각자 다른 헤더 nav 목록**을 가진다 (`lib/nav.ts`의 `introNavItems` / `blogNavItems`). Intro 존 nav는 전부 Home 섹션으로 스크롤하는 앵커 링크, Blog 존 nav(Blog/Projects)는 전부 그 존 안에서 실제 페이지를 로드하는 일반 링크다 — 존 밖으로 튕겨나가는 항목이 섞이지 않도록 Blog nav에는 Blog/Projects만 둔다. 현재 경로로 존을 판별해(`getZone`) 같은 `SiteHeader` 컴포넌트가 알맞은 nav 목록을 렌더링한다.
+두 존은 **각자 다른 헤더 nav 목록**을 가진다 (`lib/nav.ts`의 `introNavItems` / `blogNavItems`). Intro 존 nav는 전부 Home 섹션으로 스크롤하는 앵커 링크다. **Blog 존 nav는 비어 있다** — Projects가 Intro로 옮겨간 뒤 Blog 하나만 남았는데, 지금 보고 있는 페이지를 가리키는 항목 하나짜리 목록은 소음이다. 브랜드가 이미 `hgkim /blog`로 존을 표시하고 나가는 길은 `ZoneSwitcher`가 맡으므로 목록이 할 일이 없다. 현재 경로로 존을 판별해(`getZone`) 같은 `SiteHeader` 컴포넌트가 알맞은 nav 목록을 렌더링하며, 항목이 없으면 `<nav>`도 모바일 햄버거도 렌더링하지 않는다(빈 서랍이 열리지 않도록).
 
 존 사이의 전환은 헤더 nav 항목이 아니라 **별도의 세그먼트 토글**(`ZoneSwitcher`, "소개 | 블로그")로 이루어진다. 언어 스위처·테마 토글과 같은 줄, 헤더 오른쪽 컨트롤 영역에 위치.
 
-Contact는 두 존 헤더 nav 어디에도 없다. Blog nav 안에 텍스트 링크로 두면 다른 항목(Blog/Projects)과 달리 혼자 Intro로 튕겨나가서 어색했기 때문. 대신:
+Contact는 두 존 헤더 nav 어디에도 없다. Blog nav 안에 텍스트 링크로 두면 같은 줄의 다른 항목과 달리 혼자 Intro로 튕겨나가서 어색했기 때문. 대신:
 
 - **Intro 존**: Home 스크롤의 마지막 섹션(`#contact`)이 곧 연락 수단.
 - **Blog 존 푸터**: GitHub·Instagram·Email 아이콘을 상시 노출(`components/site-footer.tsx`, `getZone`으로 판별). Intro 존은 `SiteFooter`가 아예 렌더링되지 않는다(빈 카피라이트 줄도 없음) — 어차피 Home 스크롤의 마지막 슬롯이 Contact라 그 자체로 페이지의 자연스러운 끝이기 때문.
@@ -38,11 +38,11 @@ Contact는 두 존 헤더 nav 어디에도 없다. Blog nav 안에 텍스트 링
 | ----------------- | ------------- | ----------- | ----------------------------------------------------- |
 | (헤더)            | Intro         | 히어로      | 한 줄 소개 + 현재 상태 요약                           |
 | `#about`          | Intro         | 앵커        | 개발을 시작한 계기·이유·삶의 철학이 담긴 짧은 에세이. 마지막 문단은 "그래서 요즘은 —"으로 현재 하고 있는 것을 한두 줄 언급해 Life로 넘어가는 다리 역할(Now 섹션의 기능만 가볍게 흡수, 문장 하나 수준이라 유지보수 부담 없음) |
+| `#projects`       | Intro         | 앵커        | 만든 것들. Blog 존에서 옮겨온 섹션                     |
 | `#life`           | Intro         | 앵커        | 개인적인 면을 인터랙티브 카테고리로 나눈 로그 (아래 참고) |
 | `#contact`        | Intro         | 앵커        | 연락 링크 (이메일 등 민감정보 노출 지양, SNS/폼 위주) |
 | GitHub/IG/Email    | Blog(푸터)    | 외부 링크   | Blog 존 전용 소셜 아이콘 (Intro 존에는 없음)          |
 | `/blog`        | Blog          | 페이지      | 생각/배움 기록 목록 (개별 글은 `/blog/[slug]`)        |
-| `/projects`    | Blog          | 페이지      | 프로젝트 목록 (개별 상세는 `/projects/[slug]`)        |
 
 `#life`의 인터랙티브 카테고리 (각 카테고리는 나열보다 "왜"가 붙는 구체적인 1~2개 위주 — 많이 채우기보다 진짜 할 얘기가 있는 것만):
 
@@ -59,7 +59,7 @@ Contact는 두 존 헤더 nav 어디에도 없다. Blog nav 안에 텍스트 링
 로컬 Markdown/MDX 기반, 성격에 따라 세 패턴으로 나눈다.
 
 - **문서형** (`content/about.md`) — About처럼 단일 페이지 에세이, frontmatter 최소화
-- **컬렉션형** (`content/{projects,blog}/*.md`) — 여러 항목, frontmatter로 메타데이터(title, date, tags, cover 등) 관리, 상세 페이지 자동 생성
+- **컬렉션형** (`content/blog/*.md`) — 여러 항목, frontmatter로 메타데이터(title, date, tags, cover 등) 관리, 상세 페이지 자동 생성
 - **로그형** (`content/life/*.md` 또는 구조화 데이터, category: travel/books/movies/games/languages) — 카테고리당 1~2개 항목의 짧고 구체적인 기록. 여행 카테고리에 버킷리스트 성격 항목 포함. 항목이 짧아 구조화 데이터(YAML/JSON)가 markdown보다 적합할 수 있음
 
 ## 기술 설정
@@ -84,7 +84,7 @@ Contact는 두 존 헤더 nav 어디에도 없다. Blog nav 안에 텍스트 링
 
 ## 진행 방식
 
-1. 공통 레이아웃/네비게이션 (헤더, 푸터, 다크모드, 다국어 4개 언어) + Home(3개 앵커 섹션) + Blog/Projects 목록 페이지 골격(placeholder) — 완료
-2. 각 섹션·페이지에 실제 콘텐츠 채우기 (About부터 시작, Life는 카테고리 인터랙션 구현까지 필요해 다음 순서)
-3. Blog/Projects에 실제 항목이 쌓이면 콘텐츠 로딩 파이프라인(Markdown/MDX) 구성 + `/projects/[slug]`, `/blog/[slug]` 상세 라우트 추가
+1. 공통 레이아웃/네비게이션 (헤더, 푸터, 다크모드, 다국어 4개 언어) + Home(앵커 섹션) + Blog 목록 페이지 골격(placeholder) — 완료
+2. 각 섹션·페이지에 실제 콘텐츠 채우기 (About 완료, Life는 입구 포스터 월 + 전체화면 오버레이까지 구현 완료 — 콘텐츠 문장은 교체 필요. Projects는 자리만 잡힌 상태)
+3. Blog에 실제 글이 쌓이면 콘텐츠 로딩 파이프라인(Markdown/MDX) 구성 + `/blog/[slug]` 상세 라우트 추가. Projects는 Intro 섹션이 됐으므로 개별 프로젝트를 어떻게 펼칠지(Life처럼 전체화면 오버레이 / 별도 상세 라우트 부활) 미정 — 실제 프로젝트가 정해지면 결정
 4. GitHub Pages 배포 파이프라인 구성
