@@ -1,9 +1,14 @@
 import { localizeAnchor, localizeHref, type Locale } from "@/lib/i18n/config";
 
-export const homeSectionKeys = ["about", "life", "contact"] as const;
+export const homeSectionKeys = [
+  "about",
+  "projects",
+  "life",
+  "contact",
+] as const;
 
 export type HomeSectionKey = (typeof homeSectionKeys)[number];
-export type PageNavKey = "blog" | "projects";
+export type PageNavKey = "blog";
 
 type NavItem =
   | { key: HomeSectionKey; type: "anchor" }
@@ -18,15 +23,15 @@ export const introNavItems: NavItem[] = homeSectionKeys.map((key) => ({
   type: "anchor",
 }));
 
-// Blog zone: Blog/Projects have their own header entirely, separate from
-// the intro nav above. Every item here loads a page within this zone.
-// Contact isn't listed here — it lives in the footer instead, since it's
-// really an Intro-zone anchor and didn't belong pretending to be a
-// same-zone link.
-export const blogNavItems: NavItem[] = [
-  { key: "blog", type: "page", path: "/blog" },
-  { key: "projects", type: "page", path: "/projects" },
-];
+// Blog zone: no header nav at all.
+//
+// Projects moved to the Intro scroll, which left Blog as the only item — and a
+// one-item nav pointing at the page you are already on is noise. The brand
+// already reads "hgkim /blog" in this zone, and the ZoneSwitcher is how you
+// leave it, so the list has nothing left to do. Kept as an empty array rather
+// than deleted so the zone still has an answer to "which nav items?" and can
+// grow one back (tags, an archive index) without re-plumbing SiteHeader.
+export const blogNavItems: NavItem[] = [];
 
 export function navItemHref(item: NavItem, locale: Locale): string {
   return item.type === "anchor"
@@ -36,15 +41,11 @@ export function navItemHref(item: NavItem, locale: Locale): string {
 
 export type Zone = "intro" | "blog";
 
-// Which zone's header to render. Blog and Projects share the "blog" zone;
-// everything else (currently just Home) is the "intro" zone.
+// Which zone's header to render. Only /blog and its detail routes are the
+// "blog" zone; everything else (currently just Home) is the "intro" zone.
 export function getZone(pathname: string, locale: Locale): Zone {
   const blogRoot = localizeHref("/blog", locale);
-  const projectsRoot = localizeHref("/projects", locale);
   const isBlogZone =
-    pathname === blogRoot ||
-    pathname.startsWith(`${blogRoot}/`) ||
-    pathname === projectsRoot ||
-    pathname.startsWith(`${projectsRoot}/`);
+    pathname === blogRoot || pathname.startsWith(`${blogRoot}/`);
   return isBlogZone ? "blog" : "intro";
 }
