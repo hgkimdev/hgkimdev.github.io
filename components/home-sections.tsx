@@ -10,12 +10,18 @@ import {
 } from "motion/react";
 
 import type { HomeSectionKey } from "@/lib/nav";
+import type { LifeCategory } from "@/content/life";
+import { LifeSection } from "@/components/life/life-section";
 
 type Section = {
   key: HomeSectionKey;
   label: string;
   description: string;
   body?: string[][];
+  // Life only: the categories its entrance opens into. Present only where the
+  // content exists (ko), the same way `body` is — every other locale falls
+  // through to the placeholder below.
+  life?: { categories: LifeCategory[]; intro: string };
 };
 
 function interpolateClamped(
@@ -54,7 +60,9 @@ type Slot = {
 
 // Content-derived: one viewport of runway per paragraph. Sections with no body
 // (en/fr/ja About, Life, Contact) stay at one viewport, so those locales'
-// geometry is numerically identical to the old uniform-slot version.
+// geometry is numerically identical to the old uniform-slot version. Life keeps
+// weight 1 on purpose: it is a one-screen map, and the exploring happens in a
+// dialog outside this scroll engine, not by scrolling through it.
 function sectionWeight(section: Section): number {
   return Math.max(1, section.body?.length ?? 1);
 }
@@ -95,7 +103,8 @@ function buildSlots(weights: number[]) {
 function revealWindows(count: number, slot: Slot, viewportUnit: number) {
   const revealEnd = slot.weight - RAMP_VIEWPORTS - REVEAL_DWELL_VIEWPORTS;
   const lastStart = revealEnd - REVEAL_DUR_VIEWPORTS;
-  const step = count > 2 ? (lastStart - REVEAL_LEAD_VIEWPORTS) / (count - 2) : 0;
+  const step =
+    count > 2 ? (lastStart - REVEAL_LEAD_VIEWPORTS) / (count - 2) : 0;
   const roomy = lastStart >= REVEAL_LEAD_VIEWPORTS;
   return Array.from({ length: count }, (_, i) => {
     if (i === 0 || !roomy) return null;
@@ -328,6 +337,14 @@ function PinnedLayer({
   // end, so `v === 1 ? 0 : DRIFT_PX` made an already-fully-opaque layer jump
   // 16px in a single frame at every boundary.
   const drift = useTransform(opacity, (v) => (1 - v) * DRIFT_PX);
+  // Every layer is `absolute inset-0`, so a faded-out one still covers the
+  // whole frame and swallows clicks meant for the visible layer — Contact sits
+  // last in the DOM, so it was eating every press on Life's entrance. Opacity
+  // is the single source of truth for "is this the layer on screen", and a
+  // crossfading pair sums to exactly 1, so >0.5 picks out exactly one layer.
+  const pointerEvents = useTransform(opacity, (v) =>
+    v > 0.5 ? "auto" : "none",
+  );
 
   // The pb offsets the header: the sticky frame starts below it, so content
   // centred in the frame sits half a header-height *below* the viewport's
@@ -337,7 +354,7 @@ function PinnedLayer({
   // through the crossfade.
   return (
     <motion.div
-      style={{ opacity, y: drift }}
+      style={{ opacity, y: drift, pointerEvents }}
       className="absolute inset-0 flex flex-col justify-center pb-[var(--header-height)]"
     >
       {children}
@@ -366,7 +383,12 @@ function SectionContent({
       <h2 className="text-4xl font-bold tracking-tight sm:text-6xl [@media(max-height:620px)]:text-3xl">
         {section.label}
       </h2>
-      {section.body ? (
+      {section.life ? (
+        <LifeSection
+          categories={section.life.categories}
+          intro={section.life.intro}
+        />
+      ) : section.body ? (
         <SectionBody paragraphs={section.body} reveal={reveal} />
       ) : (
         <>

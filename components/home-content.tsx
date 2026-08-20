@@ -3,6 +3,7 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
 import { homeSectionKeys } from "@/lib/nav";
 import { getAboutContent } from "@/lib/content/about";
+import { lifeCategories, lifeIntro } from "@/content/life";
 import ShinyText from "@/components/ShinyText";
 import TextType from "@/components/TextType";
 
@@ -20,6 +21,12 @@ export function HomeContent({ locale }: { locale: Locale }) {
     body:
       key === "about" && locale === "ko"
         ? getAboutContent().paragraphs
+        : undefined,
+    // About과 같은 규칙: 한국어 원문만 있는 콘텐츠는 ko에서만 붙이고, 나머지
+    // 로케일은 기존 placeholder로 떨어진다.
+    life:
+      key === "life" && locale === "ko"
+        ? { categories: lifeCategories, intro: lifeIntro }
         : undefined,
   }));
 
