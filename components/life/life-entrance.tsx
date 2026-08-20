@@ -20,10 +20,13 @@ export function LifeEntrance({
   categories,
   intro,
   onOpen,
+  animateIn = false,
 }: {
   categories: LifeCategory[];
   intro: string;
   onOpen: (key: LifeCategoryKey) => void;
+  /** 액자가 스스로 등장 애니메이션을 재생할지. Poster의 주석 참고. */
+  animateIn?: boolean;
 }) {
   return (
     <>
@@ -41,6 +44,7 @@ export function LifeEntrance({
             key={category.key}
             category={category}
             index={i}
+            animateIn={animateIn}
             onOpen={() => onOpen(category.key)}
           />
         ))}
@@ -61,10 +65,12 @@ function stillOf(media: LifeMedia): string | null {
 function Poster({
   category,
   index,
+  animateIn,
   onOpen,
 }: {
   category: LifeCategory;
   index: number;
+  animateIn: boolean;
   onOpen: () => void;
 }) {
   const prefersReducedMotion = useReducedMotion();
@@ -75,14 +81,34 @@ function Poster({
   );
   const number = String(index + 1).padStart(2, "0");
 
+  // 핀 고정 스크롤 안에서는 등장 애니메이션을 끈다.
+  //
+  // 그 안에서는 모든 레이어가 `absolute inset-0`이라, 페이지가 열리는 순간부터
+  // 다섯 장 전부 기하학적으로 뷰포트 안이다. IntersectionObserver는 조상의
+  // opacity를 보지 않으므로 whileInView가 로드 시점에 곧바로 발동하고,
+  // `once: true`라 거기서 끝난다 — 방문자가 Life까지 스크롤해 왔을 때는 이미
+  // 소진된 애니메이션이었다. 스태거도 아무도 못 봤다.
+  //
+  // 등장은 레이어 자신의 크로스페이드가 이미 맡고 있으니 여기서 겹칠 이유가
+  // 없다. 스크롤 엔진 밖(reduced-motion의 평범한 세로 배치)에서만 켠다.
+  //
+  // transition을 같이 떼는 게 중요하다. Motion의 `transition`은 whileHover에도
+  // 걸려서, 저 delay가 남아 있으면 다섯 번째 액자는 마우스를 올리고 0.24초
+  // 뒤에야 떠올랐다.
+  const entrance = animateIn
+    ? ({
+        initial: { opacity: 0, y: 14 },
+        whileInView: { opacity: 1, y: 0 },
+        viewport: { once: true, amount: 0.4 },
+        transition: { duration: 0.4, delay: index * 0.06, ease: "easeOut" },
+      } as const)
+    : undefined;
+
   return (
     <motion.button
       type="button"
       onClick={onOpen}
-      initial={{ opacity: 0, y: 14 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.4 }}
-      transition={{ duration: 0.4, delay: index * 0.06, ease: "easeOut" }}
+      {...entrance}
       whileHover={prefersReducedMotion ? undefined : { y: -6 }}
       className={`group relative flex aspect-[3/4] w-36 shrink-0 snap-start flex-col justify-end overflow-hidden rounded-xl border border-border text-left transition-colors hover:border-foreground/25 md:w-auto [@media(max-height:820px)]:aspect-[4/5] [@media(max-height:700px)]:aspect-[4/3] ${still ? "bg-card" : "bg-muted/50"}`}
     >

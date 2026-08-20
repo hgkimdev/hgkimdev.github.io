@@ -387,6 +387,9 @@ function SectionContent({
         <LifeSection
           categories={section.life.categories}
           intro={section.life.intro}
+          // `reveal`이 있다 === 핀 고정 스크롤 안이다. 거기서는 레이어
+          // 크로스페이드가 등장을 맡으므로 액자가 따로 나타나지 않는다.
+          animateIn={!reveal}
         />
       ) : section.body ? (
         <SectionBody paragraphs={section.body} reveal={reveal} />
