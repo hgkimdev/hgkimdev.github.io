@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 
 import { LocaleHtmlLang } from "@/components/locale-html-lang";
 import { PageTransition } from "@/components/page-transition";
-import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getDictionary, getNavLabels } from "@/lib/i18n/dictionaries";
 
@@ -13,8 +12,10 @@ export const metadata: Metadata = {
 
 export default function JaLayout({
   children,
+  footer,
 }: Readonly<{
   children: React.ReactNode;
+  footer: React.ReactNode;
 }>) {
   const dict = getDictionary("ja");
 
@@ -31,10 +32,8 @@ export default function JaLayout({
       <main className="mx-auto w-full max-w-4xl flex-1 px-4">
         <PageTransition>{children}</PageTransition>
       </main>
-      <SiteFooter
-        locale="ja"
-        footerText={dict.footer(new Date().getFullYear())}
-      />
+      {/* @footer 병렬 슬롯. blog 존에서만 내용이 있다. */}
+      {footer}
     </div>
   );
 }

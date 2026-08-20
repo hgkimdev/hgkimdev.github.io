@@ -1,13 +1,14 @@
 import { LocaleHtmlLang } from "@/components/locale-html-lang";
 import { PageTransition } from "@/components/page-transition";
-import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getDictionary, getNavLabels } from "@/lib/i18n/dictionaries";
 
 export default function KoLayout({
   children,
+  footer,
 }: Readonly<{
   children: React.ReactNode;
+  footer: React.ReactNode;
 }>) {
   const dict = getDictionary("ko");
 
@@ -24,10 +25,8 @@ export default function KoLayout({
       <main className="mx-auto w-full max-w-4xl flex-1 px-4">
         <PageTransition>{children}</PageTransition>
       </main>
-      <SiteFooter
-        locale="ko"
-        footerText={dict.footer(new Date().getFullYear())}
-      />
+      {/* @footer 병렬 슬롯. blog 존에서만 내용이 있다. */}
+      {footer}
     </div>
   );
 }
