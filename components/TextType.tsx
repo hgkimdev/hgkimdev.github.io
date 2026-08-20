@@ -173,9 +173,14 @@ const TextType = ({
     <span className="inline" style={{ color: getCurrentTextColor() || 'inherit' }}>
       {displayedText}
     </span>,
-    showCursor && (
+    // 숨길 때는 클래스가 아니라 렌더 자체를 막는다. 원래는 `hidden`을 덧붙였는데,
+    // 같은 요소의 `inline-block`과 특이도가 같아서 스타일시트에 나중에 나오는
+    // 쪽이 이긴다. Tailwind가 내보내는 순서상 `.inline-block`이 `.hidden`보다
+    // 뒤에 있어서, 이 프롭은 켜도 아무 일이 일어나지 않았다. 안 그리면 다툴
+    // 일이 없고, 깜빡임 애니메이션도 확실히 멈춘다.
+    showCursor && !shouldHideCursor && (
       <span
-        className={`ml-1 inline-block animate-caret-blink ${shouldHideCursor ? 'hidden' : ''} ${cursorClassName}`}
+        className={`ml-1 inline-block animate-caret-blink ${cursorClassName}`}
         style={{ animationDuration: `${cursorBlinkDuration * 2}s` }}
       >
         {cursorCharacter}
