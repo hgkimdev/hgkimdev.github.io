@@ -14,6 +14,10 @@ const WHY_TEXT =
   "text-sm leading-relaxed break-keep text-pretty text-foreground " +
   "sm:text-base md:text-lg";
 
+// 항목 태그(tags)와 여행 버킷리스트(wish)가 같이 쓰는 칩. 성격은 다르지만
+// 둘 다 "본문 옆에 붙는 짧은 조각"이라 생김새가 갈리면 화면만 시끄러워진다.
+const CHIP = "rounded-full bg-foreground/5 px-2 py-0.5 text-foreground/70";
+
 /**
  * 전체화면 탐색 오버레이.
  *
@@ -116,14 +120,23 @@ export function LifeOverlay({
                           </span>
                         ))}
                       </div>
+                      {/* 태그는 why에 딸린 것이므로 구분선 없이 바로 붙인다.
+                          아래 wish는 항목이 아니라 카테고리 전체의 것이라
+                          선을 그어 떼어놓는다 — 같은 칩이지만 소속이 다르다. */}
+                      {item.tags?.length ? (
+                        <div className="mt-1 flex flex-wrap items-center gap-2 font-mono text-xs">
+                          {item.tags.map((tag) => (
+                            <span key={tag} className={CHIP}>
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
                       {category.wish ? (
                         <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border/70 pt-4 font-mono text-xs text-muted-foreground">
                           <span>{category.wish.label}</span>
                           {category.wish.entries.map((entry) => (
-                            <span
-                              key={entry}
-                              className="rounded-full bg-foreground/5 px-2 py-0.5 text-foreground/70"
-                            >
+                            <span key={entry} className={CHIP}>
                               {entry}
                             </span>
                           ))}
