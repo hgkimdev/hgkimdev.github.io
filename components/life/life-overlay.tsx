@@ -18,6 +18,21 @@ const WHY_TEXT =
 // 둘 다 "본문 옆에 붙는 짧은 조각"이라 생김새가 갈리면 화면만 시끄러워진다.
 const CHIP = "rounded-full bg-foreground/5 px-2 py-0.5 text-foreground/70";
 
+// 이 오버레이에는 backdrop-filter가 하나도 없다. 재생 중인 영상 위에 반투명
+// 컨트롤을 띄우는 흔한 조합인데, 아래가 매 프레임 바뀌므로 블러도 매 프레임
+// 다시 계산된다. Firefox 실측(실제 창, 프로세스별 CPU): 오버레이를 열어둔
+// 상태가 코어의 38%였고 backdrop-filter만 전부 걷으면 28%로 떨어졌다.
+// 합성을 맡는 parent 프로세스만 보면 30% -> 13%다. Chrome에서는 같은 차이가
+// 노이즈에 묻혀 보이지 않는다 — 브라우저 하나만 보고 판단하면 놓친다.
+//
+// 하나씩 꺼서는 소용이 없다는 게 함정이었다. 백드롭만, 또는 캡슐만 꺼서는
+// 3포인트뿐이고 전부 걷어내야 9포인트가 빠진다. 하나라도 남으면 Firefox는
+// 비싼 경로를 유지한다.
+//
+// 잃는 것은 거의 없다. 배경이 bg-muted/85처럼 85% 불투명하면 그 뒤의 블러는
+// 원래 보이지 않았다(끄기 전후 스크린샷이 구분되지 않는다). 70%였던 닫기
+// 버튼만 영상 질감이 살짝 비쳐서 85%로 올려 맞췄다.
+
 /**
  * 전체화면 탐색 오버레이.
  *
@@ -59,7 +74,7 @@ export function LifeOverlay({
       }}
     >
       <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 z-50 bg-background/70 backdrop-blur-sm transition-opacity duration-200 data-ending-style:opacity-0 data-starting-style:opacity-0" />
+        <Dialog.Backdrop className="fixed inset-0 z-50 bg-background/70 transition-opacity duration-200 data-ending-style:opacity-0 data-starting-style:opacity-0" />
         {/* `dark`는 테마 토글이 아니라 이 서브트리의 토큰 스코프다. globals.css의
             `.dark`가 --background/--foreground/--muted를 재정의하므로, 이 한 줄로
             오버레이 안의 모든 것(스크림, 목록, 하단 캡슐)이 라이트 테마에서도
@@ -81,7 +96,7 @@ export function LifeOverlay({
                 <span aria-hidden>/</span>
                 <span className="text-foreground">{category?.label}</span>
               </Dialog.Title>
-              <Dialog.Close className="flex size-9 items-center justify-center rounded-full border border-border bg-card/70 text-muted-foreground backdrop-blur transition-colors hover:text-foreground">
+              <Dialog.Close className="flex size-9 items-center justify-center rounded-full border border-border bg-card/85 text-muted-foreground transition-colors hover:text-foreground">
                 <XIcon className="size-4" />
                 <span className="sr-only">닫기</span>
               </Dialog.Close>
@@ -299,7 +314,7 @@ function CategoryDock({
           e.stopPropagation();
         }
       }}
-      className={`pointer-events-auto relative touch-none rounded-full border border-border bg-muted/85 p-1 shadow-lg backdrop-blur select-none ${
+      className={`pointer-events-auto relative touch-none rounded-full border border-border bg-muted/85 p-1 shadow-lg select-none ${
         isDragging ? "cursor-grabbing" : "cursor-grab"
       }`}
     >
@@ -381,7 +396,7 @@ function ItemStrip({
               className={`shrink-0 snap-start rounded-full border px-3 py-1.5 text-xs font-medium whitespace-nowrap shadow-sm transition-colors ${
                 active
                   ? "border-border bg-background text-foreground"
-                  : "border-transparent bg-muted/85 text-muted-foreground backdrop-blur"
+                  : "border-transparent bg-muted/85 text-muted-foreground"
               }`}
             >
               {item.title}

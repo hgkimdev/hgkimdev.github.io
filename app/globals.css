@@ -219,6 +219,29 @@
    its own named group (only during the theme transition, so navigation's
    root crossfade is untouched) makes it its own compositing layer, which
    captures the blur correctly. */
+/* 전체화면 모달이 열려 있는 동안 헤더의 간유리를 끈다.
+ *
+ * backdrop-filter는 보이지 않아도 계산된다. Life 오버레이가 열리면 헤더는
+ * 불투명한 전체화면 팝업에 완전히 가려지는데, 그 아래에서는 배경 영상이
+ * 재생 중이라 헤더의 블러가 매 영상 프레임마다 다시 계산됐다. Firefox
+ * 실측(실제 창, 프로세스별 CPU): 오버레이를 열어둔 상태에서 이 한 줄이
+ * 코어의 5%p를 먹었고, 합성을 맡는 parent 프로세스만 보면 23% -> 13%였다.
+ * 히어로 화면에서는 아래에 움직이는 게 없어서 비용이 0이다 — 즉 이 비용은
+ * "아래에서 무엇이 움직이는가"에만 달려 있어서 평소 개발 중에는 보이지
+ * 않는다. Chrome에서는 차이가 노이즈에 묻힌다.
+ *
+ * aria-hidden은 Base UI만의 것이 아니라 모달이 바깥 콘텐츠를 표시하는
+ * 표준 방식이다. inert를 쓰는 구현으로 바뀌어도 걸리도록 둘 다 받는다.
+ * 어느 쪽도 아니게 되면 최적화만 조용히 사라지고 화면은 그대로다. */
+[aria-hidden="true"] .site-header,
+[inert] .site-header {
+  /* 접두사를 직접 쓰지 않는다. -webkit- 줄을 같이 적었더니 Lightning CSS가
+     둘을 하나로 접으면서 접두사 없는 쪽을 버렸고, -webkit-backdrop-filter를
+     모르는 Firefox에서는 규칙이 통째로 무시됐다 — 정확히 이 최적화가
+     필요한 브라우저에서만 조용히 안 먹었다. 접두사는 빌드가 붙인다. */
+  backdrop-filter: none;
+}
+
 :root[data-transition-kind="theme"] .site-header {
   view-transition-name: site-header;
 }
