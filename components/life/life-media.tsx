@@ -343,6 +343,17 @@ function thumbnailSrc(id: string) {
 }
 
 /**
+ * 썸네일이 없을 때 i.ytimg.com이 대신 주는 회색 판의 가로 폭.
+ *
+ * maxres가 없는 영상을 요청하면 404가 오는데, 몸통이 비어 있지 않다 —
+ * 120x90짜리 회색 JPEG가 `Content-Type: image/jpeg`로 멀쩡히 실려온다.
+ * 브라우저는 디코드에 성공했으므로 error가 아니라 load를 쏜다(실측). 그래서
+ * onError만 걸어둔 폴백은 영영 실행되지 않고, 화면에는 그 회색 판이 전체
+ * 화면으로 늘어난 채 남는다. 크기로 걸러내는 수밖에 없다.
+ */
+const YT_PLACEHOLDER_WIDTH = 120;
+
+/**
  * YouTube UI가 떠 있는 동안 iframe을 덮는 한 장.
  *
  * 상태(maxres -> hq 폴백)를 들고 있어야 해서 컴포넌트로 뺐다. 부모에서
@@ -363,6 +374,16 @@ function CoverPoster({
 }) {
   const [src, setSrc] = useState(() => thumbnailSrc(id));
 
+  // 일부 영상은 maxres 썸네일이 없다. hq로 한 단계 내려가고, 그것마저 없으면
+  // 아무것도 그리지 않는다 — 회색 판을 띄우느니 영상을 그냥 보여주는 게 낫다.
+  function downgrade() {
+    setSrc((prev) =>
+      prev.includes("maxresdefault")
+        ? prev.replace("maxresdefault", "hqdefault")
+        : "",
+    );
+  }
+
   if (!src) return null;
 
   return (
@@ -372,14 +393,13 @@ function CoverPoster({
     <img
       src={src}
       alt=""
-      // 일부 영상은 maxres 썸네일이 없다. 깨진 이미지 대신 hq로 내려간다.
-      onError={() =>
-        setSrc((prev) =>
-          prev.includes("maxresdefault")
-            ? prev.replace("maxresdefault", "hqdefault")
-            : "",
-        )
-      }
+      // 진짜 로드 실패(네트워크 등).
+      onError={downgrade}
+      // 로드에 성공해도 끝이 아니다. YT_PLACEHOLDER_WIDTH 주석 참고 —
+      // 없는 썸네일은 "성공한 회색 판"으로 도착하므로 크기를 봐야 한다.
+      onLoad={(e) => {
+        if (e.currentTarget.naturalWidth <= YT_PLACEHOLDER_WIDTH) downgrade();
+      }}
       className={`${className} transition-opacity ease-out ${
         covered ? "opacity-100 duration-200" : "opacity-0 duration-700"
       }`}
