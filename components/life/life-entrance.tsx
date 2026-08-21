@@ -58,7 +58,8 @@ export function LifeEntrance({
 function stillOf(media: LifeMedia): string | null {
   if (media.kind === "youtube")
     return `https://i.ytimg.com/vi/${media.id}/maxresdefault.jpg`;
-  if (media.kind === "image") return media.src;
+  // 표지도 액자에서는 그림이다. 3:4 액자에 세로 표지는 살짝만 잘린다.
+  if (media.kind === "image" || media.kind === "cover") return media.src;
   return null;
 }
 

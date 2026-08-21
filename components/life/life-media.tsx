@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { motion, useReducedMotion } from "motion/react";
 
-import type { LifeMedia } from "@/content/life";
+import type { LifeCoverMedia, LifeMedia } from "@/content/life";
 
 // youtube-nocookie.com은 재생 전까지 쿠키를 심지 않는다. 소개용 사이트에
 // 굳이 방문자 추적을 얹을 이유가 없어 기본값으로 쓴다.
@@ -317,7 +317,10 @@ export function LifeMediaBackground({
         />
       ) : null}
 
-      {/* 글이 놓이는 왼쪽은 거의 불투명하게, 오른쪽은 배경이 비치도록.
+      {/* 스크림은 꽉 찬 그림 위에서만 의미가 있다. 깔린 게 없으면 배경색
+          위에 같은 배경색을 겹치는 셈이라 그리지 않는다.
+
+          글이 놓이는 왼쪽은 거의 불투명하게, 오른쪽은 배경이 비치도록.
           왼쪽이 충분히 불투명해야 본문 글자색을 토큰 그대로 둘 수 있다.
 
           값은 다크 모드 기준으로 잡혀 있다 — 어둡게 덮으면 영상의 색이 살아
@@ -325,8 +328,12 @@ export function LifeMediaBackground({
           그래서 오버레이는 라이트 테마에서도 다크 토큰으로 그린다
           (life-overlay.tsx의 Dialog.Popup에 붙은 `dark`). 여기서 `background`가
           늘 어두운 색인 것은 그 덕분이다. */}
-      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/88 to-background/25" />
-      <div className="absolute inset-0 bg-gradient-to-t from-background/85 via-transparent to-background/30" />
+      {videoId || stillSrc ? (
+        <>
+          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/88 to-background/25" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/85 via-transparent to-background/30" />
+        </>
+      ) : null}
     </div>
   );
 }
@@ -378,5 +385,160 @@ function CoverPoster({
       }`}
       style={{ scale: CHROME_CROP_SCALE }}
     />
+  );
+}
+
+/** 표지 높이. 폭은 판형에 맡기고 높이만 정한다 — LifeCoverPlate 주석 참고. */
+const COVER_HEIGHT = "clamp(13rem, 44vh, 28rem)";
+/**
+ * 두께. 높이에 비례시키는 게 핵심이다.
+ *
+ * 고정 px로 두면 높이가 clamp로 13rem~28rem을 오가는 동안 두께만 그대로라,
+ * 큰 화면에서는 종잇장처럼 얇고 작은 화면에서는 벽돌처럼 두꺼워진다.
+ * 0.11은 시안에서 300px 높이에 34px가 맞아 보였던 비율이다.
+ */
+const COVER_THICKNESS = `calc(${COVER_HEIGHT} * 0.11)`;
+/** 쉬고 있을 때 / 가리켰을 때 각도. 눌리는 물건이라는 걸 각도로 알린다. */
+const COVER_ANGLE = -28;
+const COVER_ANGLE_HOVER = -14;
+
+/**
+ * 페이지 단면. 종이 한 장이 1.5px, 사이 그늘이 1px인 결을 반복해 그린다.
+ * 실제 종이 두께를 흉내내려는 게 아니라, 이 면이 "쌓인 종이"로 읽히기만
+ * 하면 된다.
+ */
+const PAPER_EDGE =
+  "repeating-linear-gradient(to right, #efe9db 0 1.5px, #cfc7b4 1.5px 2.5px, #e6dfd0 2.5px 4px)";
+/** 책등. 가운데가 밝고 양끝이 어두워야 둥글게 말린 것처럼 보인다. */
+const SPINE_SHADING =
+  "linear-gradient(to right, rgba(0,0,0,0.55), rgba(255,255,255,0.10) 22%, rgba(0,0,0,0.30) 70%, rgba(0,0,0,0.6)), #16130f";
+
+/**
+ * 오른쪽에 세워두는 책 표지 한 권.
+ *
+ * 표지를 배경으로 꽉 채우지 않는 이유는 두 가지다. 표지는 판형이 정해진
+ * 그림이라 object-cover로 늘리면 제목과 출판사 로고가 화면 밖으로 잘리고,
+ * 세로로 긴 그림을 가로로 넓은 뷰포트에 맞추는 만큼 크게 확대돼 흐려진다.
+ * 원래 비율 그대로 한 권 세워두면 둘 다 생기지 않는다.
+ *
+ * 크기는 높이로 정한다. 폭으로 정하면 판형이 다른 책마다(1984는 0.58,
+ * 명상록은 0.67) 높이가 제각각이 되어 책을 바꿀 때 위아래로 널뛴다.
+ *
+ * 두께는 CSS 3D로 만든다. 면은 넷이면 충분하다 — 앞표지(그림), 뒤표지(실루엣을
+ * 닫는 판), 책등, 그리고 페이지 단면. 두께 방향이 Z라서 앞표지가 +t/2, 뒤표지가
+ * -t/2에 서고, 옆면 둘이 자기 모서리를 축으로 90도 접혀 그 사이를 잇는다.
+ *
+ * 원근은 조상에게 `perspective`를 주는 대신 이 요소의 transform에 직접
+ * `perspective()`를 넣는다. 위에 부유 애니메이션 레이어가 끼어 있는데, 그
+ * 레이어는 `transform-style: flat`이라 조상의 원근이 여기까지 닿지 않는다.
+ */
+export function LifeCoverPlate({
+  media,
+  title,
+}: {
+  media: LifeCoverMedia;
+  title: string;
+}) {
+  const prefersReducedMotion = useReducedMotion();
+
+  const faceBase = "absolute top-0 h-full";
+  const book = (
+    <motion.div
+      className="relative"
+      style={{
+        transformStyle: "preserve-3d",
+        transformPerspective: 1400,
+        // 각도의 기준을 책등 쪽에 두면 회전이 "책을 정면으로 돌려세우는"
+        // 움직임이 된다. 가운데를 기준으로 돌리면 제자리에서 비틀리기만 한다.
+        originX: 0.15,
+      }}
+      initial={{ rotateY: COVER_ANGLE }}
+      animate={{ rotateY: COVER_ANGLE }}
+      whileHover={prefersReducedMotion ? undefined : { rotateY: COVER_ANGLE_HOVER }}
+      whileFocus={prefersReducedMotion ? undefined : { rotateY: COVER_ANGLE_HOVER }}
+      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {/* 뒤표지. 그림이 없으니 판형만 남긴다. */}
+      <div
+        className="absolute inset-0 rounded-l-[2px] rounded-r-sm bg-[#16130f]"
+        style={{ transform: `translateZ(calc(${COVER_THICKNESS} / -2))` }}
+      />
+      {/* 책등: 왼쪽 모서리를 축으로 뒤로 접는다. */}
+      <div
+        className={`${faceBase} left-0 rounded-l-[2px]`}
+        style={{
+          width: COVER_THICKNESS,
+          background: SPINE_SHADING,
+          transformOrigin: "left center",
+          transform: `translateZ(calc(${COVER_THICKNESS} / 2)) rotateY(90deg)`,
+        }}
+      />
+      {/* 페이지 단면: 오른쪽 모서리를 축으로 뒤로 접는다. 위아래를 표지보다
+          조금 들여야 종이 뭉치가 표지 안에 들어앉은 것처럼 보인다. */}
+      <div
+        className="absolute right-0"
+        style={{
+          top: "0.4%",
+          height: "99.2%",
+          width: COVER_THICKNESS,
+          background: PAPER_EDGE,
+          boxShadow: "inset 0 0 14px rgba(0,0,0,0.45)",
+          transformOrigin: "right center",
+          transform: `translateZ(calc(${COVER_THICKNESS} / 2)) rotateY(-90deg)`,
+        }}
+      />
+      {/* 앞표지. 흐름에 남아 있는 유일한 면이라 이 그림이 상자 크기를 정한다.
+          max-w-none이 필요하다: Tailwind preflight의 `img { max-width: 100% }`가
+          그리드 칸 폭에 맞춰 아래 height로 정한 크기를 조용히 깎는다. */}
+      {/* next/image를 쓰지 않는 이유는 CoverPoster 쪽 주석과 같다. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={media.src}
+        alt=""
+        className="block w-auto max-w-none rounded-l-[2px] rounded-r-sm ring-1 ring-white/10"
+        style={{
+          height: COVER_HEIGHT,
+          transform: `translateZ(calc(${COVER_THICKNESS} / 2))`,
+        }}
+      />
+    </motion.div>
+  );
+
+  // 등장(한 번)과 부유(무한)를 두 겹으로 나눈다. 한 요소에 얹으면 Motion이
+  // 같은 transform을 두고 다투고, y 키프레임이 initial 값을 무시해 튄다.
+  return (
+    <motion.div
+      key={media.src}
+      initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, ease: "easeOut" }}
+      // 바닥 그림자는 여기 건다. .book에 filter를 걸면 안 된다 — filter는
+      // grouping property라 preserve-3d를 flat으로 만들어 면들이 통째로
+      // 납작해진다.
+      style={{ filter: "drop-shadow(0 18px 26px rgba(0,0,0,0.55))" }}
+    >
+      <motion.div
+        animate={prefersReducedMotion ? undefined : { y: [0, -10, 0] }}
+        transition={{ duration: 9, ease: "easeInOut", repeat: Infinity }}
+      >
+        {media.href ? (
+          // 외부 주소라 next/link를 쓰지 않는다. Link가 얹어주는 프리페치와
+          // 클라이언트 라우팅은 같은 앱 안에서만 의미가 있다.
+          <a
+            href={media.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            // 표지 그림의 alt는 비워 두었으므로 링크 이름을 여기서 준다.
+            // 표지만 읽어주면 이게 눌러서 어디로 가는 물건인지 알 수 없다.
+            aria-label={`교보문고에서 『${title}』 미리보기 (새 창)`}
+            className="block rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-4 focus-visible:ring-offset-transparent"
+          >
+            {book}
+          </a>
+        ) : (
+          book
+        )}
+      </motion.div>
+    </motion.div>
   );
 }
