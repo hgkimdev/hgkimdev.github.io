@@ -6,7 +6,10 @@ import { AnimatePresence, motion } from "motion/react";
 import { Volume2Icon, VolumeXIcon, XIcon } from "lucide-react";
 
 import type { LifeCategory, LifeCategoryKey } from "@/content/life";
-import { LifeMediaBackground } from "@/components/life/life-media";
+import {
+  LifeCoverPlate,
+  LifeMediaBackground,
+} from "@/components/life/life-media";
 
 // 본문 대비 한 단계 작은 조판. break-keep은 한글에서 필수다 — 기본 줄바꿈
 // 규칙은 음절 사이 아무 데서나 끊어서 "있습니" / "다." 같은 조각을 만든다.
@@ -69,6 +72,25 @@ export function LifeOverlay({
     category?.items[0] ??
     null;
 
+  // 방금 넘어온 방향. 0이면 탭으로 고른 것이다.
+  //
+  // 본문이 위아래로 뜨고 지는 기존 전환은 "골랐다"에는 맞지만 "밀었다"에는
+  // 맞지 않는다 — 왼쪽으로 민 글이 위로 사라지면 손끝과 화면이 따로 논다.
+  // 방향을 기억해 두면 민 쪽으로 빠지고 반대쪽에서 들어온다.
+  const [swipeDir, setSwipeDir] = useState<-1 | 0 | 1>(0);
+
+  function selectItem(id: string, direction: -1 | 0 | 1 = 0) {
+    if (!openKey) return;
+    setSwipeDir(direction);
+    setSelected({ key: openKey, id });
+  }
+
+  const { layerRef: swipeLayerRef, handlers: swipeHandlers } = useItemSwipe(
+    category?.items ?? [],
+    item?.id ?? "",
+    selectItem,
+  );
+
   return (
     <Dialog.Root
       open={openKey !== null}
@@ -111,63 +133,127 @@ export function LifeOverlay({
             </header>
 
             {category && item ? (
-              <div className="flex min-h-0 flex-1 flex-col px-5 pb-32 sm:px-10 md:grid md:grid-cols-[minmax(11rem,15rem)_1fr] md:gap-12 md:pb-28">
+              // 표지가 있으면 칸을 하나 더 연다. 배경 레이어에 절대 위치로
+              // 띄우지 않는 건, 본문이 max-w-2xl이라 화면이 좁아질수록 오른쪽
+              // 여백이 먼저 사라져서 어떤 % 값을 잡아도 md 언저리에서 글자
+              // 위로 책이 올라타기 때문이다. 칸으로 두면 겹칠 수가 없다.
+              <div
+                className={`flex min-h-0 flex-1 flex-col px-5 pb-32 sm:px-10 md:grid md:grid-cols-[minmax(11rem,15rem)_1fr] md:gap-12 md:pb-28 ${
+                  item.media.kind === "cover"
+                    ? "lg:grid-cols-[minmax(11rem,15rem)_minmax(0,42rem)_1fr]"
+                    : ""
+                }`}
+              >
                 <ItemList
                   category={category}
                   activeId={item.id}
-                  onSelect={(id) =>
-                    openKey && setSelected({ key: openKey, id })
-                  }
+                  onSelect={selectItem}
                 />
 
-                <div className="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto">
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={item.id}
-                      initial={{ opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.28, ease: "easeOut" }}
-                      className="flex max-w-2xl flex-col gap-4 pb-6"
-                    >
-                      <h3 className="text-3xl font-bold tracking-tight break-keep sm:text-5xl">
-                        {item.title}
-                      </h3>
-                      <p className="font-mono text-xs text-muted-foreground sm:text-sm">
-                        {item.meta}
-                      </p>
-                      <div className={`flex flex-col pt-2 ${WHY_TEXT}`}>
-                        {item.why.map((line, i) => (
-                          <span key={i} className="block">
-                            {line}
-                          </span>
-                        ))}
-                      </div>
-                      {/* 태그는 why에 딸린 것이므로 구분선 없이 바로 붙인다.
+                <div
+                  {...swipeHandlers}
+                  // 세로는 브라우저에게, 가로는 이쪽으로. pinch-zoom을 같이
+                  // 적어두지 않으면 이 영역에서만 확대가 막힌다.
+                  style={{ touchAction: "pan-y pinch-zoom" }}
+                  // overflow-x를 명시하는 게 핵심이다. overflow-y만 auto로 두면
+                  // 나머지 축의 visible이 auto로 계산되는데(CSS 규칙), 그러면
+                  // 이 칸이 가로로도 스크롤 컨테이너가 된다. 아래에서 본문을
+                  // translateX로 밀 때 오른쪽으로 나간 만큼이 스크롤 가능
+                  // 영역으로 잡혀서(실측: +70px 밀면 scrollWidth가 70px 늘고,
+                  // -70px는 0 — LTR에서 왼쪽 넘침은 스크롤 대상이 아니다)
+                  // 칩 목록 바로 위에 가로 스크롤바가 떴다.
+                  //
+                  // hidden은 스크롤바를 그리지 않는다. 가로로 잘리는 건 화면
+                  // 끝에서 px-5만큼 안쪽이라 어차피 보이지 않던 자리다.
+                  className="flex min-h-0 flex-1 flex-col justify-center overflow-x-hidden overflow-y-auto"
+                >
+                  {/* 손끝을 따라 움직이는 겹. AnimatePresence가 쥔 transform과
+                      겹치지 않게 한 겹 밖에 둔다 — 같은 요소에 얹으면 넘어가는
+                      순간 둘이 같은 transform을 두고 다툰다. */}
+                  <div
+                    ref={swipeLayerRef}
+                    style={{
+                      transform: "translateX(var(--swipe-x, 0px))",
+                      transition:
+                        "transform var(--swipe-dur, 0ms) cubic-bezier(0.22, 1, 0.36, 1)",
+                    }}
+                  >
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={item.id}
+                        initial={
+                          swipeDir
+                            ? { opacity: 0, x: swipeDir * 44 }
+                            : { opacity: 0, y: 12 }
+                        }
+                        animate={{ opacity: 1, x: 0, y: 0 }}
+                        exit={
+                          swipeDir
+                            ? { opacity: 0, x: swipeDir * -32 }
+                            : { opacity: 0, y: -8 }
+                        }
+                        transition={{
+                          duration: swipeDir ? 0.2 : 0.28,
+                          ease: "easeOut",
+                        }}
+                        className="flex max-w-2xl flex-col gap-4 pb-6"
+                      >
+                        <h3 className="text-3xl font-bold tracking-tight break-keep sm:text-5xl">
+                          {item.title}
+                        </h3>
+                        <p className="font-mono text-xs text-muted-foreground sm:text-sm">
+                          {item.meta}
+                        </p>
+                        <div className={`flex flex-col pt-2 ${WHY_TEXT}`}>
+                          {item.why.map((line, i) => (
+                            <span key={i} className="block">
+                              {line}
+                            </span>
+                          ))}
+                        </div>
+                        {/* 태그는 why에 딸린 것이므로 구분선 없이 바로 붙인다.
                           아래 wish는 항목이 아니라 카테고리 전체의 것이라
                           선을 그어 떼어놓는다 — 같은 칩이지만 소속이 다르다. */}
-                      {item.tags?.length ? (
-                        <div className="mt-1 flex flex-wrap items-center gap-2 font-mono text-xs">
-                          {item.tags.map((tag) => (
-                            <span key={tag} className={CHIP}>
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      ) : null}
-                      {category.wish ? (
-                        <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border/70 pt-4 font-mono text-xs text-muted-foreground">
-                          <span>{category.wish.label}</span>
-                          {category.wish.entries.map((entry) => (
-                            <span key={entry} className={CHIP}>
-                              {entry}
-                            </span>
-                          ))}
-                        </div>
-                      ) : null}
-                    </motion.div>
-                  </AnimatePresence>
+                        {item.tags?.length ? (
+                          <div className="mt-1 flex flex-wrap items-center gap-2 font-mono text-xs">
+                            {item.tags.map((tag) => (
+                              <span key={tag} className={CHIP}>
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        ) : null}
+                        {category.wish ? (
+                          <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border/70 pt-4 font-mono text-xs text-muted-foreground">
+                            <span>{category.wish.label}</span>
+                            {category.wish.entries.map((entry) => (
+                              <span key={entry} className={CHIP}>
+                                {entry}
+                              </span>
+                            ))}
+                          </div>
+                        ) : null}
+                      </motion.div>
+                    </AnimatePresence>
+                  </div>
                 </div>
+
+                {/* 셋째 칸은 lg부터. 그보다 좁으면 본문이 이미 남는 폭을 다
+                    쓰고 있어서, 책을 넣을 자리가 진짜로 없다.
+
+                    가운데가 아니라 왼쪽에 붙인다. 이 칸은 1fr이라 화면이 넓어질수록
+                    혼자 늘어나는데, 가운데 정렬이면 책이 본문에서 점점 멀어져
+                    1920px에서는 사이가 350px까지 벌어진다. 왼쪽에 붙여두면 폭과
+                    무관하게 본문에서 같은 거리에 선다 — 사이를 벌리는 건 그리드
+                    gap 하나로 충분하다.
+
+                    좁은 폭(1024·1280)에서는 칸이 책 폭까지 줄어 여유가 0이므로
+                    이 정렬은 아무것도 바꾸지 않는다. */}
+                {item.media.kind === "cover" ? (
+                  <div className="hidden items-center justify-start lg:flex">
+                    <LifeCoverPlate media={item.media} title={item.title} />
+                  </div>
+                ) : null}
               </div>
             ) : null}
 
@@ -210,9 +296,7 @@ export function LifeOverlay({
                 <ItemStrip
                   category={category}
                   activeId={item.id}
-                  onSelect={(id) =>
-                    openKey && setSelected({ key: openKey, id })
-                  }
+                  onSelect={selectItem}
                 />
               ) : null}
               <CategoryDock
@@ -237,6 +321,129 @@ export function LifeOverlay({
  * TabsList/TabsTrigger가 쓰는 것과 같은 조합이라 사이트의 나머지와 겉돌지
  * 않는다.
  */
+
+/**
+ * 본문을 옆으로 밀어 다음/이전 항목으로 넘기는 제스처 (터치 전용).
+ *
+ * 마우스는 일부러 받지 않는다. 포인터 종류를 안 가리면 데스크톱에서 글을
+ * 드래그해 선택하는 순간 항목이 넘어가버린다. 넘길 방법은 폰에도 이미
+ * 있으므로(ItemStrip) 이건 그 위에 얹는 지름길이지 유일한 길이 아니다.
+ *
+ * 세로 스크롤과 같은 표면을 쓰는 게 이 제스처의 전부다. 그래서 두 가지가
+ * 필요하다. `touch-action: pan-y`로 세로는 브라우저에 넘기고 가로만 받아오고,
+ * 처음 몇 px에서 어느 축인지 한 번 정한 뒤로는 그 판정을 바꾸지 않는다
+ * (축 고정). 매 이벤트마다 다시 판단하면 비스듬히 긋는 손가락에 본문이
+ * 좌우로 떨린다.
+ */
+// 축을 정하기 전에 지켜보는 거리. 짧으면 세로 스크롤이 가로로 오인되고,
+// 길면 넘기기 시작이 굼뜨게 느껴진다.
+const SWIPE_AXIS_LOCK = 10;
+// 천천히 끌어서 넘길 때 필요한 거리.
+const SWIPE_COMMIT_PX = 64;
+// 짧고 빠르게 튕겼을 때. 거리는 모자라도 의도는 분명하다.
+const SWIPE_FLICK_MS = 250;
+const SWIPE_FLICK_PX = 24;
+// 첫/마지막 항목에서 더 밀 때 손끝을 따라오는 비율. 벽에 딱 막히면 고장난
+// 것처럼 보이고, 그대로 따라오면 넘어갈 것처럼 보인다.
+const SWIPE_EDGE_RESIST = 4;
+
+function useItemSwipe(
+  items: LifeCategory["items"],
+  activeId: string,
+  onSelect: (id: string, direction: -1 | 1) => void,
+) {
+  const layerRef = useRef<HTMLDivElement>(null);
+  const startX = useRef(0);
+  const startY = useRef(0);
+  const startAt = useRef(0);
+  // 제스처가 시작된 시점의 자리. 렌더 중에 다시 계산하지 않는다 — 넘기는
+  // 도중에 인덱스가 바뀌면 고무줄 판정의 기준이 손 안에서 달라진다.
+  const startIndex = useRef(0);
+  const axis = useRef<"none" | "x" | "y">("none");
+  const tracking = useRef(false);
+
+  // 도크와 같은 이유로 커스텀 속성에 쓴다 — React가 쥔 style 문자열이 제스처
+  // 내내 변하지 않아야 재렌더가 위치를 시작점으로 되돌리지 않는다.
+  function paint(x: number, settleMs: number) {
+    const el = layerRef.current;
+    if (!el) return;
+    el.style.setProperty("--swipe-x", `${x}px`);
+    el.style.setProperty("--swipe-dur", `${settleMs}ms`);
+  }
+
+  function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    if (e.pointerType !== "touch") return;
+    tracking.current = true;
+    axis.current = "none";
+    startX.current = e.clientX;
+    startY.current = e.clientY;
+    startAt.current = performance.now();
+    startIndex.current = items.findIndex((i) => i.id === activeId);
+    paint(0, 0);
+  }
+
+  function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    if (!tracking.current) return;
+    const dx = e.clientX - startX.current;
+    const dy = e.clientY - startY.current;
+
+    if (axis.current === "none") {
+      if (Math.abs(dx) < SWIPE_AXIS_LOCK && Math.abs(dy) < SWIPE_AXIS_LOCK) {
+        return;
+      }
+      if (Math.abs(dy) >= Math.abs(dx)) {
+        // 세로다. 이 제스처는 스크롤이므로 손을 뗀다.
+        axis.current = "y";
+        tracking.current = false;
+        return;
+      }
+      axis.current = "x";
+      // 본문 밖으로 손가락이 나가도 이벤트가 계속 오게 한다.
+      e.currentTarget.setPointerCapture(e.pointerId);
+    }
+
+    const i = startIndex.current;
+    const atEdge = (dx > 0 && i <= 0) || (dx < 0 && i >= items.length - 1);
+    paint(atEdge ? dx / SWIPE_EDGE_RESIST : dx, 0);
+  }
+
+  function onPointerUp(e: React.PointerEvent<HTMLDivElement>) {
+    if (!tracking.current) {
+      paint(0, 260);
+      return;
+    }
+    tracking.current = false;
+    if (axis.current !== "x") return;
+
+    const dx = e.clientX - startX.current;
+    const held = performance.now() - startAt.current;
+    const decided =
+      Math.abs(dx) > SWIPE_COMMIT_PX ||
+      (held < SWIPE_FLICK_MS && Math.abs(dx) > SWIPE_FLICK_PX);
+    // 왼쪽으로 밀면 다음 항목이 따라 들어온다 — 종이를 넘기는 방향.
+    const direction: -1 | 1 = dx < 0 ? 1 : -1;
+    const next = startIndex.current + direction;
+
+    if (decided && next >= 0 && next < items.length) {
+      onSelect(items[next].id, direction);
+      // 새 본문은 제 자리에서 시작해야 한다. 되돌아오는 애니메이션을 남겨두면
+      // 들어오는 글이 옆에서 밀려들어오다 한 번 더 미끄러진다.
+      paint(0, 0);
+    } else {
+      paint(0, 260);
+    }
+  }
+
+  return {
+    layerRef,
+    handlers: {
+      onPointerDown,
+      onPointerMove,
+      onPointerUp,
+      onPointerCancel: onPointerUp,
+    },
+  };
+}
 
 // 목표를 살짝 지나쳤다 돌아오는 커브.
 const SPRING = "cubic-bezier(0.34, 1.56, 0.64, 1)";
