@@ -321,8 +321,8 @@ function BentoTile({
     const r = el.getBoundingClientRect();
     const px = (e.clientX - r.left) / r.width;
     const py = (e.clientY - r.top) / r.height;
-    const rx = (py - 0.5) * -6;
-    const ry = (px - 0.5) * 6;
+    const rx = (py - 0.5) * -10;
+    const ry = (px - 0.5) * 10;
     el.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-4px)`;
     el.style.setProperty("--mx", `${px * 100}%`);
     el.style.setProperty("--my", `${py * 100}%`);
@@ -338,8 +338,15 @@ function BentoTile({
       onPointerMove={onPointerMove}
       onPointerLeave={onPointerLeave}
       {...entrance}
-      className={`group relative flex flex-col justify-end overflow-hidden rounded-xl border border-border text-left transition-[border-color,box-shadow] duration-300 [transition-property:border-color,box-shadow] hover:border-foreground/25 hover:shadow-[0_24px_48px_-20px_rgba(0,0,0,0.35)] motion-reduce:transform-none ${still ? "bg-card" : "bg-muted/50"} ${className}`}
-      style={{ transitionProperty: "transform, border-color, box-shadow" }}
+      className={`group relative flex flex-col justify-end overflow-hidden rounded-xl border border-border text-left hover:border-foreground/25 hover:shadow-[0_24px_48px_-20px_rgba(0,0,0,0.35)] motion-reduce:transform-none ${still ? "bg-card" : "bg-muted/50"} ${className}`}
+      // transform은 pointermove마다 새 목표값을 받는다 — border-color/box-shadow와
+      // 같은 300ms를 쓰면 커서를 늘 뒤늦게 쫓아가는 것처럼 느껴진다(각 프레임이
+      // 이전 트랜지션이 끝나기 전에 새로 시작돼 계속 밀린다). 틸트만 120ms로
+      // 짧게 끊어야 손 밑에 붙어 도는 느낌이 난다.
+      style={{
+        transition:
+          "transform 120ms ease-out, border-color 300ms ease, box-shadow 300ms ease",
+      }}
     >
       {/* 커서를 따라오는 하이라이트. 틸트와 짝이라 유리처럼 빛이 스치는
           느낌을 준다 — mix-blend-overlay라 배경이 밝든 어둡든 자연스럽다. */}
