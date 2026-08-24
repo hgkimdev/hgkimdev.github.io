@@ -4,49 +4,28 @@
 //
 // 이제 "어느 존에서 보일지"는 라우터가 정한다 — app/*/@footer 슬롯을 볼 것.
 // 여기 남은 건 생김새뿐이라 아이콘 SVG도 서버에서 HTML로 굳는다.
-import { Mail } from "lucide-react";
-import { SiGithub, SiInstagram } from "@icons-pack/react-simple-icons";
-
-const socialLinks = [
-  {
-    key: "github",
-    href: "https://github.com/hgkimdev",
-    label: "GitHub",
-    Icon: SiGithub,
-    external: true,
-  },
-  {
-    key: "instagram",
-    href: "https://www.instagram.com/hgkim_2/",
-    label: "Instagram",
-    Icon: SiInstagram,
-    external: true,
-  },
-  {
-    key: "email",
-    href: "mailto:hgkimdev@proton.me",
-    label: "Email",
-    Icon: Mail,
-    external: false,
-  },
-] as const;
+import { contactChannels } from "@/content/contact";
+import { contactIcons } from "@/components/contact-icons";
 
 export function SiteFooter({ footerText }: { footerText: string }) {
   return (
     <footer className="border-t border-border/60">
       <div className="mx-auto flex max-w-4xl flex-col items-center gap-3 px-4 py-8 text-center text-sm text-muted-foreground">
         <div className="flex items-center gap-4">
-          {socialLinks.map(({ key, href, label, Icon, external }) => (
-            <a
-              key={key}
-              href={href}
-              aria-label={label}
-              className="text-muted-foreground transition-colors hover:text-foreground"
-              {...(external ? { target: "_blank", rel: "noreferrer" } : {})}
-            >
-              <Icon size={18} color="currentColor" />
-            </a>
-          ))}
+          {contactChannels.map(({ key, href, label, external }) => {
+            const Icon = contactIcons[key];
+            return (
+              <a
+                key={key}
+                href={href}
+                aria-label={label}
+                className="text-muted-foreground transition-colors hover:text-foreground"
+                {...(external ? { target: "_blank", rel: "noreferrer" } : {})}
+              >
+                <Icon size={18} color="currentColor" />
+              </a>
+            );
+          })}
         </div>
         <p>{footerText}</p>
       </div>

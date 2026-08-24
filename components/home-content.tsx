@@ -4,6 +4,7 @@ import type { Locale } from "@/lib/i18n/config";
 import { homeSectionKeys } from "@/lib/nav";
 import { getAboutContent } from "@/lib/content/about";
 import { lifeCategories, lifeIntro } from "@/content/life";
+import { ContactSection } from "@/components/contact-section";
 import ShinyText from "@/components/ShinyText";
 import TextType from "@/components/TextType";
 
@@ -28,6 +29,12 @@ export function HomeContent({ locale }: { locale: Locale }) {
       key === "life" && locale === "ko"
         ? { categories: lifeCategories, intro: lifeIntro }
         : undefined,
+    // About/Life와 달리 로케일 게이트가 없다: 연락 채널은 언어 중립이라
+    // 4개 로케일 전부 실제 콘텐츠를 낸다.
+    // key prop: 이 JSX는 homeSectionKeys.map() 콜백 안에서 만들어져서, 단일
+    // 자식으로만 쓰여도 React가 "리스트 안에서 생성됨"으로 인식해 key를
+    // 요구한다(SectionContent 렌더 시 "passed a child from HomeContent" 경고).
+    content: key === "contact" ? <ContactSection key="contact" /> : undefined,
   }));
 
   const hero = (

@@ -22,6 +22,11 @@ type Section = {
   // content exists (ko), the same way `body` is — every other locale falls
   // through to the placeholder below.
   life?: { categories: LifeCategory[]; intro: string };
+  // Contact only: built server-side in home-content.tsx and handed down as a
+  // finished ReactNode, the same way `hero` is — this file is "use client",
+  // so importing the icon components directly here would ship them to the
+  // Intro bundle for nothing.
+  content?: ReactNode;
 };
 
 function interpolateClamped(
@@ -383,7 +388,9 @@ function SectionContent({
       <h2 className="text-4xl font-bold tracking-tight sm:text-6xl [@media(max-height:620px)]:text-3xl">
         {section.label}
       </h2>
-      {section.life ? (
+      {section.content ? (
+        section.content
+      ) : section.life ? (
         <LifeSection
           categories={section.life.categories}
           intro={section.life.intro}

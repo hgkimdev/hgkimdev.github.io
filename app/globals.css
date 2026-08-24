@@ -26,6 +26,19 @@
   }
 }
 
+/* Contact 섹션 배경에서 라벨이 왼쪽에서 들어와 오른쪽으로 흐른다. 애니메이션
+   대상 트랙은 반드시 콘텐츠 너비만큼만(w-fit) 잡혀야 한다 — 부모 너비에
+   맞춰 늘어난 요소를 이 값으로 옮기면 -50%가 그 늘어난 박스의 절반, 즉
+   실제 콘텐츠보다 훨씬 짧은 거리만 이동해 중간에 끊겨 처음으로 되돌아간다. */
+@keyframes contact-marquee {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
 @theme inline {
   --animate-caret-blink: caret-blink 1s ease-in-out infinite;
   --color-background: var(--background);
