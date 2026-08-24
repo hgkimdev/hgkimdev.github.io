@@ -24,12 +24,10 @@ import type { LifeCategory, LifeCategoryKey, LifeMedia } from "@/content/life";
  */
 export function LifeEntrance({
   categories,
-  intro,
   onOpen,
   animateIn = false,
 }: {
   categories: LifeCategory[];
-  intro: string;
   onOpen: (key: LifeCategoryKey) => void;
   /** 액자가 스스로 등장 애니메이션을 재생할지. Poster의 주석 참고. */
   animateIn?: boolean;
@@ -53,10 +51,6 @@ export function LifeEntrance({
 
   return (
     <>
-      <p className="max-w-md text-base break-keep text-pretty text-muted-foreground sm:text-lg">
-        {intro}
-      </p>
-
       {/* 좁은 화면에서는 다섯 장이 세 줄로 접혀 한 화면을 넘긴다. 가로로
           눕히고 스냅 스크롤을 준다 — 오버레이 항목 스트립과 같은 방식.
           -mx-4/px-4는 섹션 좌우 여백을 뚫고 나가 화면 끝까지 스크롤되게
@@ -391,10 +385,6 @@ function BentoTile({
       )}
 
       <div className="absolute inset-x-0 bottom-0 z-[1] h-2/3 bg-gradient-to-t from-card via-card/94 to-transparent" />
-
-      <span className="absolute top-2.5 left-2.5 z-[4] rounded-full border border-white/70 bg-white/55 px-2.5 py-1 font-mono text-[0.68rem] text-foreground shadow-[0_2px_10px_rgba(0,0,0,0.08)] backdrop-blur-md backdrop-saturate-150">
-        {number} · {category.items.length}
-      </span>
 
       <div className="relative z-[2] flex flex-col gap-1 p-3.5">
         <span

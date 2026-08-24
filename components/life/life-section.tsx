@@ -15,11 +15,9 @@ import { LifeOverlay } from "@/components/life/life-overlay";
  */
 export function LifeSection({
   categories,
-  intro,
   animateIn,
 }: {
   categories: LifeCategory[];
-  intro: string;
   animateIn?: boolean;
 }) {
   const [openKey, setOpenKey] = useState<LifeCategoryKey | null>(null);
@@ -28,7 +26,6 @@ export function LifeSection({
     <>
       <LifeEntrance
         categories={categories}
-        intro={intro}
         animateIn={animateIn}
         onOpen={setOpenKey}
       />

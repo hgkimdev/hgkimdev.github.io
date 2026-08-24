@@ -14,9 +14,6 @@
 //
 // 표지는 교보문고 상품 이미지를 받아 `public/life/`에 두었다(가로 1200px).
 
-/** 입구에 놓이는 한 줄. About 마지막 문단에서 넘어오는 자리다. */
-export const lifeIntro = "일 밖의 문화생활";
-
 export type LifeCategoryKey =
   "travel" | "books" | "movies" | "games" | "languages";
 
@@ -159,7 +156,6 @@ export const lifeCategories: LifeCategory[] = [
         id: "spirited-away",
         title: "센과 치히로의 행방불명",
         meta: "미야자키 하야오 · 2001",
-        // TODO: 본인 문장으로 채울 것. 지어낸 1인칭을 넣지 않으려고 비워 둔다.
         why: [
           "낯선 세상속에서도 자신을 잃지 않고 고난과 역경을 이겨낸 성장서사",
           "자신의 이름을 잊고 사는 현대사회 어른들을 위한 이야기이기도 하다.",
@@ -171,7 +167,6 @@ export const lifeCategories: LifeCategory[] = [
         id: "dark-waters",
         title: "다크 워터스",
         meta: "토드 헤인즈 · 2019",
-        // TODO: 본인 문장으로 채울 것. 지어낸 1인칭을 넣지 않으려고 비워 둔다.
         why: [
           "자신의 신념을 끝까지 밀고 나가는 것은 어렵고 외로운 길이지만,",
           "결국 포기하지 않고 행동하면 변화가 찾아온다.",

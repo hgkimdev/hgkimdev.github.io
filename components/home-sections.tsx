@@ -21,7 +21,7 @@ type Section = {
   // Life only: the categories its entrance opens into. Present only where the
   // content exists (ko), the same way `body` is — every other locale falls
   // through to the placeholder below.
-  life?: { categories: LifeCategory[]; intro: string };
+  life?: { categories: LifeCategory[] };
   // Contact only: built server-side in home-content.tsx and handed down as a
   // finished ReactNode, the same way `hero` is — this file is "use client",
   // so importing the icon components directly here would ship them to the
@@ -393,7 +393,6 @@ function SectionContent({
       ) : section.life ? (
         <LifeSection
           categories={section.life.categories}
-          intro={section.life.intro}
           // `reveal`이 있다 === 핀 고정 스크롤 안이다. 거기서는 레이어
           // 크로스페이드가 등장을 맡으므로 액자가 따로 나타나지 않는다.
           animateIn={!reveal}
