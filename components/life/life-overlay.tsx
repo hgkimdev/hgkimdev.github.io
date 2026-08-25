@@ -10,6 +10,7 @@ import {
   LifeCoverPlate,
   LifeMediaBackground,
 } from "@/components/life/life-media";
+import { LifeTravelGallery } from "@/components/life/life-gallery";
 
 // 본문 대비 한 단계 작은 조판. break-keep은 한글에서 필수다 — 기본 줄바꿈
 // 규칙은 음절 사이 아무 데서나 끊어서 "있습니" / "다." 같은 조각을 만든다.
@@ -165,13 +166,24 @@ export function LifeOverlay({
                   //
                   // hidden은 스크롤바를 그리지 않는다. 가로로 잘리는 건 화면
                   // 끝에서 px-5만큼 안쪽이라 어차피 보이지 않던 자리다.
-                  className="flex min-h-0 flex-1 flex-col justify-center overflow-x-hidden overflow-y-auto"
+                  //
+                  // justify-center는 여기 두지 않는다. 사진첩처럼 본문이 칸보다
+                  // 길어지면 flex의 중앙 정렬은 넘치는 양을 위아래로 똑같이
+                  // 나눠 위쪽을 가려버리는데, 스크롤은 이미 맨 위(scrollTop=0)라
+                  // 그 가려진 위쪽(제목)에 닿을 방법이 없다 — 실측: 여행 항목을
+                  // 낮은 화면에서 열면 "프랑스" 제목이 컨테이너 위로 -16px 밀려
+                  // 나가 있는데 scrollTop은 0이었다. 대신 아래 레이어에 my-auto를
+                  // 준다: 짧은 본문은 그대로 가운데에 놓이고, 넘치는 순간에는
+                  // 마진이 0으로 접혀 위 끝부터 자연히 스크롤된다 — 이른바
+                  // "safe center"를 브라우저 호환에 기대지 않고 만드는 방법.
+                  className="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto"
                 >
                   {/* 손끝을 따라 움직이는 겹. AnimatePresence가 쥔 transform과
                       겹치지 않게 한 겹 밖에 둔다 — 같은 요소에 얹으면 넘어가는
                       순간 둘이 같은 transform을 두고 다툰다. */}
                   <div
                     ref={swipeLayerRef}
+                    className="my-auto"
                     style={{
                       transform: "translateX(var(--swipe-x, 0px))",
                       transition:
@@ -232,6 +244,9 @@ export function LifeOverlay({
                               </span>
                             ))}
                           </div>
+                        ) : null}
+                        {item.media.kind === "gallery" ? (
+                          <LifeTravelGallery media={item.media} />
                         ) : null}
                       </motion.div>
                     </AnimatePresence>
@@ -373,6 +388,9 @@ function useItemSwipe(
 
   function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
     if (e.pointerType !== "touch") return;
+    // 내부에 자기 몫의 터치 제스처를 가진 위젯(사진첩 캐러셀 등)이 있으면
+    // 거기서 시작된 손짓은 항목 전환으로 가로채지 않는다.
+    if ((e.target as HTMLElement).closest("[data-swipe-ignore]")) return;
     tracking.current = true;
     axis.current = "none";
     startX.current = e.clientX;

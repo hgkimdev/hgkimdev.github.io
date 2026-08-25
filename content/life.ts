@@ -41,6 +41,24 @@ export type LifeCoverMedia = {
   href?: string;
 };
 
+/** 갤러리 한 장. width/height는 원본 리사이즈본의 실제 픽셀 크기 — PhotoSwipe가
+ * 이미지를 받기 전에 확대 애니메이션의 목표 크기를 알아야 해서 미리 박아둔다. */
+export type LifeGalleryPhoto = {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+};
+
+/**
+ * 여러 장을 넘겨보는 사진첩. 배경으로 한 장만 까는 `image`와 달리, 본문
+ * 옆에 인터랙티브한 캐러셀로 선다 — LifeTravelGallery 참고.
+ */
+export type LifeGalleryMedia = {
+  kind: "gallery";
+  photos: LifeGalleryPhoto[];
+};
+
 export type LifeMedia =
   | { kind: "youtube"; id: string; start?: number }
   /** 배경으로 꽉 채우는 사진. 여행 사진처럼 잘려도 되는 그림. */
@@ -51,6 +69,7 @@ export type LifeMedia =
    * 인쇄돼 있어서 배경으로 늘리면 잘린다. LifeCoverPlate 주석 참고.
    */
   | LifeCoverMedia
+  | LifeGalleryMedia
   | { kind: "none" };
 
 export type LifeItem = {
@@ -98,7 +117,37 @@ export const lifeCategories: LifeCategory[] = [
           "도시가 다르게 보이기 시작했다.",
           "길을 잃어야만 보이는 것들이 있었다.",
         ],
-        media: { kind: "none" },
+        // 2023년 11월, 파리 -> 몽생미셸 -> 파리 -> 리옹 -> 안시 -> 니스 순.
+        // 촬영 시각(EXIF DateTimeOriginal) 순서 그대로다. width/height는
+        // public/life/travel/에 저장된 리사이즈본(최대 2000px) 실측치.
+        media: {
+          kind: "gallery",
+          photos: [
+            { src: "/life/travel/travel-01.jpg", alt: "루브르 박물관 유리 피라미드", width: 1500, height: 2000 },
+            { src: "/life/travel/travel-02.jpg", alt: "튈르리 정원에서 본 루브르 박물관과 분수", width: 1500, height: 2000 },
+            { src: "/life/travel/travel-03.jpg", alt: "생트샤펠 스테인드글라스", width: 1500, height: 2000 },
+            { src: "/life/travel/travel-04.jpg", alt: "저녁 골목길", width: 1500, height: 2000 },
+            { src: "/life/travel/travel-05.jpg", alt: "노을 진 몽생미셸 전경", width: 2000, height: 1500 },
+            { src: "/life/travel/travel-06.jpg", alt: "몽생미셸 성벽 위 야경", width: 1500, height: 2000 },
+            { src: "/life/travel/travel-07.jpg", alt: "가을 낙엽이 쌓인 묘지 공원", width: 2000, height: 1500 },
+            { src: "/life/travel/travel-08.jpg", alt: "가로수길의 분수와 연못", width: 1500, height: 2000 },
+            { src: "/life/travel/travel-09.jpg", alt: "언덕 위 대성당이 내려다보는 도시 전경", width: 2000, height: 1500 },
+            { src: "/life/travel/travel-10.jpg", alt: "노을 지는 강변 산책로", width: 1500, height: 2000 },
+            { src: "/life/travel/travel-11.jpg", alt: "운하 마을의 물 위 탑 건물", width: 1500, height: 2000 },
+            { src: "/life/travel/travel-12.jpg", alt: "호수 위 백조와 산자락", width: 2000, height: 1500 },
+            { src: "/life/travel/travel-13.jpg", alt: "운하를 바라보는 사람", width: 1334, height: 2000 },
+            { src: "/life/travel/travel-14.jpg", alt: "유리로 지어진 현대 건축물", width: 1500, height: 2000 },
+            { src: "/life/travel/travel-15.jpg", alt: "흐린 하늘 아래 강변", width: 1501, height: 2000 },
+            { src: "/life/travel/travel-16.jpg", alt: "좁고 낡은 골목길", width: 1500, height: 2000 },
+            { src: "/life/travel/travel-17.jpg", alt: "가로수와 동상이 있는 광장", width: 1500, height: 2000 },
+            { src: "/life/travel/travel-18.jpg", alt: "지중해 해안절벽", width: 1500, height: 2000 },
+            { src: "/life/travel/travel-19.jpg", alt: "옥빛 바다와 해안절벽", width: 1500, height: 2000 },
+            { src: "/life/travel/travel-20.jpg", alt: "해안 산책로에서", width: 2000, height: 1500 },
+            { src: "/life/travel/travel-21.jpg", alt: "네온 간판이 켜진 저녁 골목", width: 2000, height: 1500 },
+            { src: "/life/travel/travel-22.jpg", alt: "노을빛 하늘 아래 좁은 골목", width: 1499, height: 2000 },
+            { src: "/life/travel/travel-23.jpg", alt: "언덕 위에서 본 항구 마을 전경", width: 2000, height: 1500 },
+          ],
+        },
       },
     ],
     wish: { label: "다음엔", entries: ["핀란드", "덴마크", "이탈리아"] },

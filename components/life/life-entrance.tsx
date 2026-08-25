@@ -133,6 +133,8 @@ function stillOf(media: LifeMedia): string | null {
     return `https://i.ytimg.com/vi/${media.id}/maxresdefault.jpg`;
   // 표지도 액자에서는 그림이다. 3:4 액자에 세로 표지는 살짝만 잘린다.
   if (media.kind === "image" || media.kind === "cover") return media.src;
+  // 사진첩은 첫 장을 대표 그림으로 쓴다.
+  if (media.kind === "gallery") return media.photos[0]?.src ?? null;
   return null;
 }
 

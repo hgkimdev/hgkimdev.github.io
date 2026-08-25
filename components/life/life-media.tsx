@@ -267,7 +267,9 @@ export function LifeMediaBackground({
       ? thumbnailSrc(media.id)
       : media.kind === "image"
         ? media.src
-        : null;
+        : media.kind === "gallery"
+          ? (media.photos[0]?.src ?? null)
+          : null;
 
   return (
     <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
