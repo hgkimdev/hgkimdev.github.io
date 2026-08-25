@@ -128,14 +128,24 @@ export function LifeEntrance({
 
 // 오버레이 배경과 같은 그림을 쓴다. 입구에서 본 장면이 그대로 안에서 움직여야
 // "그 문이 맞다"는 감각이 생긴다.
+// 목록 순서(발매·개봉 연도순)와 타일 대표 그림이 다를 수 있다 — tileItemId 참고.
+function tileItem(category: LifeCategory) {
+  if (!category.tileItemId) return category.items[0];
+  return (
+    category.items.find((item) => item.id === category.tileItemId) ??
+    category.items[0]
+  );
+}
+
 function stillOf(media: LifeMedia): string | null {
   if (media.kind === "youtube")
     return `https://i.ytimg.com/vi/${media.id}/maxresdefault.jpg`;
   // 표지도 액자에서는 그림이다. 3:4 액자에 세로 표지는 살짝만 잘린다.
   if (media.kind === "image" || media.kind === "cover") return media.src;
-  // 사진첩은 cover가 있으면 그걸, 없으면 첫 장을 대표 그림으로 쓴다.
+  // 사진첩은 타일 전용 tileCover가 있으면 그걸, 없으면 오버레이와 같은
+  // cover, 그것도 없으면 첫 장을 대표 그림으로 쓴다.
   if (media.kind === "gallery")
-    return media.cover ?? media.photos[0]?.src ?? null;
+    return media.tileCover ?? media.cover ?? media.photos[0]?.src ?? null;
   return null;
 }
 
@@ -165,7 +175,7 @@ function Poster({
   // 항목이 바로 그것이라, 문을 열면 방금 본 장면이 그대로 이어진다. "책"만
   // 예외로 서점 사진을 쓴다(위 BOOKS_HERO_SRC 주석 참고).
   const [still, setStill] = useState(() =>
-    isBooks ? BOOKS_HERO_SRC : stillOf(category.items[0]?.media ?? { kind: "none" }),
+    isBooks ? BOOKS_HERO_SRC : stillOf(tileItem(category)?.media ?? { kind: "none" }),
   );
   const number = String(index + 1).padStart(2, "0");
 
@@ -299,7 +309,7 @@ function BentoTile({
   const prefersReducedMotion = useReducedMotion();
   const isBooks = category.key === "books";
   const [still, setStill] = useState(() =>
-    isBooks ? BOOKS_HERO_SRC : stillOf(category.items[0]?.media ?? { kind: "none" }),
+    isBooks ? BOOKS_HERO_SRC : stillOf(tileItem(category)?.media ?? { kind: "none" }),
   );
   // 책 타일에만 뜨는 두 번째 표지. content/life.ts의 books 카테고리는
   // [1984, 명상록] 순으로 고정돼 있어 items[1]이 곧 명상록이다.

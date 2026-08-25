@@ -8,11 +8,16 @@
 // 형태를 보려고 지어낸 문장이므로 실제 내용으로 교체해야 한다. 1인칭으로
 // 쓰여 있어서 그대로 두면 사이트 주인이 하지 않은 말이 그의 말로 올라간다.
 //
-// 배경 그림: 영화·게임은 예고편, 책은 표지가 있다. 여행·언어는
-// `kind: "none"`이라 입구 액자와 오버레이 배경이 비어 있다 — 사진을 넣으면
-// 그대로 붙는다.
+// 배경 그림: 영화·게임은 예고편, 책·여행은 각각 표지·갤러리 사진이 있다.
+// 언어는 영어만 책 표지를 재활용해 채웠다 — 프랑스어(듀오링고 커스텀
+// 그래픽)는 시도했다가 어울리지 않아 되돌렸고, 일본어는 아직 시작 전이라
+// 둘 다 `kind: "none"`으로 남아 있다 — 입구 액자와 오버레이 배경이 비어
+// 있다.
 //
-// 표지는 교보문고 상품 이미지를 받아 `public/life/`에 두었다(가로 1200px).
+// 표지는 서점(교보문고·알라딘) 상품 이미지를 받아 `public/life/`에
+// 두었다. 대체로 가로 1200px지만, 알라딘 표지(egu.jpg)처럼 서점이
+// 그보다 작은 이미지만 제공하는 경우도 있다 — LifeCoverPlate가 높이
+// 기준으로 그리므로 실사용에는 문제없다.
 
 export type LifeCategoryKey =
   "travel" | "books" | "movies" | "games" | "languages";
@@ -57,12 +62,17 @@ export type LifeGalleryPhoto = {
 export type LifeGalleryMedia = {
   kind: "gallery";
   /**
-   * 입구/오버레이 배경 전용 대표 그림. 없으면 첫 장(photos[0])을 쓴다.
+   * 오버레이 배경 전용 대표 그림. 없으면 첫 장(photos[0])을 쓴다.
    * 배경은 object-cover로 화면 전체를 덮는 가로 상자라 세로 사진을 넣으면
    * 크게 확대돼 화질이 흐려 보인다 — 촬영 순서상 첫 장이 세로일 때 이 필드로
    * 가로 사진을 대신 지정한다. photos 배열의 촬영 시각 순서는 건드리지 않는다.
    */
   cover?: string;
+  /**
+   * 입구 타일 전용 대표 그림. 없으면 cover, 그것도 없으면 photos[0]을 쓴다.
+   * 입구 타일과 오버레이 배경에 서로 다른 사진을 걸고 싶을 때만 지정한다.
+   */
+  tileCover?: string;
   photos: LifeGalleryPhoto[];
 };
 
@@ -117,6 +127,13 @@ export type LifeCategory = {
   teaser: string;
   items: LifeItem[];
   /**
+   * 입구 타일 대표 그림을 고를 항목의 id. 없으면 items[0]을 쓴다.
+   * 목록 순서(=발매·개봉 연도순)와 타일 대표 그림이 다를 때만 지정한다 —
+   * 게임은 연도순으로 오버워치(2016)가 맨 앞이지만 타일은 젤다의 전설
+   * 그림을 쓰고 싶은 경우처럼.
+   */
+  tileItemId?: string;
+  /**
    * 여행 카테고리에만 있는 버킷리스트. SPEC상 여행만
    * "다녀온 곳 + 가고 싶은 곳" 두 성격이 섞이므로 타입에서 구분해둔다.
    */
@@ -143,9 +160,10 @@ export const lifeCategories: LifeCategory[] = [
         // public/life/travel/에 저장된 리사이즈본(최대 2000px) 실측치.
         media: {
           kind: "gallery",
-          // 리옹 푸르비에르 언덕 전경(travel-09) — 촬영 순서상 첫 장인
-          // travel-01(세로)보다 가로라서 배경으로 덜 흐리다.
+          // 오버레이 배경은 리옹 푸르비에르 언덕 전경(가로라 덜 흐림).
           cover: "/life/travel/travel-09.jpg",
+          // 입구 타일은 루브르 유리 피라미드(촬영 순서상 첫 장, 세로).
+          tileCover: "/life/travel/travel-01.jpg",
           photos: [
             {
               src: "/life/travel/travel-01.jpg",
@@ -382,6 +400,9 @@ export const lifeCategories: LifeCategory[] = [
     key: "games",
     label: "게임",
     teaser: "또 다른 형태의 예술작품",
+    // 목록은 발매 연도순(오버워치 2016 → 젤다 2017)이지만, 입구 타일
+    // 그림은 젤다의 전설을 쓴다.
+    tileItemId: "botw",
     items: [
       {
         id: "overwatch",
@@ -419,7 +440,16 @@ export const lifeCategories: LifeCategory[] = [
         meta: "학습 중 · B1",
         level: { status: "학습 중", cefr: "B1" },
         why: ["명실상부한 국제 비즈니스 언어.", "늘 노력하지만 쉽지 않다."],
-        media: { kind: "none" },
+        // Cambridge 『English Grammar in Use』 5판(Raymond Murphy, 2019),
+        // 영국식 중급판 — 통칭 "파란책". 알라딘 상품 이미지(ISBN
+        // 9781108586627), 표지는 475x640이라 다른 책들의 1200px보다
+        // 작지만 LifeCoverPlate가 높이 기준(최대 28rem)으로 그려서
+        // 확대되지 않는다.
+        media: {
+          kind: "cover",
+          src: "/life/egu.jpg",
+          alt: "Cambridge 『English Grammar in Use』 5판 영국식 표지",
+        },
       },
       {
         id: "french",
