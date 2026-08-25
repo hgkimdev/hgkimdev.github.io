@@ -70,13 +70,21 @@ type Slot = {
   isLast: boolean;
 };
 
-// Content-derived: one viewport of runway per paragraph. Sections with no body
-// (en/fr/ja About, Life, Contact) stay at one viewport, so those locales'
-// geometry is numerically identical to the old uniform-slot version. Life keeps
-// weight 1 on purpose: it is a one-screen map, and the exploring happens in a
-// dialog outside this scroll engine, not by scrolling through it.
+// Content-derived: one viewport of runway per paragraph. Life keeps weight 1
+// on purpose: it is a one-screen map, and the exploring happens in a dialog
+// outside this scroll engine, not by scrolling through it.
+//
+// Everything else with no body text (Projects, Contact, and About in locales
+// with no body copy yet) got only ~0.3 viewport of settled dwell once the
+// crossfade ramps ate their share of a bare 1-viewport slot — sessions were
+// passing through in a single scroll tick. NO_BODY_WEIGHT gives them more
+// runway (~0.7 viewport of dwell) without touching Life.
+const NO_BODY_WEIGHT = 1.4;
+
 function sectionWeight(section: Section): number {
-  return Math.max(1, section.body?.length ?? 1);
+  if (section.body?.length) return section.body.length;
+  if (section.life) return 1;
+  return NO_BODY_WEIGHT;
 }
 
 function buildSlots(weights: number[]) {
