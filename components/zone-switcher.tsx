@@ -10,6 +10,14 @@ import { getZone, type Zone } from "@/lib/nav";
 
 const zones: Zone[] = ["intro", "blog"];
 
+// 존마다 고유 강조색을 준다(Intro=코랄, Blog=시안). 트랙 배경은 두 색을
+// --card와 옅게 섞은 그라디언트로, 활성 탭은 카드색 배경 + 해당 색 테두리로
+// "지금 어디 있는지"를 즉시 읽히게 한다.
+const zoneAccent: Record<Zone, string> = {
+  intro: "var(--zone-intro)",
+  blog: "var(--zone-blog)",
+};
+
 export function ZoneSwitcher({
   locale,
   labels,
@@ -26,7 +34,12 @@ export function ZoneSwitcher({
   };
 
   return (
-    <div className="relative inline-flex items-center rounded-full border border-border bg-muted/50 p-0.5 text-xs font-medium">
+    <div
+      className="relative inline-flex items-center rounded-full border border-border p-0.5 text-xs font-medium"
+      style={{
+        background: `linear-gradient(90deg, color-mix(in srgb, ${zoneAccent.intro} 20%, var(--card)), color-mix(in srgb, ${zoneAccent.blog} 20%, var(--card)))`,
+      }}
+    >
       {zones.map((zone) => {
         const isActive = zone === currentZone;
 
@@ -68,16 +81,16 @@ export function ZoneSwitcher({
             }}
             className={cn(
               "relative z-10 rounded-full px-2.5 py-1 transition-colors",
-              isActive
-                ? "text-foreground"
-                : "text-muted-foreground hover:text-foreground"
+              !isActive && "text-muted-foreground hover:text-foreground"
             )}
+            style={isActive ? { color: zoneAccent[zone] } : undefined}
           >
             {isActive && (
               <motion.span
                 layoutId="zone-switcher-active"
                 transition={{ type: "spring", stiffness: 500, damping: 22 }}
-                className="absolute inset-0 -z-10 rounded-full bg-background shadow-sm"
+                className="absolute inset-0 -z-10 rounded-full bg-card"
+                style={{ boxShadow: `0 0 0 1.5px ${zoneAccent[zone]}` }}
               />
             )}
             {labels[zone]}
