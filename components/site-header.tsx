@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { HomeAnchorLink } from "@/components/home-anchor-link";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { ZoneSwitcher } from "@/components/zone-switcher";
@@ -59,15 +60,26 @@ export function SiteHeader({
 
         {hasNav && (
           <nav className="hidden flex-1 items-center justify-end gap-x-5 text-sm text-muted-foreground sm:flex">
-            {navItems.map((item) => (
-              <Link
-                key={item.key}
-                href={navItemHref(item, locale)}
-                className="transition-colors hover:text-foreground"
-              >
-                {navLabels[item.key]}
-              </Link>
-            ))}
+            {navItems.map((item) =>
+              item.type === "anchor" ? (
+                <HomeAnchorLink
+                  key={item.key}
+                  anchor={item.key}
+                  locale={locale}
+                  className="transition-colors hover:text-foreground"
+                >
+                  {navLabels[item.key]}
+                </HomeAnchorLink>
+              ) : (
+                <Link
+                  key={item.key}
+                  href={navItemHref(item, locale)}
+                  className="transition-colors hover:text-foreground"
+                >
+                  {navLabels[item.key]}
+                </Link>
+              )
+            )}
           </nav>
         )}
 

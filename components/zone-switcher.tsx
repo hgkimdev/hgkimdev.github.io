@@ -7,6 +7,7 @@ import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { localizeHref, type Locale } from "@/lib/i18n/config";
 import { getZone, type Zone } from "@/lib/nav";
+import { isPlainLeftClick, resetScrollForNavigation } from "@/lib/scroll";
 
 const zones: Zone[] = ["intro", "blog"];
 
@@ -49,34 +50,8 @@ export function ZoneSwitcher({
             href={hrefs[zone]}
             aria-current={isActive}
             onClick={(event) => {
-              // Force scroll-to-top synchronously, before Next.js processes
-              // the navigation. Without this, if you switch zones while
-              // scrolled deep into a long page, the sticky header can
-              // momentarily "unstick" during the DOM swap (old tall page
-              // gone, new short page in, scrollY still at the old depth) —
-              // Framer Motion's layoutId measurement picks up that
-              // transient rect and springs the pill in from there,
-              // making it look like it flies up from the bottom of the
-              // page instead of sliding sideways.
-              //
-              // Modified clicks (cmd/ctrl/shift/alt, non-primary button)
-              // open in a new tab/window — the current page doesn't
-              // navigate, so it must not scroll either.
-              if (
-                !isActive &&
-                !event.defaultPrevented &&
-                event.button === 0 &&
-                !event.metaKey &&
-                !event.ctrlKey &&
-                !event.shiftKey &&
-                !event.altKey
-              ) {
-                // `behavior: "instant"` matters here — <html> has
-                // scroll-smooth (see app/layout.tsx), so a plain
-                // window.scrollTo(0, 0) would itself animate, drifting
-                // through the transition window instead of resetting
-                // before Motion measures anything.
-                window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+              if (!isActive && isPlainLeftClick(event)) {
+                resetScrollForNavigation();
               }
             }}
             className={cn(
