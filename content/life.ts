@@ -247,17 +247,6 @@ export const lifeCategories: LifeCategory[] = [
     teaser: "또 다른 형태의 예술작품",
     items: [
       {
-        id: "botw",
-        title: "젤다의 전설: 야생의 숨결",
-        meta: "닌텐도 · 2017",
-        why: [
-          "자유도 높은 오픈월드 게임이",
-          "이렇게 재미있을 수 있다는 걸",
-          "처음으로 알려준 게임.",
-        ],
-        media: { kind: "youtube", id: "zw47_q9wbBE" },
-      },
-      {
         id: "overwatch",
         title: "오버워치",
         meta: "블리자드 · 2016",
@@ -268,6 +257,17 @@ export const lifeCategories: LifeCategory[] = [
         tags: ["프레야 메인"],
         // 한국 공식 "오버워치" 채널의 프레야 게임플레이 트레일러.
         media: { kind: "youtube", id: "JDr5VYfuLXY" },
+      },
+      {
+        id: "botw",
+        title: "젤다의 전설: 야생의 숨결",
+        meta: "닌텐도 · 2017",
+        why: [
+          "자유도 높은 오픈월드 게임이",
+          "이렇게 재미있을 수 있다는 걸",
+          "처음으로 알려준 게임.",
+        ],
+        media: { kind: "youtube", id: "zw47_q9wbBE" },
       },
     ],
   },
