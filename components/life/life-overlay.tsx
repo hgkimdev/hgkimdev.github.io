@@ -5,7 +5,12 @@ import { Dialog } from "@base-ui/react/dialog";
 import { AnimatePresence, motion } from "motion/react";
 import { Volume2Icon, VolumeXIcon, XIcon } from "lucide-react";
 
-import type { LifeCategory, LifeCategoryKey } from "@/content/life";
+import type {
+  CefrLevel,
+  LifeCategory,
+  LifeCategoryKey,
+  LifeLanguageLevel,
+} from "@/content/life";
 import {
   LifeCoverPlate,
   LifeMediaBackground,
@@ -213,9 +218,16 @@ export function LifeOverlay({
                         <h3 className="text-3xl font-bold tracking-tight break-keep sm:text-5xl">
                           {item.title}
                         </h3>
-                        <p className="font-mono text-xs text-muted-foreground sm:text-sm">
-                          {item.meta}
-                        </p>
+                        {item.level ? (
+                          <LanguageLevelBadge
+                            level={item.level}
+                            className="text-xs sm:text-sm"
+                          />
+                        ) : (
+                          <p className="font-mono text-xs text-muted-foreground sm:text-sm">
+                            {item.meta}
+                          </p>
+                        )}
                         <div className={`flex flex-col pt-2 ${WHY_TEXT}`}>
                           {item.why.map((line, i) => (
                             <span key={i} className="block">
@@ -668,6 +680,45 @@ function CategoryDock({
  * 같은 목록을 두 벌 그리는 셈이지만 display:none 쪽은 접근성 트리에서도
  * 통째로 빠지므로, 한 번에 하나만 존재하는 것과 같다.
  */
+const CEFR_LEVELS: CefrLevel[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
+
+/**
+ * 언어 항목의 meta 대신 그리는 CEFR 배지. 6단계 중 현재 단계까지 채운
+ * 점과 상태 문구를 CHIP 하나에 담는다. cefr이 null이면(다음 차례)
+ * 점 6개가 전부 비어 "아직 0"으로 읽힌다.
+ */
+function LanguageLevelBadge({
+  level,
+  size = "md",
+  className = "",
+}: {
+  level: LifeLanguageLevel;
+  size?: "sm" | "md";
+  className?: string;
+}) {
+  const activeIndex = level.cefr ? CEFR_LEVELS.indexOf(level.cefr) : -1;
+  const dot = size === "sm" ? "size-1" : "size-1.5";
+  return (
+    <span className={`inline-flex items-center gap-1.5 font-mono ${className}`}>
+      <span className={`${CHIP} inline-flex items-center gap-1`}>
+        {CEFR_LEVELS.map((lv, i) => (
+          <span
+            key={lv}
+            aria-hidden
+            className={`${dot} rounded-full ${
+              i <= activeIndex ? "bg-foreground/70" : "bg-foreground/15"
+            }`}
+          />
+        ))}
+      </span>
+      <span className="text-muted-foreground">
+        {level.status}
+        {level.cefr ? ` · ${level.cefr}` : ""}
+      </span>
+    </span>
+  );
+}
+
 function ItemStrip({
   category,
   activeId,
@@ -743,9 +794,17 @@ function ItemList({
             <span className="block text-sm font-medium break-keep">
               {item.title}
             </span>
-            <span className="mt-0.5 block font-mono text-[0.7rem] text-muted-foreground">
-              {item.meta}
-            </span>
+            {item.level ? (
+              <LanguageLevelBadge
+                level={item.level}
+                size="sm"
+                className="mt-0.5 text-[0.7rem]"
+              />
+            ) : (
+              <span className="mt-0.5 block font-mono text-[0.7rem] text-muted-foreground">
+                {item.meta}
+              </span>
+            )}
           </button>
         );
       })}

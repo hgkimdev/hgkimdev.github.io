@@ -72,6 +72,18 @@ export type LifeMedia =
   | LifeGalleryMedia
   | { kind: "none" };
 
+export type CefrLevel = "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
+
+/**
+ * 언어 카테고리 전용. meta의 자유 텍스트를 배지로 그리기 위해 구조화한 값 —
+ * status는 기존 meta 문구를 그대로 옮긴 것이지 새로 지어낸 카피가 아니다.
+ * cefr이 null이면 아직 스케일에 오르지 않은 상태다.
+ */
+export type LifeLanguageLevel = {
+  status: string;
+  cefr: CefrLevel | null;
+};
+
 export type LifeItem = {
   id: string;
   /** 목록과 본문 양쪽에 쓰이는 이름 */
@@ -86,6 +98,8 @@ export type LifeItem = {
    * 따로 두지 않는다  
    */
   tags?: string[];
+  /** 언어 카테고리에만 채운다. 있으면 meta 대신 배지로 그린다. */
+  level?: LifeLanguageLevel;
   media: LifeMedia;
 };
 
@@ -393,6 +407,7 @@ export const lifeCategories: LifeCategory[] = [
         id: "english",
         title: "영어",
         meta: "학습 중 · B1",
+        level: { status: "학습 중", cefr: "B1" },
         why: ["명실상부한 국제 비즈니스 언어.", "늘 노력하지만 쉽지 않다."],
         media: { kind: "none" },
       },
@@ -400,6 +415,7 @@ export const lifeCategories: LifeCategory[] = [
         id: "french",
         title: "프랑스어",
         meta: "학습 중 · A1",
+        level: { status: "학습 중", cefr: "A1" },
         why: [
           "여행 중 한마디라도 알아듣고 싶어서 시작했다.",
           "지금은 듀오링고로 잊지 않을 정도로만 하고 있다.",
@@ -410,6 +426,7 @@ export const lifeCategories: LifeCategory[] = [
         id: "japanese",
         title: "일본어",
         meta: "다음 차례",
+        level: { status: "다음 차례", cefr: null },
         why: [
           "새 언어를 하나 배울 때마다",
           "닿을 수 있는 사람이 늘어난다.",
