@@ -258,13 +258,6 @@ export const lifeCategories: LifeCategory[] = [
         media: { kind: "youtube", id: "zw47_q9wbBE" },
       },
       {
-        id: "totk",
-        title: "젤다의 전설: 왕국의 눈물",
-        meta: "닌텐도 · 2023",
-        why: ["같은 지도를 다시 주고도", "완전히 새로운 경험을 선사하는 게임."],
-        media: { kind: "youtube", id: "uHGShqcAHlQ" },
-      },
-      {
         id: "overwatch",
         title: "오버워치",
         meta: "블리자드 · 2016",
