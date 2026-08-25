@@ -268,7 +268,7 @@ export function LifeMediaBackground({
       : media.kind === "image"
         ? media.src
         : media.kind === "gallery"
-          ? (media.photos[0]?.src ?? null)
+          ? (media.cover ?? media.photos[0]?.src ?? null)
           : null;
 
   return (

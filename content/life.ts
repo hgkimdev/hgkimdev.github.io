@@ -56,6 +56,13 @@ export type LifeGalleryPhoto = {
  */
 export type LifeGalleryMedia = {
   kind: "gallery";
+  /**
+   * 입구/오버레이 배경 전용 대표 그림. 없으면 첫 장(photos[0])을 쓴다.
+   * 배경은 object-cover로 화면 전체를 덮는 가로 상자라 세로 사진을 넣으면
+   * 크게 확대돼 화질이 흐려 보인다 — 촬영 순서상 첫 장이 세로일 때 이 필드로
+   * 가로 사진을 대신 지정한다. photos 배열의 촬영 시각 순서는 건드리지 않는다.
+   */
+  cover?: string;
   photos: LifeGalleryPhoto[];
 };
 
@@ -136,6 +143,9 @@ export const lifeCategories: LifeCategory[] = [
         // public/life/travel/에 저장된 리사이즈본(최대 2000px) 실측치.
         media: {
           kind: "gallery",
+          // 리옹 푸르비에르 언덕 전경(travel-09) — 촬영 순서상 첫 장인
+          // travel-01(세로)보다 가로라서 배경으로 덜 흐리다.
+          cover: "/life/travel/travel-09.jpg",
           photos: [
             {
               src: "/life/travel/travel-01.jpg",
