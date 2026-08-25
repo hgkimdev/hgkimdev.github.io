@@ -257,20 +257,29 @@ function PinnedSections({
     <div
       ref={containerRef}
       className="relative left-1/2 w-screen -translate-x-1/2"
-      style={{ height: `${totalWeight * 100}dvh` }}
+      // `svh`, not `dvh` — this height defines the *total scroll distance*,
+      // and on mobile `dvh` shrinks/grows as the address bar shows and hides
+      // mid-scroll. Sizing the scroll-distance container with a unit that
+      // moves under the user's thumb desyncs it from useScroll's progress
+      // math, and the tail end (Contact) could fall in the gap and never
+      // become reachable. `svh` is pinned to the smallest (chrome-visible)
+      // viewport, so the scroll target never shifts mid-gesture.
+      style={{ height: `${totalWeight * 100}svh` }}
     >
       {/* Zero-height anchor targets for #about/#life/#contact nav links.
           Hero occupies slot 0, so real sections start at slot 1. `offsets` is
           cumulative viewports, so a fragment jump lands at progress ===
           slots[index + 1].start — exactly where that section reaches full
-          opacity, whatever its weight. */}
+          opacity, whatever its weight. Same `svh` as the container above —
+          these tops are coordinates within that container's own height, so
+          they have to share its unit. */}
       {sections.map((section, index) => (
         <div
           key={section.key}
           id={section.key}
           aria-hidden
           className="absolute inset-x-0 h-0"
-          style={{ top: `${offsets[index + 1] * 100}dvh` }}
+          style={{ top: `${offsets[index + 1] * 100}svh` }}
         />
       ))}
 
