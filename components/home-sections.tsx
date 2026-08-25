@@ -11,7 +11,9 @@ import {
 
 import type { HomeSectionKey } from "@/lib/nav";
 import type { LifeCategory } from "@/content/life";
+import type { ProjectGroup } from "@/content/projects";
 import { LifeSection } from "@/components/life/life-section";
+import { ProjectsEntrance } from "@/components/projects/projects-entrance";
 
 type Section = {
   key: HomeSectionKey;
@@ -22,6 +24,11 @@ type Section = {
   // content exists (ko), the same way `body` is — every other locale falls
   // through to the placeholder below.
   life?: { categories: LifeCategory[] };
+  // Projects only: same locale gating as `life`. Unlike Life there is no
+  // dialog/open-state to hold here — each row is a real link to
+  // /projects/[slug], so the entrance renders directly with no section
+  // wrapper component.
+  projects?: { groups: ProjectGroup[] };
   // Contact only: built server-side in home-content.tsx and handed down as a
   // finished ReactNode, the same way `hero` is — this file is "use client",
   // so importing the icon components directly here would ship them to the
@@ -395,6 +402,11 @@ function SectionContent({
           categories={section.life.categories}
           // `reveal`이 있다 === 핀 고정 스크롤 안이다. 거기서는 레이어
           // 크로스페이드가 등장을 맡으므로 액자가 따로 나타나지 않는다.
+          animateIn={!reveal}
+        />
+      ) : section.projects ? (
+        <ProjectsEntrance
+          groups={section.projects.groups}
           animateIn={!reveal}
         />
       ) : section.body ? (
