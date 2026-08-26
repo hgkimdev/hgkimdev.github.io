@@ -288,3 +288,173 @@
     animation-delay: 0s !important;
   }
 }
+
+/* ============================================================
+   Blog 존
+   ============================================================ */
+
+/* 카테고리 점 색. 큰 축 세 개뿐이라 zone 색과 같은 계열에서 하나씩 집었다.
+   라이트는 warm paper 배경 위에서 읽히도록 진하게, 다크는 뉴트럴 배경
+   위에서 뜨도록 밝게. */
+:root {
+  --cat-study: #0891b2;
+  --cat-daily: #ea580c;
+  --cat-think: #4d7c0f;
+}
+.dark {
+  --cat-study: #22d3ee;
+  --cat-daily: #fb923c;
+  --cat-think: #a3e635;
+}
+
+/* Blog 존 목록·상세는 사이드바가 붙어 본문이 넓다. <main>은 두 존이 함께
+   쓰는 레이아웃이라 페이지가 자기 폭을 직접 정할 수 없어서, 페이지가 존을
+   표시하고(data-zone-wide) main이 :has로 반응한다. Intro 존에는 이 속성이
+   없으니 max-w-4xl 그대로다. Tailwind 유틸리티는 레이어 안에 있고 이
+   규칙은 밖에 있어서 특정도와 무관하게 이쪽이 이긴다. */
+main:has([data-zone-wide]) {
+  max-width: 72rem;
+}
+
+/* 마크다운이 만든 HTML의 조판. 클래스를 직접 붙일 수 없는 출력이라
+   자식 선택자로 스타일을 준다. 규칙은 본문 다른 곳과 같다 — 한글은
+   break-keep으로 단어 중간에서 끊기지 않게, 문단은 text-pretty. */
+.blog-prose {
+  --blog-prose-gap: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--blog-prose-gap);
+  max-width: 38rem;
+}
+.blog-prose > * {
+  margin: 0;
+}
+.blog-prose p,
+.blog-prose li {
+  font-size: 1rem;
+  line-height: 1.8;
+  word-break: keep-all;
+  text-wrap: pretty;
+}
+@media (min-width: 640px) {
+  .blog-prose p,
+  .blog-prose li {
+    font-size: 1.0625rem;
+  }
+}
+.blog-prose h2 {
+  margin-top: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  word-break: keep-all;
+  scroll-margin-top: calc(var(--header-height) + 1rem);
+}
+.blog-prose h3 {
+  margin-top: 1rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  word-break: keep-all;
+  scroll-margin-top: calc(var(--header-height) + 1rem);
+}
+.blog-prose ul,
+.blog-prose ol {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-left: 1.25rem;
+}
+.blog-prose ul {
+  list-style: disc;
+}
+.blog-prose ol {
+  list-style: decimal;
+}
+.blog-prose li::marker {
+  color: var(--muted-foreground);
+}
+.blog-prose a {
+  color: #1d4ed8;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.dark .blog-prose a {
+  color: #93c5fd;
+}
+.blog-prose code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+  border-radius: 6px;
+  padding: 0.1rem 0.3rem;
+}
+/* 코드 블록의 배경색과 토큰 색은 shiki(Tokyo Night)가 인라인 style로 넣는다.
+   여기서는 상자 모양만 정한다 — 배경을 여기서 또 선언하면 인라인 style에
+   져서 죽은 규칙이 된다. */
+.blog-prose pre {
+  overflow-x: auto;
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  border-radius: var(--radius-xl);
+  padding: 1rem 1.1rem;
+  line-height: 1.7;
+  font-size: 0.8125rem;
+  font-family: var(--font-mono);
+}
+/* 다크 모드에서 두 번째 테마(tokyo-night)로 갈아탄다. shiki가 토큰마다
+   --shiki-dark를 같이 실어 보내므로 여기서 변수를 꺼내 쓰기만 하면 된다.
+   인라인 style로 박힌 라이트 색을 이겨야 해서 !important가 필요하다 —
+   shiki 공식 문서가 안내하는 클래스 기반 다크 모드 방식이다. */
+.dark .blog-prose .shiki,
+.dark .blog-prose .shiki span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
+}
+.blog-prose pre code {
+  background: transparent;
+  padding: 0;
+  font-size: inherit;
+}
+.blog-prose blockquote {
+  padding-left: 1rem;
+  border-left: 2px solid color-mix(in srgb, var(--foreground) 25%, transparent);
+  color: var(--muted-foreground);
+  word-break: keep-all;
+  line-height: 1.8;
+}
+/* 본문 이미지는 원본 비율을 그대로 지킨다. 글 안의 사진은 비율 자체가
+   내용이라(세로 사진, 스크린샷) 상자에 맞춰 자르면 안 된다 — 빌드 때도
+   폭만 줄이고 자르지 않는다. 목록 썸네일만 정해진 상자에 맞춰 자른다. */
+.blog-prose img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-xl);
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  display: block;
+}
+/* 표는 본문보다 넓어질 수 있다. 페이지가 가로로 스크롤되는 대신 표만
+   자기 상자 안에서 스크롤한다. */
+.blog-prose table {
+  display: block;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+.blog-prose th,
+.blog-prose td {
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  word-break: keep-all;
+}
+.blog-prose th {
+  font-weight: 600;
+  background: color-mix(in srgb, var(--foreground) 4%, transparent);
+}
+.blog-prose hr {
+  border: 0;
+  border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+}
