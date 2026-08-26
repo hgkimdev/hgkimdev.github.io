@@ -46,8 +46,11 @@ export function SiteHeader({
   return (
     <header className="site-header sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur">
       <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-4 py-4">
+        {/* 브랜드는 "지금 존의 첫 화면"으로 간다. Blog 존에서 Intro로
+            튕기면 이름 옆에 붙은 /blog와 어긋나고, 존을 나가는 일은 어차피
+            ZoneSwitcher가 맡는다. */}
         <Link
-          href={localizeHref("/", locale)}
+          href={localizeHref(zone === "blog" ? "/blog" : "/", locale)}
           className="flex items-baseline gap-1 text-lg font-semibold tracking-tight"
         >
           {brand}

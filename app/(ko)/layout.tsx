@@ -1,4 +1,5 @@
 import { LocaleHtmlLang } from "@/components/locale-html-lang";
+import { ScrollResetOnNav } from "@/components/scroll-reset-on-nav";
 import { PageTransition } from "@/components/page-transition";
 import { SiteHeader } from "@/components/site-header";
 import { getDictionary, getNavLabels } from "@/lib/i18n/dictionaries";
@@ -15,6 +16,7 @@ export default function KoLayout({
   return (
     <div className="flex min-h-full flex-1 flex-col">
       <LocaleHtmlLang locale="ko" />
+      <ScrollResetOnNav />
       <SiteHeader
         locale="ko"
         brand={dict.brand}

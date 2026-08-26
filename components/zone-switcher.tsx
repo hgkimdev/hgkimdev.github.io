@@ -7,7 +7,6 @@ import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { localizeHref, type Locale } from "@/lib/i18n/config";
 import { getZone, type Zone } from "@/lib/nav";
-import { isPlainLeftClick, resetScrollForNavigation } from "@/lib/scroll";
 
 const zones: Zone[] = ["intro", "blog"];
 
@@ -49,11 +48,6 @@ export function ZoneSwitcher({
             key={zone}
             href={hrefs[zone]}
             aria-current={isActive}
-            onClick={(event) => {
-              if (!isActive && isPlainLeftClick(event)) {
-                resetScrollForNavigation();
-              }
-            }}
             className={cn(
               "relative z-10 rounded-full px-2.5 py-1 transition-colors",
               !isActive && "text-muted-foreground hover:text-foreground"
