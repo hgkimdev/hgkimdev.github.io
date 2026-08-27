@@ -14,6 +14,19 @@ import type { LifeCategory } from "@/content/life";
 import type { ProjectGroup } from "@/content/projects";
 import { LifeSection } from "@/components/life/life-section";
 import { ProjectsEntrance } from "@/components/projects/projects-entrance";
+import {
+  DRIFT_PX,
+  buildSlots,
+  interpolateClamped,
+  revealWindows,
+  type Reveal,
+  type Slot,
+} from "@/components/home-fx/geometry";
+import {
+  ParagraphRevealProvider,
+  SlotFxProvider,
+  useSlotFx,
+} from "@/components/home-fx/effects";
 
 type Section = {
   key: HomeSectionKey;
@@ -36,39 +49,23 @@ type Section = {
   content?: ReactNode;
 };
 
-function interpolateClamped(
-  v: number,
-  input: number[],
-  output: number[],
-): number {
-  if (v <= input[0]) return output[0];
-  const last = input.length - 1;
-  if (v >= input[last]) return output[last];
-  for (let i = 0; i < last; i++) {
-    if (v <= input[i + 1]) {
-      const t = (v - input[i]) / (input[i + 1] - input[i]);
-      return output[i] + t * (output[i + 1] - output[i]);
-    }
-  }
-  return output[last];
-}
+// break-keep is load-bearing for Korean: the default line-break rules let a
+// browser split between any two Hangul syllables, which strands fragments like
+// "...입니" / "다." across a line boundary. keep-all restricts breaks to spaces,
+// i.e. to word boundaries, the way the text actually reads. text-pretty then
+// cleans up the resulting rag and avoids one-word last lines.
+const ESSAY_TEXT =
+  "text-base leading-relaxed break-keep text-pretty text-foreground " +
+  "sm:text-lg md:text-xl " +
+  "[@media(max-height:620px)]:text-base [@media(max-height:620px)]:leading-snug";
 
-// Every motion constant here is measured in *viewports of scroll* — the only
-// unit that stays meaningful once slots have different weights. `viewportUnit`
-// converts one viewport of scrolling into scrollYProgress.
-const RAMP_VIEWPORTS = 0.35; // layer crossfade length
-const DRIFT_PX = 16;
-const REVEAL_LEAD_VIEWPORTS = 0.5; // beat after arrival before para 2 starts
-const REVEAL_DUR_VIEWPORTS = 0.4; // one paragraph's fade-up
-const REVEAL_DWELL_VIEWPORTS = 0.65; // all-revealed hold before the out-ramp
-
-type Slot = {
-  start: number; // progress at which this slot is fully opaque
-  end: number; // progress at which the next slot takes over (=== next.start)
-  weight: number; // viewports of scroll runway
-  isFirst: boolean;
-  isLast: boolean;
-};
+// 제목과 본문 래퍼의 클래스는 상수로 뺀다 — 연출이 붙든 안 붙든(스택 경로) 타이포와
+// 간격은 똑같아야 하고, 효과 컴포넌트는 그 위에 transform만 얹는다.
+const HEADING_CLASS =
+  "text-4xl font-bold tracking-tight sm:text-6xl [@media(max-height:620px)]:text-3xl";
+// 본문은 항상 이 래퍼 한 겹을 쓴다(효과가 없을 때도). DOM 깊이가 경로마다 같아야
+// placeholder처럼 자식이 둘인 분기의 간격이 흔들리지 않는다.
+const CONTENT_CLASS = "flex flex-col gap-6 [@media(max-height:620px)]:gap-3";
 
 // Content-derived: one viewport of runway per paragraph. Life keeps weight 1
 // on purpose: it is a one-screen map, and the exploring happens in a dialog
@@ -86,71 +83,6 @@ function sectionWeight(section: Section): number {
   if (section.life) return 1;
   return NO_BODY_WEIGHT;
 }
-
-function buildSlots(weights: number[]) {
-  const totalWeight = weights.reduce((a, b) => a + b, 0);
-  // A `totalWeight`-viewport container only scrolls `totalWeight - 1` viewports
-  // past the sticky frame, so one viewport of scroll is 1/(totalWeight - 1) of
-  // progress. (In the uniform case this is the old `unit`, 1/(slotCount - 1).)
-  const viewportUnit = totalWeight > 1 ? 1 / (totalWeight - 1) : 1;
-  const offsets = [0];
-  for (const w of weights) offsets.push(offsets[offsets.length - 1] + w);
-  const slots: Slot[] = weights.map((weight, i) => ({
-    weight,
-    start: offsets[i] * viewportUnit,
-    end: offsets[i + 1] * viewportUnit,
-    isFirst: i === 0,
-    isLast: i === weights.length - 1,
-  }));
-  // `ramp` is a constant 0.35 viewports of scroll, NOT 0.35 of a slot: a slot
-  // with weight 3 must not get a 1.05-viewport crossfade that eats a third of
-  // its reveal runway. In the uniform case this equals the old `unit * 0.35`.
-  return {
-    slots,
-    offsets,
-    totalWeight,
-    viewportUnit,
-    ramp: RAMP_VIEWPORTS * viewportUnit,
-  };
-}
-
-// Absolute-progress reveal windows, one per paragraph. `null` means no window:
-// paragraph 0 arrives with the layer's own crossfade (a fragment jump to
-// /#about lands exactly at slot.start, so staging the first paragraph would
-// drop the reader on a bare heading), and every paragraph degrades to `null`
-// when the slot is too short to stage them — which is automatically the case at
-// weight 1, so this doubles as the en/fr/ja safety net.
-function revealWindows(count: number, slot: Slot, viewportUnit: number) {
-  const revealEnd = slot.weight - RAMP_VIEWPORTS - REVEAL_DWELL_VIEWPORTS;
-  const lastStart = revealEnd - REVEAL_DUR_VIEWPORTS;
-  const step =
-    count > 2 ? (lastStart - REVEAL_LEAD_VIEWPORTS) / (count - 2) : 0;
-  const roomy = lastStart >= REVEAL_LEAD_VIEWPORTS;
-  return Array.from({ length: count }, (_, i) => {
-    if (i === 0 || !roomy) return null;
-    const offset = REVEAL_LEAD_VIEWPORTS + (i - 1) * step;
-    return {
-      from: slot.start + offset * viewportUnit,
-      to: slot.start + (offset + REVEAL_DUR_VIEWPORTS) * viewportUnit,
-    };
-  });
-}
-
-// break-keep is load-bearing for Korean: the default line-break rules let a
-// browser split between any two Hangul syllables, which strands fragments like
-// "...입니" / "다." across a line boundary. keep-all restricts breaks to spaces,
-// i.e. to word boundaries, the way the text actually reads. text-pretty then
-// cleans up the resulting rag and avoids one-word last lines.
-const ESSAY_TEXT =
-  "text-base leading-relaxed break-keep text-pretty text-foreground " +
-  "sm:text-lg md:text-xl " +
-  "[@media(max-height:620px)]:text-base [@media(max-height:620px)]:leading-snug";
-
-type Reveal = {
-  scrollYProgress: MotionValue<number>;
-  slot: Slot;
-  viewportUnit: number;
-};
 
 // Intentionally never given a view-transition-name and never wrapped in a
 // <ViewTransition> boundary, so it stays outside both the route crossfade
@@ -192,7 +124,8 @@ export function HomeSections({
 //
 // SectionContent is deliberately called without a `reveal` prop here, so the
 // per-paragraph scroll staging is off by omission — nothing in this subtree
-// ever reads scroll position.
+// ever reads scroll position. 같은 이유로 SlotFxProvider도 없다: 섹션 연출은 전부
+// "슬롯이 있을 때만" 붙으므로 이 경로에는 하나도 걸리지 않는다.
 function StackedSections({
   hero,
   sections,
@@ -253,6 +186,13 @@ function PinnedSections({
     offset: ["start start", "end end"],
   });
 
+  const revealFor = (slot: Slot): Reveal => ({
+    scrollYProgress,
+    slot,
+    viewportUnit,
+    ramp,
+  });
+
   return (
     <div
       ref={containerRef}
@@ -284,32 +224,41 @@ function PinnedSections({
       ))}
 
       <div className="sticky top-[var(--header-height)] h-[calc(100dvh-var(--header-height))] overflow-hidden">
-        <PinnedLayer
-          slot={slots[0]}
-          ramp={ramp}
-          scrollYProgress={scrollYProgress}
+        {/* 히어로는 자기 제목/본문이 없고(TextType이 등장을 맡는다) 맞닿는 경계도
+            About 하나뿐이라, About의 슬롯 키를 빌려 레이어 연출만 받는다. 두 레이어가
+            같은 언어를 써야 그 경계가 어긋나 보이지 않는다. */}
+        <SlotFxProvider
+          sectionKey={sections[0]?.key ?? "about"}
+          reveal={revealFor(slots[0])}
         >
-          {hero}
-        </PinnedLayer>
-        {sections.map((section, index) => (
           <PinnedLayer
-            key={section.key}
-            slot={slots[index + 1]}
+            slot={slots[0]}
             ramp={ramp}
             scrollYProgress={scrollYProgress}
           >
-            <SectionContent
-              section={section}
-              index={index}
-              count={sections.length}
-              comingSoonText={comingSoonText}
-              reveal={{
-                scrollYProgress,
-                slot: slots[index + 1],
-                viewportUnit,
-              }}
-            />
+            {hero}
           </PinnedLayer>
+        </SlotFxProvider>
+        {sections.map((section, index) => (
+          <SlotFxProvider
+            key={section.key}
+            sectionKey={section.key}
+            reveal={revealFor(slots[index + 1])}
+          >
+            <PinnedLayer
+              slot={slots[index + 1]}
+              ramp={ramp}
+              scrollYProgress={scrollYProgress}
+            >
+              <SectionContent
+                section={section}
+                index={index}
+                count={sections.length}
+                comingSoonText={comingSoonText}
+                reveal={revealFor(slots[index + 1])}
+              />
+            </PinnedLayer>
+          </SlotFxProvider>
         ))}
       </div>
     </div>
@@ -375,6 +324,10 @@ function PinnedLayer({
     v > 0.5 ? "auto" : "none",
   );
 
+  // 레이어 차원의 연출(깊이 돌리)은 여기 안쪽 한 겹에 얹는다. 바깥 motion.div의
+  // opacity는 크로스페이드 전용이라 건드리면 안 되기 때문.
+  const { Layer } = useSlotFx();
+
   // The pb offsets the header: the sticky frame starts below it, so content
   // centred in the frame sits half a header-height *below* the viewport's
   // optical centre. Padding the bottom by one header-height re-centres it on
@@ -386,7 +339,7 @@ function PinnedLayer({
       style={{ opacity, y: drift, pointerEvents }}
       className="absolute inset-0 flex flex-col justify-center pb-[var(--header-height)]"
     >
-      {children}
+      <Layer>{children}</Layer>
     </motion.div>
   );
 }
@@ -404,38 +357,41 @@ function SectionContent({
   comingSoonText: string;
   reveal?: Reveal;
 }) {
+  // 슬롯이 없으면(스택 경로) 전부 passthrough라 지금과 같은 DOM이 나온다.
+  const { Heading, Content } = useSlotFx();
+
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 [@media(max-height:620px)]:gap-3">
       <span className="font-mono text-sm text-muted-foreground">
         {String(index + 1).padStart(2, "0")} / {String(count).padStart(2, "0")}
       </span>
-      <h2 className="text-4xl font-bold tracking-tight sm:text-6xl [@media(max-height:620px)]:text-3xl">
-        {section.label}
-      </h2>
-      {section.content ? (
-        section.content
-      ) : section.life ? (
-        <LifeSection
-          categories={section.life.categories}
-          // `reveal`이 있다 === 핀 고정 스크롤 안이다. 거기서는 레이어
-          // 크로스페이드가 등장을 맡으므로 액자가 따로 나타나지 않는다.
-          animateIn={!reveal}
-        />
-      ) : section.projects ? (
-        <ProjectsEntrance
-          groups={section.projects.groups}
-          animateIn={!reveal}
-        />
-      ) : section.body ? (
-        <SectionBody paragraphs={section.body} reveal={reveal} />
-      ) : (
-        <>
-          <p className="max-w-md text-lg text-muted-foreground">
-            {section.description}
-          </p>
-          <p className="text-sm text-muted-foreground">{comingSoonText}</p>
-        </>
-      )}
+      <Heading label={section.label} className={HEADING_CLASS} />
+      <Content className={CONTENT_CLASS}>
+        {section.content ? (
+          section.content
+        ) : section.life ? (
+          <LifeSection
+            categories={section.life.categories}
+            // `reveal`이 있다 === 핀 고정 스크롤 안이다. 거기서는 레이어
+            // 크로스페이드가 등장을 맡으므로 액자가 따로 나타나지 않는다.
+            animateIn={!reveal}
+          />
+        ) : section.projects ? (
+          <ProjectsEntrance
+            groups={section.projects.groups}
+            animateIn={!reveal}
+          />
+        ) : section.body ? (
+          <SectionBody paragraphs={section.body} reveal={reveal} />
+        ) : (
+          <>
+            <p className="max-w-md text-lg text-muted-foreground">
+              {section.description}
+            </p>
+            <p className="text-sm text-muted-foreground">{comingSoonText}</p>
+          </>
+        )}
+      </Content>
     </div>
   );
 }
@@ -483,13 +439,17 @@ function SectionBody({
 // itself. Valid inside <p>: a span is phrasing content whatever its display is.
 // Lines within a paragraph sit one line-height apart while paragraphs keep their
 // gap-4, which is what groups them visually.
+//
+// 줄 자체도 연출이 잡는 자리다(줄 단위 캐스케이드). 기본값은 예전과 똑같은
+// `<span className="block">`이라 효과가 없을 때 DOM이 변하지 않는다.
 function ParagraphLines({ lines }: { lines: string[] }) {
+  const { Line } = useSlotFx();
   return (
     <>
       {lines.map((line, i) => (
-        <span key={i} className="block">
+        <Line key={i} index={i} count={lines.length}>
           {line}
-        </span>
+        </Line>
       ))}
     </>
   );
@@ -518,7 +478,10 @@ function RevealParagraph({
   const drift = useTransform(reveal, (v) => (1 - v) * DRIFT_PX);
   return (
     <motion.p style={{ opacity: reveal, y: drift }}>
-      <ParagraphLines lines={lines} />
+      {/* 이 문단의 진행도를 줄 단위 효과가 다시 잘게 쪼개 쓸 수 있게 넘긴다. */}
+      <ParagraphRevealProvider value={reveal}>
+        <ParagraphLines lines={lines} />
+      </ParagraphRevealProvider>
     </motion.p>
   );
 }

@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "motion/react";
 import { ArrowRightIcon } from "lucide-react";
 
 import type { ProjectGroup } from "@/content/projects";
 import { isPlainLeftClick, resetScrollForNavigation } from "@/lib/scroll";
+import { useSlotFx } from "@/components/home-fx/effects";
 
 /**
  * Projects 슬롯의 본문 — 사진 벤토 그리드였던 초안을 텍스트/링크 중심의 행
@@ -34,6 +34,7 @@ export function ProjectsEntrance({
           key={group.key}
           group={group}
           index={index}
+          count={groups.length}
           animateIn={animateIn}
         />
       ))}
@@ -44,13 +45,18 @@ export function ProjectsEntrance({
 function ProjectRow({
   group,
   index,
+  count,
   animateIn,
 }: {
   group: ProjectGroup;
   index: number;
+  count: number;
   animateIn: boolean;
 }) {
   const number = String(index + 1).padStart(2, "0");
+  // 핀 고정 스크롤 안에서는 Home의 섹션 연출이 이 행의 등장 방식을 정한다. 밖(=스택
+  // 경로)에서는 passthrough라 아래 `entrance`가 그대로 motion.li에 붙는다.
+  const { Item } = useSlotFx();
 
   const entrance = animateIn
     ? ({
@@ -62,7 +68,7 @@ function ProjectRow({
     : undefined;
 
   return (
-    <motion.li {...entrance}>
+    <Item index={index} count={count} {...entrance}>
       {/* hover 연출은 딱 세 가지로 절제한다: 이 행의 아래쪽 구분선 색,
           왼쪽 여백, 화살표 이동. Contact의 배경 마퀴 텍스트나 Life의
           그레이스케일→컬러 사진 전환처럼 눈에 띄는 장치는 일부러 쓰지
@@ -92,6 +98,6 @@ function ProjectRow({
         </span>
         <ArrowRightIcon className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-hover:translate-x-1 group-focus-visible:translate-x-1" />
       </Link>
-    </motion.li>
+    </Item>
   );
 }

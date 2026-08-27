@@ -4,6 +4,7 @@ import { useEffect, useState, type CSSProperties } from "react";
 
 import { contactChannels, type ContactChannel } from "@/content/contact";
 import { contactIcons } from "@/components/contact-icons";
+import { useSlotFx } from "@/components/home-fx/effects";
 
 const SCRAMBLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&";
 
@@ -50,15 +51,28 @@ const marqueeStyle: CSSProperties = {
   animationIterationCount: "infinite",
 };
 
-function ContactRow({ channel }: { channel: ContactChannel }) {
+function ContactRow({
+  channel,
+  index,
+  count,
+}: {
+  channel: ContactChannel;
+  index: number;
+  count: number;
+}) {
   const { key, href, label, handle, external } = channel;
   const Icon = contactIcons[key];
+  // 핀 고정 스크롤 안에서는 Home의 섹션 연출이 이 행의 등장 방식을 정한다(li 자체에
+  // 걸려야 divide-y 구분선까지 같이 따라온다). 밖에서는 그냥 li다.
+  const { Item } = useSlotFx();
   const [hovered, setHovered] = useState(false);
   const scrambled = useScramble(handle, hovered);
   const repeatedLabel = Array.from({ length: 8 }, () => label.toUpperCase()).join("   ·   ");
 
   return (
-    <li
+    <Item
+      index={index}
+      count={count}
       className="group relative overflow-hidden"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -84,15 +98,20 @@ function ContactRow({ channel }: { channel: ContactChannel }) {
         <span className="font-medium text-foreground">{label}</span>
         <span className="ml-auto font-mono text-sm text-muted-foreground">{scrambled}</span>
       </a>
-    </li>
+    </Item>
   );
 }
 
 export function ContactSection() {
   return (
     <ul className="flex flex-col divide-y divide-border/60 border-y border-border/60">
-      {contactChannels.map((channel) => (
-        <ContactRow key={channel.key} channel={channel} />
+      {contactChannels.map((channel, index) => (
+        <ContactRow
+          key={channel.key}
+          channel={channel}
+          index={index}
+          count={contactChannels.length}
+        />
       ))}
     </ul>
   );
