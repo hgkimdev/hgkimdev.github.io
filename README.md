@@ -1,36 +1,32 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# hgkim.github.io
 
-## Getting Started
+Personal site built with Next.js (App Router), statically exported to GitHub Pages.
 
-First, run the development server:
+- **Intro zone** (`/`): a single pinned-scroll page (About / Projects / Life / Contact)
+- **Blog zone** (`/blog`): a Markdown-backed blog with categories, tags, and comments (giscus)
+- **Locales**: `/` (Korean, default), `/en`, `/fr`, `/ja` — see `lib/i18n/`
+
+See [`SPEC.md`](./SPEC.md) for the reasoning behind the site's structure and design decisions, and [`docs/bug-audit-2026-07-15.md`](./docs/bug-audit-2026-07-15.md) for a point-in-time audit of the codebase.
+
+## Getting started
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `npm run dev` / `npm run build` — `predev`/`prebuild` runs `scripts/build-blog-images.mjs` first, which bakes blog images into the sizes the list/detail views expect (see SPEC.md's image section)
+- `npm run lint` — ESLint (`next lint`'s config, run directly)
 
-## Learn More
+## Stack
 
-To learn more about Next.js, take a look at the following resources:
+Next.js · React · TypeScript · Tailwind CSS · shadcn/ui · Motion
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+`next.config.ts` sets `output: 'export'` — the site is a fully static export, deployed to GitHub Pages via `.github/workflows/deploy.yml` on every push to `main`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Content
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Blog posts live in `content/blog/*.md` (frontmatter: `title`, `date`, `category`, `tags`, `summary`, optional `cover`, `draft`). Files starting with `_` are excluded from the list; `_template.md` is the starting point for a new post.
