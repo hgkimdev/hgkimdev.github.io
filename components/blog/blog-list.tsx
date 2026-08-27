@@ -1,6 +1,8 @@
 import Link from "next/link";
 
 import { categoryLabel, formatDate, type BlogPost } from "@/lib/content/blog";
+import { localizeHref, type Locale } from "@/lib/i18n/config";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 
 // life-overlay.tsx·project-detail.tsx의 CHIP과 같은 생김새. 같은 값을 여기
 // 다시 선언하는 편이 다른 파일의 로컬 상수를 끌어오는 결합보다 낫다.
@@ -10,15 +12,17 @@ const CHIP =
 /** 메타 줄 맨 앞의 카테고리 표시. 점 색이 스크롤 중에도 축을 잡아준다. */
 export function CategoryMark({
   category,
+  locale,
   className,
 }: {
   category: BlogPost["category"];
+  locale: Locale;
   className?: string;
 }) {
   return (
     <span className={className} style={{ color: `var(--cat-${category})` }}>
       <span className="mr-1.5 inline-block size-1.5 rounded-full bg-current align-middle" />
-      {categoryLabel(category)}
+      {categoryLabel(category, locale)}
     </span>
   );
 }
@@ -33,11 +37,11 @@ export function CategoryMark({
  * 않고 텍스트가 왼쪽 끝에서 시작한다 — 빈 회색 판을 채워 넣으면 이미지가
  * 있는 글보다 오히려 눈에 띈다.
  */
-function BlogListItem({ post }: { post: BlogPost }) {
+function BlogListItem({ post, locale }: { post: BlogPost; locale: Locale }) {
   return (
     <li className="border-t border-border/60 last:border-b">
       <Link
-        href={`/blog/${post.slug}`}
+        href={localizeHref(`/blog/${post.slug}`, locale)}
         className="group flex gap-4 py-7 pl-0 transition-[padding-left] duration-200 hover:pl-2 focus-visible:pl-2 focus-visible:outline-none"
       >
         {post.cover ? (
@@ -64,7 +68,11 @@ function BlogListItem({ post }: { post: BlogPost }) {
 
         <span className="flex min-w-0 flex-1 flex-col gap-2">
           <span className="flex flex-wrap items-center gap-2 font-mono text-xs text-muted-foreground">
-            <CategoryMark category={post.category} className="font-medium" />
+            <CategoryMark
+              category={post.category}
+              locale={locale}
+              className="font-medium"
+            />
             <span className="text-foreground/25">·</span>
             {formatDate(post.date)}
           </span>
@@ -94,11 +102,17 @@ function BlogListItem({ post }: { post: BlogPost }) {
   );
 }
 
-export function BlogList({ posts }: { posts: BlogPost[] }) {
+export function BlogList({
+  posts,
+  locale,
+}: {
+  posts: BlogPost[];
+  locale: Locale;
+}) {
   if (posts.length === 0) {
     return (
       <p className="py-10 text-sm text-muted-foreground">
-        아직 여기 쌓인 글이 없습니다.
+        {getDictionary(locale).blog.empty}
       </p>
     );
   }
@@ -106,7 +120,7 @@ export function BlogList({ posts }: { posts: BlogPost[] }) {
   return (
     <ul className="flex flex-col">
       {posts.map((post) => (
-        <BlogListItem key={post.slug} post={post} />
+        <BlogListItem key={post.slug} post={post} locale={locale} />
       ))}
     </ul>
   );

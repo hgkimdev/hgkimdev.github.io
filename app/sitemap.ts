@@ -24,7 +24,7 @@ const LOCALIZED_PATHS: {
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const posts = getAllPosts();
-  const categories = getCategoryCounts(posts);
+  const categories = getCategoryCounts(posts, "ko");
   const tags = getTagCounts(posts);
 
   const entries: MetadataRoute.Sitemap = [];

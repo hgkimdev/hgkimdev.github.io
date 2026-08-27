@@ -17,15 +17,28 @@ const QUIET = "text-muted-foreground hover:text-foreground";
  * 양 끝에서 화살표는 disabled다 — 눌러도 아무 일이 없는 버튼을 살려 두면
  * 마지막 페이지인지 아닌지가 눌러 봐야 알 수 있다.
  */
+export type PaginationLabels = {
+  prevPage: string;
+  nextPage: string;
+  /** "{n}"이 페이지 번호로 치환되는 템플릿. */
+  pageLabel: string;
+};
+
+function formatPageLabel(template: string, n: number): string {
+  return template.replace("{n}", String(n));
+}
+
 export function Pagination({
   page,
   pageCount,
   onChange,
+  labels,
   className,
 }: {
   page: number;
   pageCount: number;
   onChange: (page: number) => void;
+  labels: PaginationLabels;
   className?: string;
 }) {
   if (pageCount <= 1) return null;
@@ -40,7 +53,7 @@ export function Pagination({
         type="button"
         onClick={() => onChange(Math.max(0, page - 1))}
         disabled={page === 0}
-        aria-label="이전 페이지"
+        aria-label={labels.prevPage}
         className={cn(
           BUTTON,
           QUIET,
@@ -56,7 +69,7 @@ export function Pagination({
           type="button"
           onClick={() => onChange(i)}
           aria-current={i === page ? "page" : undefined}
-          aria-label={`${i + 1}페이지`}
+          aria-label={formatPageLabel(labels.pageLabel, i + 1)}
           className={cn(
             BUTTON,
             i === page
@@ -72,7 +85,7 @@ export function Pagination({
         type="button"
         onClick={() => onChange(Math.min(pageCount - 1, page + 1))}
         disabled={page === pageCount - 1}
-        aria-label="다음 페이지"
+        aria-label={labels.nextPage}
         className={cn(
           BUTTON,
           QUIET,

@@ -7,6 +7,8 @@ import {
   getTagCounts,
   type BlogPost,
 } from "@/lib/content/blog";
+import { localizeHref, type Locale } from "@/lib/i18n/config";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 
 // 태그는 글이 쌓일수록 끝없이 늘어난다. 데스크톱 세로 목록에서 한 번에
 // 보여줄 개수 — 넘으면 페이저가 붙는다.
@@ -33,22 +35,26 @@ type Active =
 export function BlogSidebar({
   allPosts,
   active,
+  locale,
 }: {
   allPosts: BlogPost[];
   active: Active;
+  locale: Locale;
 }) {
+  const dict = getDictionary(locale);
+
   const categories: TaxonomyItem[] = [
     {
       key: "__all",
-      label: "전체글",
+      label: dict.blog.allPosts,
       count: allPosts.length,
-      href: "/blog",
+      href: localizeHref("/blog", locale),
     },
-    ...getCategoryCounts(allPosts).map((c) => ({
+    ...getCategoryCounts(allPosts, locale).map((c) => ({
       key: c.key,
       label: c.label,
       count: c.count,
-      href: `/blog/category/${c.key}`,
+      href: localizeHref(`/blog/category/${c.key}`, locale),
     })),
   ];
 
@@ -56,13 +62,19 @@ export function BlogSidebar({
     key: t.key,
     label: t.label,
     count: t.count,
-    href: `/blog/tag/${t.key}`,
+    href: localizeHref(`/blog/tag/${t.key}`, locale),
   }));
+
+  const paginationLabels = {
+    prevPage: dict.blog.prevPage,
+    nextPage: dict.blog.nextPage,
+    pageLabel: dict.blog.pageLabel,
+  };
 
   return (
     <aside className="flex min-w-0 flex-col gap-2.5 self-start min-[900px]:sticky min-[900px]:top-[calc(var(--header-height)+2rem)] min-[900px]:gap-7">
       <TaxonomySection
-        heading="카테고리"
+        heading={dict.blog.categoriesHeading}
         items={categories}
         activeKey={
           active.type === "all"
@@ -71,12 +83,14 @@ export function BlogSidebar({
               ? active.key
               : undefined
         }
+        paginationLabels={paginationLabels}
       />
       <TaxonomySection
-        heading="태그"
+        heading={dict.blog.tagsHeading}
         items={tags}
         activeKey={active.type === "tag" ? active.key : undefined}
         pageSize={TAG_PAGE_SIZE}
+        paginationLabels={paginationLabels}
       />
     </aside>
   );

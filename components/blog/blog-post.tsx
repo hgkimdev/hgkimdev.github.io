@@ -5,6 +5,7 @@ import { GiscusComments } from "@/components/blog/giscus-comments";
 import { PostPager } from "@/components/blog/post-pager";
 import { ReadingProgress } from "@/components/blog/reading-progress";
 import { formatDate, tagSlug, type BlogPost } from "@/lib/content/blog";
+import { localizeHref, type Locale } from "@/lib/i18n/config";
 
 const CHIP =
   "rounded-full bg-foreground/5 px-2 py-0.5 text-foreground/70 transition-colors hover:bg-foreground/10";
@@ -27,10 +28,12 @@ export function BlogPostView({
   post,
   html,
   allPosts,
+  locale,
 }: {
   post: BlogPost;
   html: string;
   allPosts: BlogPost[];
+  locale: Locale;
 }) {
   return (
     <div className="flex flex-col gap-10 py-10 sm:py-16">
@@ -40,6 +43,7 @@ export function BlogPostView({
         // 클라이언트로 넘어가는 값이라 목록에 필요한 두 필드만 추린다.
         posts={allPosts.map((p) => ({ slug: p.slug, title: p.title }))}
         currentSlug={post.slug}
+        locale={locale}
       />
 
       <div className="flex flex-col gap-4">
@@ -49,10 +53,10 @@ export function BlogPostView({
 
         <div className="flex flex-wrap items-center gap-2 font-mono text-sm text-muted-foreground">
           <Link
-            href={`/blog/category/${post.category}`}
+            href={localizeHref(`/blog/category/${post.category}`, locale)}
             className="font-medium"
           >
-            <CategoryMark category={post.category} />
+            <CategoryMark category={post.category} locale={locale} />
           </Link>
           <span className="text-foreground/25">·</span>
           {formatDate(post.date)}
@@ -63,7 +67,7 @@ export function BlogPostView({
                 {post.tags.map((tag) => (
                   <Link
                     key={tag}
-                    href={`/blog/tag/${tagSlug(tag)}`}
+                    href={localizeHref(`/blog/tag/${tagSlug(tag)}`, locale)}
                     className={CHIP}
                   >
                     {tag}
@@ -82,7 +86,7 @@ export function BlogPostView({
         dangerouslySetInnerHTML={{ __html: html }}
       />
 
-      <GiscusComments />
+      <GiscusComments locale={locale} />
     </div>
   );
 }

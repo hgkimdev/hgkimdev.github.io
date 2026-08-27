@@ -15,7 +15,7 @@ import { absoluteUrl } from "@/lib/seo";
 // 만들어 둔다. 사이드바에서는 0인 카테고리가 숨겨지지만, 예전에 공유된
 // 링크가 404가 되지 않도록 페이지 자체는 존재한다.
 export async function generateStaticParams() {
-  return blogCategories.map((c) => ({ category: c.key }));
+  return blogCategories.map((key) => ({ category: key }));
 }
 
 export const dynamicParams = false;
@@ -26,9 +26,9 @@ export async function generateMetadata({
   params,
 }: CategoryPageProps): Promise<Metadata> {
   const { category } = await params;
-  const known = blogCategories.find((c) => c.key === category);
+  const known = blogCategories.includes(category as BlogCategory);
   return {
-    title: known ? `${known.label} · Blog` : "Blog",
+    title: known ? `${categoryLabel(category as BlogCategory, "ko")} · Blog` : "Blog",
     alternates: known
       ? { canonical: absoluteUrl(`/blog/category/${category}`) }
       : undefined,
@@ -37,22 +37,23 @@ export async function generateMetadata({
 
 export default async function BlogCategoryPage({ params }: CategoryPageProps) {
   const { category } = await params;
-  if (!blogCategories.some((c) => c.key === category)) notFound();
+  if (!blogCategories.includes(category as BlogCategory)) notFound();
 
   const allPosts = getAllPosts();
   const posts = allPosts.filter((p) => p.category === category);
 
   return (
     <BlogShell
-      title={categoryLabel(category as BlogCategory)}
+      title={categoryLabel(category as BlogCategory, "ko")}
       sidebar={
         <BlogSidebar
+          locale="ko"
           allPosts={allPosts}
           active={{ type: "category", key: category }}
         />
       }
     >
-      <BlogList posts={posts} />
+      <BlogList locale="ko" posts={posts} />
     </BlogShell>
   );
 }

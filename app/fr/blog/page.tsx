@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 
-import { PagePlaceholder } from "@/components/page-placeholder";
+import { BlogList, BlogShell } from "@/components/blog/blog-list";
+import { BlogSidebar } from "@/components/blog/blog-sidebar";
+import { getAllPosts } from "@/lib/content/blog";
 import { pageAlternates } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -9,5 +11,16 @@ export const metadata: Metadata = {
 };
 
 export default function BlogPage() {
-  return <PagePlaceholder locale="fr" navKey="blog" />;
+  const posts = getAllPosts("fr");
+
+  return (
+    <BlogShell
+      title="Blog"
+      sidebar={
+        <BlogSidebar locale="fr" allPosts={posts} active={{ type: "all" }} />
+      }
+    >
+      <BlogList locale="fr" posts={posts} />
+    </BlogShell>
+  );
 }

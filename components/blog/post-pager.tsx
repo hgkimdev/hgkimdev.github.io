@@ -5,6 +5,8 @@ import { ChevronDownIcon } from "lucide-react";
 import { useId, useState } from "react";
 
 import { Pagination } from "@/components/blog/pagination";
+import { localizeHref, type Locale } from "@/lib/i18n/config";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import { cn } from "@/lib/utils";
 
 const PAGE_SIZE = 5;
@@ -27,10 +29,13 @@ export type PagerPost = { slug: string; title: string };
 export function PostPager({
   posts,
   currentSlug,
+  locale,
 }: {
   posts: PagerPost[];
   currentSlug: string;
+  locale: Locale;
 }) {
+  const dict = getDictionary(locale);
   const pageCount = Math.ceil(posts.length / PAGE_SIZE);
   const [page, setPage] = useState(() => {
     const index = posts.findIndex((p) => p.slug === currentSlug);
@@ -44,7 +49,7 @@ export function PostPager({
   const shown = posts.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
 
   return (
-    <nav aria-label="글 목록" className="flex flex-col gap-2">
+    <nav aria-label={dict.blog.postList} className="flex flex-col gap-2">
       {/* 접이식 UI의 표준형 — 행 전체가 클릭 영역이라 눌러야 하는 물건임이
           모양만으로 전달된다. 펼쳤을 때는 아래 목록이 자기 위 테두리를
           그리므로 이 행의 아래 테두리를 지운다(가로선 두 줄이 나란히 서면
@@ -62,7 +67,7 @@ export function PostPager({
           open && "border-b-transparent hover:border-b-transparent",
         )}
       >
-        <span>글 목록</span>
+        <span>{dict.blog.postList}</span>
         <ChevronDownIcon
           className={cn(
             "size-3.5 transition-transform duration-200",
@@ -92,7 +97,7 @@ export function PostPager({
                     </span>
                   ) : (
                     <Link
-                      href={`/blog/${post.slug}`}
+                      href={localizeHref(`/blog/${post.slug}`, locale)}
                       className="block truncate py-2.5 pl-0 text-sm text-muted-foreground transition-[padding-left,color] duration-200 hover:pl-2 hover:text-foreground focus-visible:pl-2 focus-visible:text-foreground focus-visible:outline-none"
                     >
                       {post.title}
@@ -103,7 +108,16 @@ export function PostPager({
             })}
           </ul>
 
-          <Pagination page={page} pageCount={pageCount} onChange={setPage} />
+          <Pagination
+            page={page}
+            pageCount={pageCount}
+            onChange={setPage}
+            labels={{
+              prevPage: dict.blog.prevPage,
+              nextPage: dict.blog.nextPage,
+              pageLabel: dict.blog.pageLabel,
+            }}
+          />
         </>
       ) : null}
     </nav>

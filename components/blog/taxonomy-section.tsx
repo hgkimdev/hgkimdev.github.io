@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import { Pagination } from "@/components/blog/pagination";
+import { Pagination, type PaginationLabels } from "@/components/blog/pagination";
 import { cn } from "@/lib/utils";
 
 export type TaxonomyItem = {
@@ -60,12 +60,14 @@ export function TaxonomySection({
   items,
   activeKey,
   pageSize,
+  paginationLabels,
 }: {
   heading: string;
   items: TaxonomyItem[];
   activeKey?: string;
   /** 없으면 페이징하지 않는다(카테고리처럼 개수가 고정된 축). */
   pageSize?: number;
+  paginationLabels: PaginationLabels;
 }) {
   const pageCount = pageSize ? Math.ceil(items.length / pageSize) : 1;
   const [page, setPage] = useState(() => {
@@ -115,6 +117,7 @@ export function TaxonomySection({
         page={page}
         pageCount={pageCount}
         onChange={setPage}
+        labels={paginationLabels}
         className="hidden min-[900px]:flex"
       />
     </div>

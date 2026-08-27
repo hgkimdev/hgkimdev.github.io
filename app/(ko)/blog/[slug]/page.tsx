@@ -43,5 +43,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
   const html = await getPostHtml(slug);
 
-  return <BlogPostView post={post} html={html} allPosts={posts} />;
+  return (
+    <BlogPostView post={post} html={html} allPosts={posts} locale="ko" />
+  );
 }

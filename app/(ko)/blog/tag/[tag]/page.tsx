@@ -52,10 +52,14 @@ export default async function BlogTagPage({ params }: TagPageProps) {
     <BlogShell
       title={label}
       sidebar={
-        <BlogSidebar allPosts={allPosts} active={{ type: "tag", key: slug }} />
+        <BlogSidebar
+          locale="ko"
+          allPosts={allPosts}
+          active={{ type: "tag", key: slug }}
+        />
       }
     >
-      <BlogList posts={posts} />
+      <BlogList locale="ko" posts={posts} />
     </BlogShell>
   );
 }

@@ -16,24 +16,25 @@ import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
 import { unified } from "unified";
 
+import type { Locale } from "@/lib/i18n/config";
+import { getDictionary } from "@/lib/i18n/dictionaries";
+
 // 카테고리는 큰 축(한 글에 하나), 태그는 세부 축(한 글에 여럿)이다. 이
 // 구분이 흐려지면 사이드바가 태그 수십 개짜리 목록으로 무너진다 — velog가
 // 카테고리를 두지 않아서 실제로 겪는 문제다. 그래서 카테고리는 여기 상수로
 // 고정하고, 태그만 글에서 자유롭게 늘어나게 둔다.
 //
 // key가 곧 URL(`/blog/category/study`)이라 한번 정하면 바꿀 때 링크가 깨진다.
-export const blogCategories = [
-  { key: "study", label: "공부" },
-  { key: "daily", label: "일상" },
-  { key: "think", label: "생각" },
-] as const;
+// 라벨은 로케일마다 달라서 여기 두지 않고 dictionaries.ts의 blog.categories가
+// 갖는다 — key만 이 파일의 몫이다.
+export const blogCategories = ["study", "daily", "think"] as const;
 
-export type BlogCategory = (typeof blogCategories)[number]["key"];
+export type BlogCategory = (typeof blogCategories)[number];
 
-const categoryKeys = blogCategories.map((c) => c.key) as readonly string[];
+const categoryKeys = blogCategories as readonly string[];
 
-export function categoryLabel(key: BlogCategory): string {
-  return blogCategories.find((c) => c.key === key)?.label ?? key;
+export function categoryLabel(key: BlogCategory, locale: Locale): string {
+  return getDictionary(locale).blog.categories[key];
 }
 
 export type BlogPost = {
@@ -113,9 +114,28 @@ function readFrontmatter(fileName: string) {
   }
 }
 
-function parsePost(fileName: string): BlogPost | null {
+// ko 원문은 `<slug>.md`, 번역은 `<slug>.<locale>.md`로 나란히 둔다. 번역이 없는
+// 글은 그 로케일의 목록에 그냥 나타나지 않는다 — 한국어 조각과 번역 조각이
+// 섞여 보이는 것보다, 아직 없는 편이 낫다.
+function fileNameForSlug(slug: string, locale: Locale): string {
+  return locale === "ko" ? `${slug}.md` : `${slug}.${locale}.md`;
+}
+
+function matchesLocale(fileName: string, locale: Locale): boolean {
+  return locale === "ko"
+    ? /\.md$/.test(fileName) && !/\.(en|fr|ja)\.md$/.test(fileName)
+    : fileName.endsWith(`.${locale}.md`);
+}
+
+function slugFromFileName(fileName: string, locale: Locale): string {
+  return locale === "ko"
+    ? fileName.replace(/\.md$/, "")
+    : fileName.replace(`.${locale}.md`, "");
+}
+
+function parsePost(fileName: string, locale: Locale): BlogPost | null {
   const { data, content } = readFrontmatter(fileName);
-  const slug = fileName.replace(/\.md$/, "");
+  const slug = slugFromFileName(fileName, locale);
 
   // `/blog/category/...`, `/blog/tag/...`와 같은 자리를 두고 다투는 이름은
   // 미리 막는다. 정적 세그먼트가 이기므로 이런 글은 조용히 접근 불가가 된다.
@@ -156,7 +176,7 @@ function parsePost(fileName: string): BlogPost | null {
  * 목록 페이지는 frontmatter만 있으면 되고, 마크다운 변환은 상세 페이지가
  * 자기 글 하나에 대해서만 하면 된다.
  */
-export function getAllPosts(): BlogPost[] {
+export function getAllPosts(locale: Locale = "ko"): BlogPost[] {
   let fileNames: string[];
   try {
     fileNames = readdirSync(BLOG_DIR);
@@ -166,16 +186,19 @@ export function getAllPosts(): BlogPost[] {
   }
 
   return fileNames
-    .filter((name) => name.endsWith(".md") && !name.startsWith("_"))
-    .map(parsePost)
+    .filter((name) => !name.startsWith("_") && matchesLocale(name, locale))
+    .map((name) => parsePost(name, locale))
     .filter((post): post is BlogPost => post !== null)
     .filter((post) => includeDrafts || !post.draft)
     .sort((a, b) => b.date.localeCompare(a.date));
 }
 
 /** 상세 페이지용 본문 HTML. 빌드 타임에만 돌아서 클라이언트 번들과 무관하다. */
-export async function getPostHtml(slug: string): Promise<string> {
-  const { content } = readFrontmatter(`${slug}.md`);
+export async function getPostHtml(
+  slug: string,
+  locale: Locale = "ko",
+): Promise<string> {
+  const { content } = readFrontmatter(fileNameForSlug(slug, locale));
   const file = await unified()
     .use(remarkParse)
     .use(remarkGfm)
@@ -245,12 +268,15 @@ function rehypeBlogImages() {
 
 export type TaxonomyCount = { key: string; label: string; count: number };
 
-export function getCategoryCounts(posts: BlogPost[]): TaxonomyCount[] {
+export function getCategoryCounts(
+  posts: BlogPost[],
+  locale: Locale,
+): TaxonomyCount[] {
   return blogCategories
-    .map((c) => ({
-      key: c.key,
-      label: c.label,
-      count: posts.filter((p) => p.category === c.key).length,
+    .map((key) => ({
+      key,
+      label: categoryLabel(key, locale),
+      count: posts.filter((p) => p.category === key).length,
     }))
     .filter((c) => c.count > 0);
 }

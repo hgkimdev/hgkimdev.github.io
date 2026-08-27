@@ -16,9 +16,11 @@ export default function BlogPage() {
   return (
     <BlogShell
       title="Blog"
-      sidebar={<BlogSidebar allPosts={posts} active={{ type: "all" }} />}
+      sidebar={
+        <BlogSidebar locale="ko" allPosts={posts} active={{ type: "all" }} />
+      }
     >
-      <BlogList posts={posts} />
+      <BlogList locale="ko" posts={posts} />
     </BlogShell>
   );
 }
