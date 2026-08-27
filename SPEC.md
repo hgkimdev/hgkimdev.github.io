@@ -159,3 +159,15 @@ GitHub Discussions를 저장소로 쓰는 임베드라 정적 사이트에서도
 - 매핑은 `pathname`. **글을 공개한 뒤 파일 이름(slug)을 바꾸면 그 글의 댓글과 연결이 끊긴다**
 - 테마: 사이트가 `prefers-color-scheme`가 아니라 `<html>.dark` 클래스로 갈리므로 giscus의 `preferred_color_scheme`을 쓸 수 없다. MutationObserver로 클래스를 보고 `postMessage`로 giscus에 넘긴다. 다크는 `dark`(#0d1117)가 아니라 `dark_dimmed` — giscus의 dark가 이 사이트 다크 배경보다 훨씬 검어서 댓글창만 구멍처럼 파인다
 - **전제 조건**: giscus GitHub App이 이 레포에 설치돼 있어야 한다(<https://github.com/apps/giscus>). 설치 전에는 임베드가 "giscus is not installed on this repository"를 표시한다
+
+## SEO 메타데이터
+
+`lib/seo.ts`에 사이트 URL·OG 기본값·hreflang 헬퍼를 모아 뒀다. 레이아웃·페이지·`sitemap.ts`가 전부 여기서 가져다 쓴다 — 로직이 세 곳 이상에서 반복되길래 뽑았다.
+
+- **`metadataBase`**: 루트 레이아웃에 `https://hgkimdev.github.io`로 고정. 없으면 OG 이미지 같은 상대 경로가 절대 URL로 안 풀린다
+- **타이틀 템플릿**: 루트가 `title: { default: "hgkim", template: "%s · hgkim" }`을 잡아 두면 자식이 문자열 타이틀만 적어도(`"Blog"`, `"${post.title} · Blog"`) 자동으로 `"... · hgkim"`이 붙는다. 그래서 en/fr/ja 레이아웃의 `title: "hgkim"` 중복 선언은 지웠다 — 남겨 두면 템플릿이 한 번 더 감싸 `"hgkim · hgkim"`이 됐을 것
+- **`openGraph`는 항상 통째로 다시 적어야 한다**: Next의 메타데이터 병합은 얕은 병합이라, 자식이 `openGraph`를 선언하면 부모 쪽 `openGraph`는 필드 단위로 합쳐지지 않고 객체째로 교체된다(`node_modules/next/dist/docs`의 generate-metadata.md에서 확인). 그래서 로케일 레이아웃마다 `locale`만 다르게 주고 싶어도 `siteName`·`type`까지 매번 같이 넣어야 한다 — `lib/seo.ts`의 `openGraphFor(locale)`이 그 전체 객체를 만들어 준다
+- **OG 이미지**: `app/opengraph-image.tsx`가 `next/og`의 `ImageResponse`로 빌드 타임에 정적 PNG를 굽는다(모든 라우트의 기본값). 이미지 안 문구는 이미 배포된 루트 메타데이터 문구(`hgkim`, `나라는 사람을 소개하는 공간`)를 그대로 재사용했다 — 이미지용으로 새 카피를 지어내지 않았다. 별도 `twitter-image`는 안 만든다: `twitter:image`가 없으면 트위터 카드 파서가 `og:image`로 떨어지는 게 표준 동작이라 굳이 같은 그림을 두 벌 관리할 이유가 없다
+- **`output: 'export'`의 숨은 요구사항**: `sitemap.ts`·`robots.ts`·`opengraph-image.tsx`는 전부 Route Handler 취급이라, `export const dynamic = "force-static"`을 안 적으면 "정적 export인데 이 라우트는 정적으로 설정 안 됐다"고 빌드가 죽는다. 세 파일 모두 이 줄이 있어야 한다
+- **hreflang은 `/`·`/blog`에만 붙인다**: 로케일 4개가 실제로 대응하는 페이지는 이 둘뿐이다(en/fr/ja `/blog`는 아직 `PagePlaceholder`지만 실존하는 라우트). 글 상세·카테고리·태그·프로젝트 상세는 전부 한국어 전용이라 번역판이 없고, 없는 페이지를 가리키는 hreflang을 넣으면 오히려 신호가 틀어진다. `lib/seo.ts`의 `pageAlternates(path, locale)`이 canonical + 4개 로케일 + `x-default`(ko) 묶음을 만들고, 그 외 상세 페이지들은 자기 자신을 가리키는 `alternates.canonical`만 붙인다
+- **`sitemap.ts`**: `trailingSlash: true`라 URL 끝에 `/`를 붙여야 실제로 서빙되는 주소와 일치한다(`lib/seo.ts`의 `absoluteUrl`이 처리). 카테고리·태그는 글이 0편이면(`getCategoryCounts`/`getTagCounts`가 count>0만 남기므로) 사이트맵에서 자동으로 빠진다 — 라우트 자체는 예전 링크를 위해 미리 만들어 두지만(`generateStaticParams`), 빈 페이지를 검색엔진에 알릴 이유는 없다

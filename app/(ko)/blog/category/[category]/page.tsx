@@ -9,6 +9,7 @@ import {
   getAllPosts,
   type BlogCategory,
 } from "@/lib/content/blog";
+import { absoluteUrl } from "@/lib/seo";
 
 // 카테고리는 개수가 고정(공부·일상·생각)이라 글이 없는 카테고리까지 미리
 // 만들어 둔다. 사이드바에서는 0인 카테고리가 숨겨지지만, 예전에 공유된
@@ -26,7 +27,12 @@ export async function generateMetadata({
 }: CategoryPageProps): Promise<Metadata> {
   const { category } = await params;
   const known = blogCategories.find((c) => c.key === category);
-  return { title: known ? `${known.label} · Blog` : "Blog" };
+  return {
+    title: known ? `${known.label} · Blog` : "Blog",
+    alternates: known
+      ? { canonical: absoluteUrl(`/blog/category/${category}`) }
+      : undefined,
+  };
 }
 
 export default async function BlogCategoryPage({ params }: CategoryPageProps) {

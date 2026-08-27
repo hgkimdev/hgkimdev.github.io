@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 import { defaultLocale, locales } from "@/lib/i18n/config";
+import { openGraphFor, siteName, siteUrl } from "@/lib/seo";
 
 const geistSans = Geist({
   variable: "--font-sans",
@@ -15,8 +16,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "hgkim",
+  metadataBase: new URL(siteUrl),
+  title: { default: siteName, template: `%s · ${siteName}` },
   description: "나라는 사람을 소개하는 공간",
+  openGraph: openGraphFor(defaultLocale),
+  twitter: { card: "summary_large_image" },
 };
 
 const themeInitScript = `

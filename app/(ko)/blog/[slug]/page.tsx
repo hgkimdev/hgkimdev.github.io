@@ -7,6 +7,7 @@ import {
   getAllPosts,
   getPostHtml,
 } from "@/lib/content/blog";
+import { absoluteUrl } from "@/lib/seo";
 
 // /projects/[slug]와 같은 규칙 — 정적 export라 빌드 시점에 모든 slug가
 // 정해져 있어야 하고, 목록에 없는 slug는 새로 만들지 않는다.
@@ -30,6 +31,7 @@ export async function generateMetadata({
   return {
     title: post ? `${post.title} · Blog` : "Blog",
     description: post?.summary || undefined,
+    alternates: post ? { canonical: absoluteUrl(`/blog/${slug}`) } : undefined,
   };
 }
 

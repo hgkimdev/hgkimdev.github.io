@@ -5,10 +5,11 @@ import { ScrollResetOnNav } from "@/components/scroll-reset-on-nav";
 import { PageTransition } from "@/components/page-transition";
 import { SiteHeader } from "@/components/site-header";
 import { getDictionary, getNavLabels } from "@/lib/i18n/dictionaries";
+import { openGraphFor } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "hgkim",
   description: "私を紹介する空間",
+  openGraph: openGraphFor("ja"),
 };
 
 export default function JaLayout({

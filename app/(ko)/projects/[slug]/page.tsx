@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { projectGroups } from "@/content/projects";
 import { ProjectDetail } from "@/components/projects/project-detail";
+import { absoluteUrl } from "@/lib/seo";
 
 // 정적 export(`output: 'export'`)라 빌드 시점에 모든 slug가 정해져 있어야
 // 한다 — 이 저장소의 첫 `[slug]` 동적 라우트라 node_modules/next/dist/docs를
@@ -22,7 +23,10 @@ export async function generateMetadata({
 }: ProjectPageProps): Promise<Metadata> {
   const { slug } = await params;
   const group = projectGroups.find((g) => g.key === slug);
-  return { title: group ? `${group.label} · Projects` : "Projects" };
+  return {
+    title: group ? `${group.label} · Projects` : "Projects",
+    alternates: group ? { canonical: absoluteUrl(`/projects/${slug}`) } : undefined,
+  };
 }
 
 export default async function ProjectPage({ params }: ProjectPageProps) {
