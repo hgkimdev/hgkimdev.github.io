@@ -22,6 +22,10 @@ function getServerSnapshot() {
   return false;
 }
 
+// Module-scoped so a transition started by a later click can tell an earlier
+// transition's cleanup not to clear an attribute it just set.
+let transitionId = 0;
+
 export function ThemeToggle({ label }: { label: string }) {
   const isDark = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
@@ -47,12 +51,18 @@ export function ThemeToggle({ label }: { label: string }) {
     // dropped/never matches). Use a plain attribute instead, same approach
     // as ZoneSwitcher's data-zone-nav.
     document.documentElement.dataset.transitionKind = "theme";
+    const id = ++transitionId;
     const transition = document.startViewTransition(applyTheme);
     // Clear the attribute once the wipe is done, otherwise the theme-scoped
     // rules keep matching on later navigations and the header stays merged
-    // into the root snapshot (see .site-header in globals.css).
+    // into the root snapshot (see .site-header in globals.css). Guarded by
+    // id: a fast second click starts a new transition (and re-sets the
+    // attribute) before this one's `finally` runs, which would otherwise
+    // wipe out the newer transition's attribute mid-flight.
     transition.finished.finally(() => {
-      delete document.documentElement.dataset.transitionKind;
+      if (transitionId === id) {
+        delete document.documentElement.dataset.transitionKind;
+      }
     });
   }
 

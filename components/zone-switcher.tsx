@@ -47,7 +47,7 @@ export function ZoneSwitcher({
           <Link
             key={zone}
             href={hrefs[zone]}
-            aria-current={isActive}
+            aria-current={isActive ? "page" : undefined}
             className={cn(
               "relative z-10 rounded-full px-2.5 py-1 transition-colors",
               !isActive && "text-muted-foreground hover:text-foreground"

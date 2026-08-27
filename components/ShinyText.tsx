@@ -41,14 +41,19 @@ const ShinyText: React.FC<ShinyTextProps> = ({
   direction = "left",
   delay = 0,
 }) => {
+  // speed<=0이면 아래 % 계산과 `${cycle}s`가 0/음수가 되어 애니메이션이
+  // 조용히 죽는다. 정지시키고 싶으면 `disabled`를 쓰라는 뜻으로, speed 자체는
+  // 항상 양수로 클램프한다.
+  const safeSpeed = Math.max(speed, 0.01);
+
   // 한 주기 = 훑는 시간 + 끝에서 쉬는 시간. CSS의 animation-delay는 첫 회에만
   // 걸리므로 반복되는 쉼에는 못 쓴다. 대신 주기를 늘리고 easing으로 뒷부분을
   // 눌러 붙인다 — linear()가 진행도 1에 먼저 도달한 뒤 그대로 머무르므로,
   // 그 구간이 곧 쉼이다.
-  const cycle = speed + delay;
+  const cycle = safeSpeed + delay;
   const timingFunction =
     delay > 0
-      ? `linear(0 0%, 1 ${((speed / cycle) * 100).toFixed(2)}%, 1 100%)`
+      ? `linear(0 0%, 1 ${((safeSpeed / cycle) * 100).toFixed(2)}%, 1 100%)`
       : "linear";
 
   // 방향은 키프레임을 뒤집지 않고 재생 방향으로 준다. yoyo면 왕복(alternate),

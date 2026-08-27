@@ -64,6 +64,21 @@ const TextType = ({
     return textColors[currentTextIndex % textColors.length];
   };
 
+  // Without a remount, changing `text` mid-animation would otherwise leave
+  // stale `displayedText`/`currentCharIndex` around and the new text would
+  // pick up typing from wherever the old one left off. This is React's
+  // documented "adjusting state during render" pattern (a plain state
+  // variable, not a ref, tracks the previous value so the compiler can
+  // still treat render as pure).
+  const [prevTextArray, setPrevTextArray] = useState(textArray);
+  if (prevTextArray !== textArray) {
+    setPrevTextArray(textArray);
+    setDisplayedText('');
+    setCurrentCharIndex(0);
+    setIsDeleting(false);
+    setCurrentTextIndex(0);
+  }
+
   useEffect(() => {
     if (!startOnVisible || !containerRef.current) return;
 
@@ -88,7 +103,10 @@ const TextType = ({
     let timeout: ReturnType<typeof setTimeout>;
 
     const currentText = textArray[currentTextIndex];
-    const processedText = reverseMode ? currentText.split('').reverse().join('') : currentText;
+    // Array.from splits on code points, not UTF-16 code units, so surrogate
+    // pairs (emoji, etc.) survive reversing/indexing/deleting below intact.
+    const processedChars = Array.from(currentText);
+    if (reverseMode) processedChars.reverse();
 
     const executeTypingAnimation = () => {
       if (isDeleting) {
@@ -113,14 +131,14 @@ const TextType = ({
           }, pauseDuration);
         } else {
           timeout = setTimeout(() => {
-            setDisplayedText(prev => prev.slice(0, -1));
+            setDisplayedText(prev => Array.from(prev).slice(0, -1).join(''));
           }, deletingSpeed);
         }
       } else {
-        if (currentCharIndex < processedText.length) {
+        if (currentCharIndex < processedChars.length) {
           timeout = setTimeout(
             () => {
-              setDisplayedText(prev => prev + processedText[currentCharIndex]);
+              setDisplayedText(prev => prev + processedChars[currentCharIndex]);
               setCurrentCharIndex(prev => prev + 1);
             },
             variableSpeed ? getRandomSpeed() : typingSpeed
@@ -155,11 +173,13 @@ const TextType = ({
     isVisible,
     reverseMode,
     variableSpeed,
-    onSentenceComplete
+    onSentenceComplete,
+    getRandomSpeed
   ]);
 
   const shouldHideCursor =
-    hideCursorWhileTyping && (currentCharIndex < textArray[currentTextIndex].length || isDeleting);
+    hideCursorWhileTyping &&
+    (currentCharIndex < Array.from(textArray[currentTextIndex]).length || isDeleting);
 
   return createElement(
     Component,

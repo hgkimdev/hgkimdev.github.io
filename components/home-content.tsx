@@ -13,9 +13,17 @@ const AI_AGENT_MARKER = "AI 에이전트";
 
 export function HomeContent({ locale }: { locale: Locale }) {
   const dict = getDictionary(locale);
-  const introParts = dict.home.intro.includes(AI_AGENT_MARKER)
-    ? dict.home.intro.split(AI_AGENT_MARKER)
-    : null;
+  // indexOf + slice instead of split(): split() breaks on every occurrence,
+  // so a marker that appears twice would drop everything after the second
+  // one (only [0]/[1] are ever rendered below).
+  const markerIndex = dict.home.intro.indexOf(AI_AGENT_MARKER);
+  const introParts: [string, string] | null =
+    markerIndex === -1
+      ? null
+      : [
+          dict.home.intro.slice(0, markerIndex),
+          dict.home.intro.slice(markerIndex + AI_AGENT_MARKER.length),
+        ];
   const sections = homeSectionKeys.map((key) => ({
     key,
     label: dict.nav[key].label,
@@ -49,6 +57,7 @@ export function HomeContent({ locale }: { locale: Locale }) {
       </p>
       <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
         <TextType
+          as="span"
           text={dict.home.heading}
           typingSpeed={60}
           pauseDuration={4000}
