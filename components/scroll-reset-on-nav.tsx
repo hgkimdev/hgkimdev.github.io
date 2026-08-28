@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-import { isPlainLeftClick, resetScrollForNavigation } from "@/lib/scroll";
+import { isPlainLeftClick, resetScrollBeforeNavigatingTo } from "@/lib/scroll";
 
 /**
  * 내부 링크로 페이지를 옮기기 직전에 스크롤을 맨 위로 돌린다.
@@ -17,6 +17,12 @@ import { isPlainLeftClick, resetScrollForNavigation } from "@/lib/scroll";
  * 원래는 ZoneSwitcher의 링크에만 걸려 있었는데, 헤더 브랜드·목록 행·사이드바
  * 처럼 같은 조건을 만드는 링크가 계속 늘었다. 링크마다 핸들러를 다는 대신
  * document에서 한 번 잡는다 — 새로 추가되는 링크가 이 처리를 빠뜨릴 수 없다.
+ *
+ * 이 리스너는 진짜 `<a>` 클릭만 본다. Base UI Select의 onValueChange처럼
+ * 앵커 클릭 없이 router.push를 직접 부르는 트리거(LanguageSwitcher)는 여기
+ * 안 걸린다 — 그런 트리거는 lib/router.ts의 useAppRouter가 같은 이유로
+ * 처리한다. 둘이 같은 lib/scroll.ts의 resetScrollBeforeNavigatingTo를 쓰므로
+ * 네비게이션 트리거는 둘 중 하나만 거치면 이 처리를 놓칠 수 없다.
  *
  * (Motion의 layoutRoot도 시도했지만 효과가 없었다. Motion은 레이아웃을 페이지
  * 좌표로 재기 때문에 sticky 요소의 스크롤 오프셋을 알지 못한다.)
@@ -34,16 +40,8 @@ export function ScrollResetOnNav() {
       const url = new URL(anchor.href, window.location.href);
       // 바깥 사이트는 이 페이지를 떠나므로 스크롤을 건드릴 이유가 없다.
       if (url.origin !== window.location.origin) return;
-      // 같은 문서 안의 앵커 이동(#section)은 스크롤 그 자체가 목적이다.
-      if (
-        url.pathname === window.location.pathname &&
-        url.search === window.location.search
-      ) {
-        return;
-      }
-      if (window.scrollY === 0) return;
 
-      resetScrollForNavigation();
+      resetScrollBeforeNavigatingTo(anchor.href);
     };
 
     // capture 단계라야 Next의 Link 핸들러(루트에 위임된 React 이벤트)보다 먼저

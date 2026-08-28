@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 import { localizeAnchor, localizeHref, type Locale } from "@/lib/i18n/config";
 import { isPlainLeftClick } from "@/lib/scroll";
+import { useAppRouter } from "@/lib/router";
 
 /**
  * Home의 섹션(About/Projects/Life/Contact)으로 가는 링크. 이미 Home 위에
@@ -32,7 +33,7 @@ export function HomeAnchorLink({
   children: ReactNode;
 }) {
   const pathname = usePathname();
-  const router = useRouter();
+  const router = useAppRouter();
   const isHome = pathname === localizeHref("/", locale);
 
   return (
