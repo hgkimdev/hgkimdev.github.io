@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowRightIcon } from "lucide-react";
 
 import type { ProjectGroup } from "@/content/projects";
+import { localizeHref, type Locale } from "@/lib/i18n/config";
 import { isPlainLeftClick, resetScrollForNavigation } from "@/lib/scroll";
 import { useSlotFx } from "@/components/home-fx/effects";
 
@@ -19,9 +20,11 @@ import { useSlotFx } from "@/components/home-fx/effects";
  */
 export function ProjectsEntrance({
   groups,
+  locale,
   animateIn = false,
 }: {
   groups: ProjectGroup[];
+  locale: Locale;
   /** 행이 스스로 등장 애니메이션을 재생할지. Life Poster의 같은 이름 prop과
    * 같은 이유 — 핀 고정 스크롤 안에서는 레이어 크로스페이드가 등장을 이미
    * 맡으므로 reduced-motion 스택 경로에서만 켠다. */
@@ -33,6 +36,7 @@ export function ProjectsEntrance({
         <ProjectRow
           key={group.key}
           group={group}
+          locale={locale}
           index={index}
           count={groups.length}
           animateIn={animateIn}
@@ -44,11 +48,13 @@ export function ProjectsEntrance({
 
 function ProjectRow({
   group,
+  locale,
   index,
   count,
   animateIn,
 }: {
   group: ProjectGroup;
+  locale: Locale;
   index: number;
   count: number;
   animateIn: boolean;
@@ -74,7 +80,7 @@ function ProjectRow({
           그레이스케일→컬러 사진 전환처럼 눈에 띄는 장치는 일부러 쓰지
           않는다 — 이 섹션의 톤은 담백해야 한다. */}
       <Link
-        href={`/projects/${group.key}`}
+        href={localizeHref(`/projects/${group.key}`, locale)}
         // 스크롤을 깊게 내린 채로 이 행을 눌러 훨씬 짧은 상세 페이지로
         // 넘어가면, 헤더 ZoneSwitcher의 layoutId 필이 잘못된 위치에서
         // 튀는 문제가 있다 — lib/scroll.ts 참고.

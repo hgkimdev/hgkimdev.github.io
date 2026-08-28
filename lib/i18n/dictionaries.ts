@@ -9,6 +9,9 @@ type Dictionary = {
     greeting: string;
     heading: string;
     intro: string;
+    /** intro 안에서 ShinyText로 강조할 부분 문자열. intro에 그대로 등장해야
+     * 한다 — home-content.tsx가 indexOf로 잘라서 감싼다. */
+    aiAgentMarker: string;
   };
   comingSoon: string;
   themeToggleLabel: string;
@@ -30,6 +33,20 @@ type Dictionary = {
      * 건넌다. */
     pageLabel: string;
   };
+  life: {
+    close: string;
+    unmute: string;
+    mute: string;
+    /** category.label을 받아 "{label} 목록/list" 형태의 aria-label을 만든다. */
+    itemListAria: (categoryLabel: string) => string;
+    bookshelfPhotoLabel: string;
+    /** 책 표지 링크의 aria-label. 새 창으로 여는 교보문고 미리보기. */
+    bookPreviewAria: (title: string) => string;
+  };
+  projects: {
+    /** 데모 영상 iframe의 title. */
+    demoVideoAria: (title: string) => string;
+  };
 };
 
 export const dictionaries: Record<Locale, Dictionary> = {
@@ -50,6 +67,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
       greeting: "Hi, I'm hgkim 👋",
       heading: "호기심 많은 프로덕트 엔지니어입니다.",
       intro: "AI 에이전트와 함께 여러 서비스들을 만들어보고 있어요.",
+      aiAgentMarker: "AI 에이전트",
     },
     comingSoon: "준비 중입니다.",
     themeToggleLabel: "테마 전환",
@@ -67,6 +85,17 @@ export const dictionaries: Record<Locale, Dictionary> = {
       prevPage: "이전 페이지",
       nextPage: "다음 페이지",
       pageLabel: "{n}페이지",
+    },
+    life: {
+      close: "닫기",
+      unmute: "소리 켜기",
+      mute: "소리 끄기",
+      itemListAria: (categoryLabel) => `${categoryLabel} 목록`,
+      bookshelfPhotoLabel: "책장 사진",
+      bookPreviewAria: (title) => `교보문고에서 『${title}』 미리보기 (새 창)`,
+    },
+    projects: {
+      demoVideoAria: (title) => `${title} 데모 영상`,
     },
   },
   en: {
@@ -90,6 +119,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
       greeting: "Hi, I'm hgkim 👋",
       heading: "I'm a curious product engineer.",
       intro: "I'm building various services together with AI agents.",
+      aiAgentMarker: "AI agents",
     },
     comingSoon: "Coming soon.",
     themeToggleLabel: "Toggle theme",
@@ -107,6 +137,18 @@ export const dictionaries: Record<Locale, Dictionary> = {
       prevPage: "Previous page",
       nextPage: "Next page",
       pageLabel: "Page {n}",
+    },
+    life: {
+      close: "Close",
+      unmute: "Unmute",
+      mute: "Mute",
+      itemListAria: (categoryLabel) => `${categoryLabel} list`,
+      bookshelfPhotoLabel: "Bookshelf photo",
+      bookPreviewAria: (title) =>
+        `Preview 『${title}』 on Kyobo Book Center (opens in new window)`,
+    },
+    projects: {
+      demoVideoAria: (title) => `${title} demo video`,
     },
   },
 };

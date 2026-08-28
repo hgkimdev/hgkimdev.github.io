@@ -4,6 +4,8 @@ import { useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 
 import type { LifeCategory, LifeCategoryKey, LifeMedia } from "@/content/life";
+import type { Locale } from "@/lib/i18n/config";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 
 /**
  * Life 슬롯의 본문 — 한 화면짜리 "입구".
@@ -24,14 +26,17 @@ import type { LifeCategory, LifeCategoryKey, LifeMedia } from "@/content/life";
  */
 export function LifeEntrance({
   categories,
+  locale,
   onOpen,
   animateIn = false,
 }: {
   categories: LifeCategory[];
+  locale: Locale;
   onOpen: (key: LifeCategoryKey) => void;
   /** 액자가 스스로 등장 애니메이션을 재생할지. Poster의 주석 참고. */
   animateIn?: boolean;
 }) {
+  const dict = getDictionary(locale);
   const byKey = (key: LifeCategoryKey) => {
     const found = categories.find((category) => category.key === key);
     if (!found) throw new Error(`life category "${key}" missing`);
@@ -111,7 +116,7 @@ export function LifeEntrance({
       {/* CC BY-SA 4.0 요건: "책" 타일 배경(서점 실사진)의 출처 표시. 값을
           치장이 아니라 이 사진을 계속 쓰기 위한 최소 조건으로 둔다. */}
       <p className="text-right text-[0.65rem] text-muted-foreground">
-        책장 사진: Shakespeare and Company, Paris ·{" "}
+        {dict.life.bookshelfPhotoLabel}: Shakespeare and Company, Paris ·{" "}
         <a
           href="https://commons.wikimedia.org/wiki/File:SCO_Front_Lib_Be_Not.jpg"
           target="_blank"

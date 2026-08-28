@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import type { LifeCategory, LifeCategoryKey } from "@/content/life";
+import type { Locale } from "@/lib/i18n/config";
 import { LifeEntrance } from "@/components/life/life-entrance";
 import { LifeOverlay } from "@/components/life/life-overlay";
 
@@ -15,9 +16,11 @@ import { LifeOverlay } from "@/components/life/life-overlay";
  */
 export function LifeSection({
   categories,
+  locale,
   animateIn,
 }: {
   categories: LifeCategory[];
+  locale: Locale;
   animateIn?: boolean;
 }) {
   const [openKey, setOpenKey] = useState<LifeCategoryKey | null>(null);
@@ -26,11 +29,13 @@ export function LifeSection({
     <>
       <LifeEntrance
         categories={categories}
+        locale={locale}
         animateIn={animateIn}
         onOpen={setOpenKey}
       />
       <LifeOverlay
         categories={categories}
+        locale={locale}
         openKey={openKey}
         onOpenKeyChange={setOpenKey}
       />

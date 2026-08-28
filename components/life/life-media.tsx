@@ -4,6 +4,8 @@ import { useEffect, useRef, useState, type RefObject } from "react";
 import { motion, useReducedMotion } from "motion/react";
 
 import type { LifeCoverMedia, LifeMedia } from "@/content/life";
+import type { Locale } from "@/lib/i18n/config";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 
 // youtube-nocookie.com은 재생 전까지 쿠키를 심지 않는다. 소개용 사이트에
 // 굳이 방문자 추적을 얹을 이유가 없어 기본값으로 쓴다.
@@ -457,10 +459,13 @@ const SPINE_SHADING =
 export function LifeCoverPlate({
   media,
   title,
+  locale,
 }: {
   media: LifeCoverMedia;
   title: string;
+  locale: Locale;
 }) {
+  const dict = getDictionary(locale);
   const prefersReducedMotion = useReducedMotion();
 
   const faceBase = "absolute top-0 h-full";
@@ -552,7 +557,7 @@ export function LifeCoverPlate({
             rel="noopener noreferrer"
             // 표지 그림의 alt는 비워 두었으므로 링크 이름을 여기서 준다.
             // 표지만 읽어주면 이게 눌러서 어디로 가는 물건인지 알 수 없다.
-            aria-label={`교보문고에서 『${title}』 미리보기 (새 창)`}
+            aria-label={dict.life.bookPreviewAria(title)}
             className="block rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-4 focus-visible:ring-offset-transparent"
           >
             {book}

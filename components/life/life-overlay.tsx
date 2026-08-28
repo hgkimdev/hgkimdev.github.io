@@ -11,6 +11,8 @@ import type {
   LifeCategoryKey,
   LifeLanguageLevel,
 } from "@/content/life";
+import type { Locale } from "@/lib/i18n/config";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import {
   LifeCoverPlate,
   LifeMediaBackground,
@@ -52,13 +54,16 @@ const CHIP = "rounded-full bg-foreground/5 px-2 py-0.5 text-foreground/70";
  */
 export function LifeOverlay({
   categories,
+  locale,
   openKey,
   onOpenKeyChange,
 }: {
   categories: LifeCategory[];
+  locale: Locale;
   openKey: LifeCategoryKey | null;
   onOpenKeyChange: (key: LifeCategoryKey | null) => void;
 }) {
+  const dict = getDictionary(locale);
   const category = categories.find((c) => c.key === openKey) ?? null;
   // 선택을 카테고리와 묶어서 들고 있는다. 항목 id만 저장하면 카테고리가 바뀔 때
   // effect로 초기화해줘야 하는데(= 렌더 연쇄), 어느 카테고리의 선택인지까지
@@ -134,7 +139,7 @@ export function LifeOverlay({
               </Dialog.Title>
               <Dialog.Close className="flex size-9 items-center justify-center rounded-full border border-border bg-card/85 text-muted-foreground transition-colors hover:text-foreground">
                 <XIcon className="size-4" />
-                <span className="sr-only">닫기</span>
+                <span className="sr-only">{dict.life.close}</span>
               </Dialog.Close>
             </header>
 
@@ -278,7 +283,11 @@ export function LifeOverlay({
                     이 정렬은 아무것도 바꾸지 않는다. */}
                 {item.media.kind === "cover" ? (
                   <div className="hidden items-center justify-start lg:flex">
-                    <LifeCoverPlate media={item.media} title={item.title} />
+                    <LifeCoverPlate
+                      media={item.media}
+                      title={item.title}
+                      locale={locale}
+                    />
                   </div>
                 ) : null}
               </div>
@@ -310,7 +319,7 @@ export function LifeOverlay({
                   <Volume2Icon className="size-4" />
                 )}
                 <span className="sr-only">
-                  {muted ? "소리 켜기" : "소리 끄기"}
+                  {muted ? dict.life.unmute : dict.life.mute}
                 </span>
               </button>
             ) : null}
@@ -322,6 +331,7 @@ export function LifeOverlay({
               {category && item ? (
                 <ItemStrip
                   category={category}
+                  locale={locale}
                   activeId={item.id}
                   onSelect={selectItem}
                 />
@@ -721,16 +731,19 @@ function LanguageLevelBadge({
 
 function ItemStrip({
   category,
+  locale,
   activeId,
   onSelect,
 }: {
   category: LifeCategory;
+  locale: Locale;
   activeId: string;
   onSelect: (id: string) => void;
 }) {
+  const dict = getDictionary(locale);
   return (
     <nav
-      aria-label={`${category.label} 목록`}
+      aria-label={dict.life.itemListAria(category.label)}
       className="pointer-events-auto w-full md:hidden"
       style={{ maskImage: EDGE_FADE, WebkitMaskImage: EDGE_FADE }}
     >

@@ -3,6 +3,8 @@ import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 import { SiGithub } from "@icons-pack/react-simple-icons";
 
 import type { Project, ProjectGroup } from "@/content/projects";
+import { localizeHref, type Locale } from "@/lib/i18n/config";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import { ProjectsBackLink } from "@/components/projects/projects-back-link";
 
 // 본문 조판. home-sections.tsx의 ESSAY_TEXT와 같은 규칙(break-keep·text-pretty)을
@@ -25,10 +27,13 @@ const LINK_BUTTON =
 export function ProjectDetail({
   groups,
   group,
+  locale,
 }: {
   groups: ProjectGroup[];
   group: ProjectGroup;
+  locale: Locale;
 }) {
+  const dict = getDictionary(locale);
   const index = groups.findIndex((g) => g.key === group.key);
   const total = groups.length;
   const prev = groups[(index - 1 + total) % total];
@@ -42,7 +47,7 @@ export function ProjectDetail({
     <div className="flex flex-col gap-10 py-10 sm:py-16">
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between gap-4">
-          <ProjectsBackLink />
+          <ProjectsBackLink locale={locale} />
           <span className="font-mono text-sm text-muted-foreground">
             {String(index + 1).padStart(2, "0")} /{" "}
             {String(total).padStart(2, "0")}
@@ -57,12 +62,12 @@ export function ProjectDetail({
       </div>
 
       {solo ? (
-        <ProjectBody project={group.items[0]} showTitle={false} />
+        <ProjectBody project={group.items[0]} showTitle={false} dict={dict} />
       ) : (
         <div className="flex flex-col divide-y divide-border/60">
           {group.items.map((project) => (
             <div key={project.id} className="py-10 first:pt-0 last:pb-0">
-              <ProjectBody project={project} showTitle />
+              <ProjectBody project={project} showTitle dict={dict} />
             </div>
           ))}
         </div>
@@ -70,14 +75,14 @@ export function ProjectDetail({
 
       <nav className="flex items-center justify-between border-t border-border/60 pt-8 font-mono text-sm">
         <Link
-          href={`/projects/${prev.key}`}
+          href={localizeHref(`/projects/${prev.key}`, locale)}
           className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeftIcon className="size-4" />
           {prev.label}
         </Link>
         <Link
-          href={`/projects/${next.key}`}
+          href={localizeHref(`/projects/${next.key}`, locale)}
           className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
         >
           {next.label}
@@ -91,9 +96,11 @@ export function ProjectDetail({
 function ProjectBody({
   project,
   showTitle,
+  dict,
 }: {
   project: Project;
   showTitle: boolean;
+  dict: ReturnType<typeof getDictionary>;
 }) {
   return (
     <div className="flex flex-col gap-4">
@@ -113,7 +120,7 @@ function ProjectBody({
         <div className="aspect-video w-full overflow-hidden rounded-xl border border-border">
           <iframe
             src={`https://www.youtube.com/embed/${project.media.id}`}
-            title={`${project.title} 데모 영상`}
+            title={dict.projects.demoVideoAria(project.title)}
             allow="encrypted-media; picture-in-picture; fullscreen"
             allowFullScreen
             className="h-full w-full"

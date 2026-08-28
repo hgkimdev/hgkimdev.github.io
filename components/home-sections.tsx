@@ -10,6 +10,7 @@ import {
 } from "motion/react";
 
 import type { HomeSectionKey } from "@/lib/nav";
+import type { Locale } from "@/lib/i18n/config";
 import type { LifeCategory } from "@/content/life";
 import type { ProjectGroup } from "@/content/projects";
 import { LifeSection } from "@/components/life/life-section";
@@ -32,15 +33,17 @@ type Section = {
   key: HomeSectionKey;
   label: string;
   description: string;
+  // Life/Projects need this to localize the UI strings and links their
+  // render components own directly (Home's other content is either plain
+  // data or, like `content` below, already resolved to a locale before it
+  // gets here).
+  locale: Locale;
   body?: string[][];
-  // Life only: the categories its entrance opens into. Present only where the
-  // content exists (ko), the same way `body` is — every other locale falls
-  // through to the placeholder below.
+  // Life only: the categories its entrance opens into.
   life?: { categories: LifeCategory[] };
-  // Projects only: same locale gating as `life`. Unlike Life there is no
-  // dialog/open-state to hold here — each row is a real link to
-  // /projects/[slug], so the entrance renders directly with no section
-  // wrapper component.
+  // Projects only: unlike Life there is no dialog/open-state to hold here —
+  // each row is a real link to /projects/[slug], so the entrance renders
+  // directly with no section wrapper component.
   projects?: { groups: ProjectGroup[] };
   // Contact only: built server-side in home-content.tsx and handed down as a
   // finished ReactNode, the same way `hero` is — this file is "use client",
@@ -71,10 +74,10 @@ const CONTENT_CLASS = "flex flex-col gap-6 [@media(max-height:620px)]:gap-3";
 // on purpose: it is a one-screen map, and the exploring happens in a dialog
 // outside this scroll engine, not by scrolling through it.
 //
-// Everything else with no body text (Projects, Contact, and About in locales
-// with no body copy yet) got only ~0.3 viewport of settled dwell once the
-// crossfade ramps ate their share of a bare 1-viewport slot — sessions were
-// passing through in a single scroll tick. NO_BODY_WEIGHT gives them more
+// Everything else with no body text (Projects, Contact) got only ~0.3
+// viewport of settled dwell once the crossfade ramps ate their share of a
+// bare 1-viewport slot — sessions were passing through in a single scroll
+// tick. NO_BODY_WEIGHT gives them more
 // runway (~0.7 viewport of dwell) without touching Life.
 const NO_BODY_WEIGHT = 1.4;
 
@@ -372,6 +375,7 @@ function SectionContent({
         ) : section.life ? (
           <LifeSection
             categories={section.life.categories}
+            locale={section.locale}
             // `reveal`이 있다 === 핀 고정 스크롤 안이다. 거기서는 레이어
             // 크로스페이드가 등장을 맡으므로 액자가 따로 나타나지 않는다.
             animateIn={!reveal}
@@ -379,6 +383,7 @@ function SectionContent({
         ) : section.projects ? (
           <ProjectsEntrance
             groups={section.projects.groups}
+            locale={section.locale}
             animateIn={!reveal}
           />
         ) : section.body ? (

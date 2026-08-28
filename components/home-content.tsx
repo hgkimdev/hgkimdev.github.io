@@ -3,47 +3,35 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 import type { Locale } from "@/lib/i18n/config";
 import { homeSectionKeys } from "@/lib/nav";
 import { getAboutContent } from "@/lib/content/about";
-import { lifeCategories } from "@/content/life";
-import { projectGroups } from "@/content/projects";
+import { getLifeCategories } from "@/lib/content/life";
+import { getProjectGroups } from "@/lib/content/projects";
 import { ContactSection } from "@/components/contact-section";
 import ShinyText from "@/components/ShinyText";
 import TextType from "@/components/TextType";
-
-const AI_AGENT_MARKER = "AI 에이전트";
 
 export function HomeContent({ locale }: { locale: Locale }) {
   const dict = getDictionary(locale);
   // indexOf + slice instead of split(): split() breaks on every occurrence,
   // so a marker that appears twice would drop everything after the second
   // one (only [0]/[1] are ever rendered below).
-  const markerIndex = dict.home.intro.indexOf(AI_AGENT_MARKER);
+  const markerIndex = dict.home.intro.indexOf(dict.home.aiAgentMarker);
   const introParts: [string, string] | null =
     markerIndex === -1
       ? null
       : [
           dict.home.intro.slice(0, markerIndex),
-          dict.home.intro.slice(markerIndex + AI_AGENT_MARKER.length),
+          dict.home.intro.slice(markerIndex + dict.home.aiAgentMarker.length),
         ];
   const sections = homeSectionKeys.map((key) => ({
     key,
     label: dict.nav[key].label,
     description: dict.nav[key].description,
-    body:
-      key === "about" && locale === "ko"
-        ? getAboutContent().paragraphs
-        : undefined,
-    // About과 같은 규칙: 한국어 원문만 있는 콘텐츠는 ko에서만 붙이고, 나머지
-    // 로케일은 기존 placeholder로 떨어진다.
-    life:
-      key === "life" && locale === "ko"
-        ? { categories: lifeCategories }
-        : undefined,
+    locale,
+    body: key === "about" ? getAboutContent(locale).paragraphs : undefined,
+    life: key === "life" ? { categories: getLifeCategories(locale) } : undefined,
     projects:
-      key === "projects" && locale === "ko"
-        ? { groups: projectGroups }
-        : undefined,
-    // About/Life와 달리 로케일 게이트가 없다: 연락 채널은 언어 중립이라
-    // 4개 로케일 전부 실제 콘텐츠를 낸다.
+      key === "projects" ? { groups: getProjectGroups(locale) } : undefined,
+    // 연락 채널은 언어 중립이라 모든 로케일에서 실제 콘텐츠를 낸다.
     // key prop: 이 JSX는 homeSectionKeys.map() 콜백 안에서 만들어져서, 단일
     // 자식으로만 쓰여도 React가 "리스트 안에서 생성됨"으로 인식해 key를
     // 요구한다(SectionContent 렌더 시 "passed a child from HomeContent" 경고).
@@ -71,7 +59,7 @@ export function HomeContent({ locale }: { locale: Locale }) {
             {introParts[0]}
             <span className="rounded-full bg-foreground/5 px-2 py-0.5">
               <ShinyText
-                text={AI_AGENT_MARKER}
+                text={dict.home.aiAgentMarker}
                 className="font-medium"
                 color="var(--muted-foreground)"
                 shineColor="var(--foreground)"

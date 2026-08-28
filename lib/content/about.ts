@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
+import type { Locale } from "@/lib/i18n/config";
+
 /** A paragraph, already split into the lines it should render as. */
 export type AboutParagraph = string[];
 export type AboutContent = { title: string; paragraphs: AboutParagraph[] };
@@ -19,11 +21,10 @@ function splitLines(paragraph: string): string[] {
     .filter(Boolean);
 }
 
-export function getAboutContent(): AboutContent {
-  const raw = readFileSync(
-    path.join(process.cwd(), "content/about.md"),
-    "utf8",
-  );
+// ko 원문은 about.md, 번역은 about.<locale>.md — content/blog의 규칙과 같다.
+export function getAboutContent(locale: Locale = "ko"): AboutContent {
+  const fileName = locale === "ko" ? "about.md" : `about.${locale}.md`;
+  const raw = readFileSync(path.join(process.cwd(), "content", fileName), "utf8");
   const match = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
   const frontmatter = match?.[1] ?? "";
   const body = match?.[2] ?? raw;
