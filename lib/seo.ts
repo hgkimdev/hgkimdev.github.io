@@ -38,8 +38,6 @@ export function pageAlternates(path: string, locale: Locale) {
 const ogLocales: Record<Locale, string> = {
   ko: "ko_KR",
   en: "en_US",
-  fr: "fr_FR",
-  ja: "ja_JP",
 };
 
 /**

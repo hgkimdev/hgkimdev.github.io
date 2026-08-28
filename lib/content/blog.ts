@@ -123,7 +123,7 @@ function fileNameForSlug(slug: string, locale: Locale): string {
 
 function matchesLocale(fileName: string, locale: Locale): boolean {
   return locale === "ko"
-    ? /\.md$/.test(fileName) && !/\.(en|fr|ja)\.md$/.test(fileName)
+    ? /\.md$/.test(fileName) && !/\.en\.md$/.test(fileName)
     : fileName.endsWith(`.${locale}.md`);
 }
 

@@ -29,8 +29,6 @@ const GISCUS = {
 const GISCUS_LANG: Record<Locale, string> = {
   ko: "ko",
   en: "en",
-  fr: "fr",
-  ja: "ja",
 };
 
 // 사이트 테마는 <html>의 .dark 클래스로 갈린다(prefers-color-scheme가 아니다).

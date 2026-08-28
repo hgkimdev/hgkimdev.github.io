@@ -15,15 +15,11 @@ import { defaultLocale, locales, type Locale } from "@/lib/i18n/config";
 const localeShortLabels: Record<Locale, string> = {
   ko: "KO",
   en: "EN",
-  fr: "FR",
-  ja: "JA",
 };
 
 const localeNativeLabels: Record<Locale, string> = {
   ko: "한국어",
   en: "English",
-  fr: "Français",
-  ja: "日本語",
 };
 
 function getCurrentLocale(pathname: string): Locale {

@@ -94,7 +94,7 @@ export function buildSlots(weights: number[]) {
 // /#about lands exactly at slot.start, so staging the first paragraph would
 // drop the reader on a bare heading), and every paragraph degrades to `null`
 // when the slot is too short to stage them — which is automatically the case at
-// weight 1, so this doubles as the en/fr/ja safety net.
+// weight 1, so this doubles as the en safety net.
 export function revealWindows(
   count: number,
   slot: Slot,
