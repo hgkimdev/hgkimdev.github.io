@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { cache } from "react";
 
 import rehypeShiki from "@shikijs/rehype";
 import type { ThemeRegistration } from "shiki";
@@ -176,7 +177,10 @@ function parsePost(fileName: string, locale: Locale): BlogPost | null {
  * 목록 페이지는 frontmatter만 있으면 되고, 마크다운 변환은 상세 페이지가
  * 자기 글 하나에 대해서만 하면 된다.
  */
-export function getAllPosts(locale: Locale = "ko"): BlogPost[] {
+// cache()로 감싸는 이유: 같은 빌드 패스 안에서 generateStaticParams·
+// generateMetadata·페이지 컴포넌트가 각자 이 함수를 부른다. cache가 없으면
+// 호출마다 디렉터리를 다시 읽고 글 전체를 다시 파싱한다.
+export const getAllPosts = cache((locale: Locale = "ko"): BlogPost[] => {
   let fileNames: string[];
   try {
     fileNames = readdirSync(BLOG_DIR);
@@ -191,7 +195,7 @@ export function getAllPosts(locale: Locale = "ko"): BlogPost[] {
     .filter((post): post is BlogPost => post !== null)
     .filter((post) => includeDrafts || !post.draft)
     .sort((a, b) => b.date.localeCompare(a.date));
-}
+});
 
 /** 상세 페이지용 본문 HTML. 빌드 타임에만 돌아서 클라이언트 번들과 무관하다. */
 export async function getPostHtml(
