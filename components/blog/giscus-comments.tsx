@@ -63,7 +63,6 @@ export function GiscusComments({ locale }: { locale: Locale }) {
   // 스크립트 주입. 한 번만 붙이고, 이후 테마 변경은 아래 effect가
   // postMessage로 처리한다 — 다시 붙이면 댓글창이 통째로 깜빡인다. locale은
   // 라우트가 바뀌면 컴포넌트째로 새로 마운트되므로 의존성에 넣지 않는다.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const container = containerRef.current;
     if (!container || container.firstChild) return;
@@ -88,6 +87,7 @@ export function GiscusComments({ locale }: { locale: Locale }) {
       giscusTheme(document.documentElement.classList.contains("dark")),
     );
     container.appendChild(script);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
