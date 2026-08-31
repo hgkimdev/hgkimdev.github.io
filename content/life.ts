@@ -307,7 +307,7 @@ export const lifeCategories: LifeCategory[] = [
         },
       },
     ],
-    wish: { label: "다음엔", entries: ["핀란드", "덴마크", "이탈리아"] },
+    wish: { label: "다음엔", entries: ["영국", "덴마크", "핀란드"] },
   },
   {
     key: "books",
