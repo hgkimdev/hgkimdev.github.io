@@ -293,18 +293,26 @@
    Blog 존
    ============================================================ */
 
-/* 카테고리 점 색. 큰 축 세 개뿐이라 zone 색과 같은 계열에서 하나씩 집었다.
-   라이트는 warm paper 배경 위에서 읽히도록 진하게, 다크는 뉴트럴 배경
-   위에서 뜨도록 밝게. */
+/* 카테고리 점 색. daily는 zone-intro와 같은 주황을 그대로 쓰고(존
+   스위처와의 연결을 유지), 나머지 넷은 코드 블록에 이미 쓰고 있는 Tokyo
+   Night 팔레트에서 토큰 역할별 색을 그대로 가져왔다 — language=함수
+   파랑, dev=키워드 보라, reading=타입/프로퍼티 청록, think=문자열 초록
+   (lib/content/themes/tokyo-night-light.json과 @shikijs/themes의
+   tokyo-night 다크 값). 라이트는 warm paper 배경 위에서 읽히도록 진하게,
+   다크는 뉴트럴 배경 위에서 뜨도록 밝게. */
 :root {
-  --cat-study: #0891b2;
+  --cat-language: #2959aa;
+  --cat-dev: #65359d;
+  --cat-reading: #006c86;
   --cat-daily: #ea580c;
-  --cat-think: #4d7c0f;
+  --cat-think: #385f0d;
 }
 .dark {
-  --cat-study: #22d3ee;
+  --cat-language: #7aa2f7;
+  --cat-dev: #bb9af7;
+  --cat-reading: #7dcfff;
   --cat-daily: #fb923c;
-  --cat-think: #a3e635;
+  --cat-think: #9ece6a;
 }
 
 /* Blog 존 목록·상세는 사이드바가 붙어 본문이 넓다. <main>은 두 존이 함께
