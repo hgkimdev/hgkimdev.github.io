@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -94,6 +95,100 @@ export function Pagination({
       >
         <ChevronRightIcon className="size-4" />
       </button>
+    </div>
+  );
+}
+
+/** 끝에서는 링크 대신 비활성 자리표시자를 그린다 — `disabled` button과 같은 역할. */
+function PagerEdge({
+  disabled,
+  href,
+  label,
+  children,
+}: {
+  disabled: boolean;
+  href: string;
+  label: string;
+  children: React.ReactNode;
+}) {
+  if (disabled) {
+    return (
+      <span
+        aria-disabled="true"
+        aria-label={label}
+        className={cn(BUTTON, QUIET, "pointer-events-none text-foreground/20")}
+      >
+        {children}
+      </span>
+    );
+  }
+  return (
+    <Link href={href} aria-label={label} className={cn(BUTTON, QUIET)}>
+      {children}
+    </Link>
+  );
+}
+
+/**
+ * `‹ 1 2 3 ›` 페이저. 위 `Pagination`과 생김새는 같지만 페이지마다 실제
+ * 라우트(href)로 이동한다 — 정적 export라 블로그 메인 목록의 각 페이지는
+ * 북마크·새로고침에도 같은 내용을 보여줘야 하는 진짜 라우트이고,
+ * `onChange`로 클라이언트 상태만 바꾸는 위 버전은 URL이 안 바뀐다.
+ */
+export function LinkPagination({
+  page,
+  pageCount,
+  basePath,
+  labels,
+  className,
+}: {
+  /** 1부터 시작. */
+  page: number;
+  pageCount: number;
+  /** 로케일 접두사까지 포함한 목록 루트(예: "/blog", "/en/blog"). 1페이지는
+   * 이 경로 자신이고, 그 뒤부터 `${basePath}/page/<n>`이 된다 — 서버
+   * 컴포넌트에서 함수를 prop으로 못 넘기니(RSC 직렬화 제약) 문자열만 받아
+   * 여기서 조립한다. */
+  basePath: string;
+  labels: PaginationLabels;
+  className?: string;
+}) {
+  if (pageCount <= 1) return null;
+  const hrefFor = (n: number) => (n <= 1 ? basePath : `${basePath}/page/${n}`);
+
+  return (
+    <div
+      className={cn("flex flex-wrap items-center gap-1 font-mono text-xs", className)}
+    >
+      <PagerEdge disabled={page === 1} href={hrefFor(page - 1)} label={labels.prevPage}>
+        <ChevronLeftIcon className="size-4" />
+      </PagerEdge>
+
+      {Array.from({ length: pageCount }, (_, i) => {
+        const n = i + 1;
+        return (
+          <Link
+            key={n}
+            href={hrefFor(n)}
+            aria-current={n === page ? "page" : undefined}
+            aria-label={formatPageLabel(labels.pageLabel, n)}
+            className={cn(
+              BUTTON,
+              n === page ? "bg-foreground/5 font-medium text-foreground" : QUIET,
+            )}
+          >
+            {n}
+          </Link>
+        );
+      })}
+
+      <PagerEdge
+        disabled={page === pageCount}
+        href={hrefFor(page + 1)}
+        label={labels.nextPage}
+      >
+        <ChevronRightIcon className="size-4" />
+      </PagerEdge>
     </div>
   );
 }

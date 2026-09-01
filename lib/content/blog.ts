@@ -207,6 +207,20 @@ export const getAllPosts = cache((locale: Locale = "ko"): BlogPost[] => {
     .sort((a, b) => b.date.localeCompare(a.date));
 });
 
+/** 블로그 메인 목록 한 페이지에 보여줄 글 수. 이 수를 넘으면 페이지가 나뉜다. */
+export const POSTS_PAGE_SIZE = 10;
+
+/** 총 페이지 수. 글이 하나도 없어도 최소 1을 돌려준다 — "0페이지 중 0페이지"는 의미가 없다. */
+export function postPageCount(posts: BlogPost[]): number {
+  return Math.max(1, Math.ceil(posts.length / POSTS_PAGE_SIZE));
+}
+
+/** 1부터 시작하는 page 번째 페이지에 실릴 글만 잘라낸다. */
+export function paginatePosts(posts: BlogPost[], page: number): BlogPost[] {
+  const start = (page - 1) * POSTS_PAGE_SIZE;
+  return posts.slice(start, start + POSTS_PAGE_SIZE);
+}
+
 /** 상세 페이지용 본문 HTML. 빌드 타임에만 돌아서 클라이언트 번들과 무관하다. */
 export async function getPostHtml(
   slug: string,
