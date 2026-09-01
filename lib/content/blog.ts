@@ -128,9 +128,13 @@ function fileNameForSlug(slug: string, locale: Locale): string {
   return locale === "ko" ? `${slug}.md` : `${slug}.${locale}.md`;
 }
 
+// ko는 `<slug>.md`만 인정하고, `<slug>.xx.md` 꼴은 전부 다른 로케일의
+// 번역 파일로 보고 제외한다. "en"만 하드코딩해 걸러내면 locales에 없는
+// 로케일(예전 fr/ja 잔재 같은 것)이 섞여 들어와도 못 걸러낸다 — 실제로
+// choosing-tools.fr.md 하나가 이 구멍으로 새 들어와 있었다.
 function matchesLocale(fileName: string, locale: Locale): boolean {
   return locale === "ko"
-    ? /\.md$/.test(fileName) && !/\.en\.md$/.test(fileName)
+    ? /\.md$/.test(fileName) && !/\.[a-z]{2}\.md$/.test(fileName)
     : fileName.endsWith(`.${locale}.md`);
 }
 
