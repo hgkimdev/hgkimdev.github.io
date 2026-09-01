@@ -1,7 +1,7 @@
 ---
 title: Handling Font Loading in Static Exports
 date: 2026-08-12
-category: study
+category: dev
 tags: [Next.js, Performance, Fonts]
 summary: "How next/font fetches fonts at build time, and how subsets and preload tags get generated in an output: export environment."
 draft: true

@@ -19,7 +19,13 @@ type Dictionary = {
   zoneLabels: { intro: string; blog: string };
   footer: (year: number) => string;
   blog: {
-    categories: { study: string; daily: string; think: string };
+    categories: {
+      language: string;
+      dev: string;
+      reading: string;
+      daily: string;
+      think: string;
+    };
     allPosts: string;
     categoriesHeading: string;
     tagsHeading: string;
@@ -75,7 +81,13 @@ export const dictionaries: Record<Locale, Dictionary> = {
     zoneLabels: { intro: "Intro", blog: "Blog" },
     footer: (year) => `© ${year} hgkim. Built with Next.js.`,
     blog: {
-      categories: { study: "공부", daily: "일상", think: "생각" },
+      categories: {
+        language: "언어공부",
+        dev: "개발",
+        reading: "독서",
+        daily: "일상",
+        think: "생각",
+      },
       allPosts: "전체글",
       categoriesHeading: "카테고리",
       tagsHeading: "태그",
@@ -127,7 +139,13 @@ export const dictionaries: Record<Locale, Dictionary> = {
     zoneLabels: { intro: "Intro", blog: "Blog" },
     footer: (year) => `© ${year} hgkim. Built with Next.js.`,
     blog: {
-      categories: { study: "Study", daily: "Daily", think: "Thoughts" },
+      categories: {
+        language: "Language",
+        dev: "Dev",
+        reading: "Reading",
+        daily: "Daily",
+        think: "Thoughts",
+      },
       allPosts: "All posts",
       categoriesHeading: "Categories",
       tagsHeading: "Tags",

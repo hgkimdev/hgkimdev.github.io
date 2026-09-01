@@ -28,7 +28,13 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 // key가 곧 URL(`/blog/category/study`)이라 한번 정하면 바꿀 때 링크가 깨진다.
 // 라벨은 로케일마다 달라서 여기 두지 않고 dictionaries.ts의 blog.categories가
 // 갖는다 — key만 이 파일의 몫이다.
-export const blogCategories = ["study", "daily", "think"] as const;
+export const blogCategories = [
+  "language",
+  "dev",
+  "reading",
+  "daily",
+  "think",
+] as const;
 
 export type BlogCategory = (typeof blogCategories)[number];
 

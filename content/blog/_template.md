@@ -1,7 +1,7 @@
 ---
 title: 글 제목
 date: 2026-01-01
-category: study # study | daily | think
+category: dev # language | dev | reading | daily | think
 tags: [태그1, 태그2]
 summary: "목록에 두 줄로 노출되는 요약. 콜론이 들어가면 이렇게 따옴표로 감싼다."
 draft: true # true인 동안에는 dev에서만 보이고 배포에는 나가지 않는다

@@ -1,7 +1,7 @@
 ---
 title: 정적 내보내기에서 폰트 로딩 다루기
 date: 2026-08-12
-category: study
+category: dev
 tags: [Next.js, 성능, 폰트]
 summary: "next/font가 빌드 타임에 폰트를 가져오는 방식과, output: export 환경에서 서브셋과 프리로드 태그가 어떻게 생성되는지 정리한다."
 draft: true
