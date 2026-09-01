@@ -33,16 +33,20 @@ export function CategoryMark({
  *
  * hover 연출은 Projects 목록과 같은 절제 — 왼쪽 여백과 제목 밑줄뿐이다.
  *
- * 글에 이미지가 있으면 왼쪽에 썸네일이 붙는다. 없는 글은 자리를 비워 두지
- * 않고 텍스트가 왼쪽 끝에서 시작한다 — 빈 회색 판을 채워 넣으면 이미지가
- * 있는 글보다 오히려 눈에 띈다.
+ * 글에 이미지가 있으면 썸네일이 붙는다. 없는 글은 자리를 비워 두지 않고
+ * 텍스트가 왼쪽 끝에서 시작한다 — 빈 회색 판을 채워 넣으면 이미지가 있는
+ * 글보다 오히려 눈에 띈다.
+ *
+ * 모바일에서는 썸네일이 글 위에, sm 이상에서는 왼쪽에 붙는다. 좁은 화면에서
+ * 옆으로 나란히 두면 텍스트 폭이 썸네일만큼 줄어드는데, 제목·요약이 두세
+ * 줄로 접히는 모바일에서는 그 폭이 더 아쉽다.
  */
 function BlogListItem({ post, locale }: { post: BlogPost; locale: Locale }) {
   return (
     <li className="border-t border-border/60 last:border-b">
       <Link
         href={localizeHref(`/blog/${post.slug}`, locale)}
-        className="group flex gap-4 py-7 pl-0 transition-[padding-left] duration-200 hover:pl-2 focus-visible:pl-2 focus-visible:outline-none"
+        className="group flex flex-col gap-4 py-7 pl-0 transition-[padding-left] duration-200 hover:pl-2 focus-visible:pl-2 focus-visible:outline-none sm:flex-row"
       >
         {post.cover ? (
           // 정적 export라 이미지 최적화가 없다(images.unoptimized). next/image를
@@ -53,16 +57,10 @@ function BlogListItem({ post, locale }: { post: BlogPost; locale: Locale }) {
             alt=""
             aria-hidden
             loading="lazy"
-            // 상자는 4:3으로 고정하고 파일도 빌드 때 그 비율로 굽는다. 폭은
-            // 옆 텍스트 블록 높이(약 140px)와 얼추 맞아떨어지게 잡았다 —
-            // 16:9에 144px 폭이면 81px밖에 안 돼 아래가 59px 비었다.
-            //
-            // 세로 정렬을 self-center로 두는 이유는 모바일이다. 좁은 화면에서는
-            // 제목이 두 줄로 접혀 텍스트 블록이 167px까지 자라는데, 4:3을
-            // 유지하면서 거기까지 키우면 썸네일이 화면 폭의 절반을 넘는다.
-            // 남는 자리를 위아래로 나누면 "아래가 비었다"로 읽히지 않는다.
-            // (self-* 없이 두면 플렉스 자식이 stretch로 늘어나 aspect가 무시된다.)
-            className="aspect-[4/3] w-28 shrink-0 self-center rounded-lg border border-border/60 object-cover sm:w-44"
+            // 모바일은 글 위에 얹히는 배너라 폭 전체(w-full)에 16:9. sm부터는
+            // 왼쪽 썸네일로 돌아가 4:3 고정 폭이 되고, 두 줄로 접힌 제목 옆에서
+            // 위아래로 뜨지 않도록 self-center로 세로 중앙에 놓는다.
+            className="aspect-video w-full rounded-lg border border-border/60 object-cover sm:aspect-[4/3] sm:w-44 sm:shrink-0 sm:self-center"
           />
         ) : null}
 
