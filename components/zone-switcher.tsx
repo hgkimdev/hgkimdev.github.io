@@ -37,7 +37,7 @@ export function ZoneSwitcher({
     <div
       className="relative inline-flex items-center rounded-full border border-border p-0.5 text-xs font-medium"
       style={{
-        background: `linear-gradient(90deg, color-mix(in srgb, ${zoneAccent.intro} 20%, var(--card)), color-mix(in srgb, ${zoneAccent.blog} 20%, var(--card)))`,
+        background: `linear-gradient(90deg, color-mix(in srgb, ${zoneAccent.intro} var(--zone-switcher-tint), var(--card)), color-mix(in srgb, ${zoneAccent.blog} var(--zone-switcher-tint), var(--card)))`,
       }}
     >
       {zones.map((zone) => {
