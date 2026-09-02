@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Languages } from "lucide-react";
 
 import {
@@ -11,7 +11,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { defaultLocale, locales, type Locale } from "@/lib/i18n/config";
-import { useAppRouter } from "@/lib/router";
 
 const localeShortLabels: Record<Locale, string> = {
   ko: "KO",
@@ -34,7 +33,7 @@ function getCurrentLocale(pathname: string): Locale {
 }
 
 export function LanguageSwitcher() {
-  const router = useAppRouter();
+  const router = useRouter();
   const pathname = usePathname();
   const currentLocale = getCurrentLocale(pathname);
   const basePath =

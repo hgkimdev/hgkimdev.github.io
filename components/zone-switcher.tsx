@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "motion/react";
 
 import { cn } from "@/lib/utils";
 import { localizeHref, type Locale } from "@/lib/i18n/config";
@@ -50,18 +49,19 @@ export function ZoneSwitcher({
             aria-current={isActive ? "page" : undefined}
             className={cn(
               "relative z-10 rounded-full px-2.5 py-1 transition-colors",
-              !isActive && "text-muted-foreground hover:text-foreground"
+              isActive
+                ? "bg-card"
+                : "text-muted-foreground hover:text-foreground"
             )}
-            style={isActive ? { color: zoneAccent[zone] } : undefined}
+            style={
+              isActive
+                ? {
+                    color: zoneAccent[zone],
+                    boxShadow: `0 0 0 1.5px ${zoneAccent[zone]}`,
+                  }
+                : undefined
+            }
           >
-            {isActive && (
-              <motion.span
-                layoutId="zone-switcher-active"
-                transition={{ type: "spring", stiffness: 500, damping: 22 }}
-                className="absolute inset-0 -z-10 rounded-full bg-card"
-                style={{ boxShadow: `0 0 0 1.5px ${zoneAccent[zone]}` }}
-              />
-            )}
             {labels[zone]}
           </Link>
         );

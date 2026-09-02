@@ -5,7 +5,6 @@ import { ArrowRightIcon } from "lucide-react";
 
 import type { ProjectGroup } from "@/content/projects";
 import { localizeHref, type Locale } from "@/lib/i18n/config";
-import { isPlainLeftClick, resetScrollForNavigation } from "@/lib/scroll";
 import { useSlotFx } from "@/components/home-fx/effects";
 
 /**
@@ -81,14 +80,6 @@ function ProjectRow({
           않는다 — 이 섹션의 톤은 담백해야 한다. */}
       <Link
         href={localizeHref(`/projects/${group.key}`, locale)}
-        // 스크롤을 깊게 내린 채로 이 행을 눌러 훨씬 짧은 상세 페이지로
-        // 넘어가면, 헤더 ZoneSwitcher의 layoutId 필이 잘못된 위치에서
-        // 튀는 문제가 있다 — lib/scroll.ts 참고.
-        onClick={(event) => {
-          if (isPlainLeftClick(event)) {
-            resetScrollForNavigation();
-          }
-        }}
         className="group flex items-center gap-4 border-b border-border/60 py-5 pl-0 transition-[padding-left,border-color] duration-200 hover:border-foreground/40 hover:pl-2 focus-visible:border-foreground/40 focus-visible:pl-2 focus-visible:outline-none [@media(max-height:620px)]:py-3"
       >
         <span className="font-mono text-sm text-muted-foreground">
