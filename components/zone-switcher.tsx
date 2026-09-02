@@ -9,9 +9,13 @@ import { getZone, type Zone } from "@/lib/nav";
 
 const zones: Zone[] = ["intro", "blog"];
 
-// 존마다 고유 강조색을 준다(Intro=코랄, Blog=시안). 트랙 배경은 두 색을
-// --card와 옅게 섞은 그라디언트로, 활성 탭은 카드색 배경 + 해당 색 테두리로
-// "지금 어디 있는지"를 즉시 읽히게 한다.
+// 존마다 고유 강조색을 준다(Intro=코랄, Blog=시안). 활성 탭만 카드색 배경 +
+// 해당 색 테두리·글자로 "지금 어디 있는지"를 즉시 읽히게 한다.
+//
+// 트랙 자체는 색을 갖지 않는다. 알약이 움직이지 않게 된 뒤로는 상태를
+// 말하는 게 오직 정지된 대비뿐인데, 트랙까지 색을 띠면 트랙 색 / 카드 면 /
+// 액센트 링 세 겹이 비슷한 밝기로 겹쳐 어느 것도 도드라지지 않았다. 트랙은
+// 밝기만 한 톤 낮춰(--zone-switcher-track) 알약이 뜨는 바닥 역할만 한다.
 const zoneAccent: Record<Zone, string> = {
   intro: "var(--zone-intro)",
   blog: "var(--zone-blog)",
@@ -33,12 +37,7 @@ export function ZoneSwitcher({
   };
 
   return (
-    <div
-      className="relative inline-flex items-center rounded-full border border-border p-0.5 text-xs font-medium"
-      style={{
-        background: `linear-gradient(90deg, color-mix(in srgb, ${zoneAccent.intro} var(--zone-switcher-tint), var(--card)), color-mix(in srgb, ${zoneAccent.blog} var(--zone-switcher-tint), var(--card)))`,
-      }}
-    >
+    <div className="relative inline-flex items-center rounded-full border border-border bg-[var(--zone-switcher-track)] p-0.5 text-xs font-medium">
       {zones.map((zone) => {
         const isActive = zone === currentZone;
 
