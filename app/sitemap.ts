@@ -2,25 +2,36 @@ import type { MetadataRoute } from "next";
 
 import { projectGroups } from "@/content/projects";
 import { getAllPosts, getCategoryCounts, getTagCounts } from "@/lib/content/blog";
-import { locales, localizeHref, type Locale } from "@/lib/i18n/config";
+import {
+  locales,
+  localizedPaths,
+  localizeHref,
+  type Locale,
+  type LocalizedPath,
+} from "@/lib/i18n/config";
 import { absoluteUrl, localizedAlternates } from "@/lib/seo";
 
 // output: 'export' requires metadata routes to opt into static generation
 // explicitly in this Next.js version, or the build fails collecting page data.
 export const dynamic = "force-static";
 
-// "/" and "/blog" exist in every locale (the other three are placeholders
-// today, but they're real routes), so they carry hreflang alternates.
-// Everything past that — post/category/tag/project detail — is Korean-only
-// with no translated counterpart (see SPEC.md), so no alternates there.
-const LOCALIZED_PATHS: {
-  path: string;
-  changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"];
-  priority: number;
-}[] = [
-  { path: "/", changeFrequency: "monthly", priority: 1 },
-  { path: "/blog", changeFrequency: "weekly", priority: 0.8 },
-];
+// Which paths exist in every locale now lives in lib/i18n/config.ts, because
+// the browser-language redirect in app/layout.tsx has to agree with it: both
+// answer "does this path have a counterpart in the other locale?". Here that
+// answer decides hreflang alternates; there it decides whether it is safe to
+// send the visitor across. Everything past these — post/category/tag/project
+// detail — only has a translated counterpart when that post is translated
+// (see SPEC.md), so no alternates there.
+const PATH_META: Record<
+  LocalizedPath,
+  {
+    changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"];
+    priority: number;
+  }
+> = {
+  "/": { changeFrequency: "monthly", priority: 1 },
+  "/blog": { changeFrequency: "weekly", priority: 0.8 },
+};
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const posts = getAllPosts();
@@ -29,7 +40,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const entries: MetadataRoute.Sitemap = [];
 
-  for (const { path, changeFrequency, priority } of LOCALIZED_PATHS) {
+  for (const path of localizedPaths) {
+    const { changeFrequency, priority } = PATH_META[path];
     for (const locale of locales as readonly Locale[]) {
       entries.push({
         url: absoluteUrl(localizeHref(path, locale)),
