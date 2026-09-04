@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { lifeCategories, type LifeCategory } from "@/content/life";
 import { lifeCategoriesEn } from "@/content/life.en";
 import type { Locale } from "@/lib/i18n/config";
@@ -7,7 +8,9 @@ import type { Locale } from "@/lib/i18n/config";
  * 텍스트 번역을 항목 id로 매칭해 덮어씌운다 — media·id·tags 구조 등
  * 언어 무관 필드는 항상 원본(ko) 것을 쓴다.
  */
-export function getLifeCategories(locale: Locale): LifeCategory[] {
+// cache()로 감싸는 이유: 같은 빌드 패스 안에서 여러 곳이 이 함수를 부를 수
+// 있다. cache가 없으면 호출마다 병합을 다시 한다.
+export const getLifeCategories = cache((locale: Locale): LifeCategory[] => {
   if (locale === "ko") return lifeCategories;
 
   return lifeCategories.map((category) => {
@@ -36,4 +39,4 @@ export function getLifeCategories(locale: Locale): LifeCategory[] {
       }),
     };
   });
-}
+});
