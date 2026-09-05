@@ -1,10 +1,10 @@
-# hgkim.github.io
+# hgkimdev.github.io
 
 Personal site built with Next.js (App Router), statically exported to GitHub Pages.
 
 - **Intro zone** (`/`): a single pinned-scroll page (About / Projects / Life / Contact)
 - **Blog zone** (`/blog`): a Markdown-backed blog with categories, tags, and comments (giscus)
-- **Locales**: `/` (Korean, default), `/en`, `/fr`, `/ja` — see `lib/i18n/`
+- **Locales**: `/` (Korean, default), `/en` — see `lib/i18n/`
 
 See [`SPEC.md`](./SPEC.md) for the reasoning behind the site's structure and design decisions, and [`docs/bug-audit-2026-07-15.md`](./docs/bug-audit-2026-07-15.md) for a point-in-time audit of the codebase.
 
@@ -23,7 +23,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Stack
 
-Next.js · React · TypeScript · Tailwind CSS · shadcn/ui · Motion
+Next.js · React · TypeScript · Tailwind CSS · shadcn/ui (Base UI primitives) · Motion
 
 `next.config.ts` sets `output: 'export'` — the site is a fully static export, deployed to GitHub Pages via `.github/workflows/deploy.yml` on every push to `main`.
 
