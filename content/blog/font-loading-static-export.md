@@ -4,7 +4,7 @@ date: 2026-08-12
 category: dev
 tags: [Next.js, 성능, 폰트]
 summary: "next/font가 빌드 타임에 폰트를 가져오는 방식과, output: export 환경에서 서브셋과 프리로드 태그가 어떻게 생성되는지 정리한다."
-draft: true
+draft: false
 ---
 
 정적 내보내기 환경에서는 요청 시점에 할 수 있는 일이 없다. 폰트를 어떤 형태로 내려줄지, 어떤 글자만 남길지, 어떤 태그를 문서에 심을지가 전부 빌드 시점에 결정된다.

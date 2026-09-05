@@ -4,7 +4,7 @@ date: 2026-07-18
 category: daily
 tags: [notes, tools]
 summary: Splitting out what actually changed and what stayed the same after rearranging my desk and tools.
-draft: true
+draft: false
 ---
 
 If I rely on memory for what got better each time I change my setup, I end up buying the same thing again later. It's better to write down what changed and the result as it happens.

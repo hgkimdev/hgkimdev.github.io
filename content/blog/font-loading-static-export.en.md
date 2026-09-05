@@ -4,7 +4,7 @@ date: 2026-08-12
 category: dev
 tags: [Next.js, Performance, Fonts]
 summary: "How next/font fetches fonts at build time, and how subsets and preload tags get generated in an output: export environment."
-draft: true
+draft: false
 ---
 
 In a static export environment, nothing can happen at request time. Which format the font ships in, which characters get kept, and which tags get injected into the document — all of it is decided at build time.

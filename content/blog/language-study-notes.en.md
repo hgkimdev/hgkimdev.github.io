@@ -4,7 +4,7 @@ date: 2026-08-31
 category: language
 tags: [notes, English]
 summary: Splitting out what actually changed and what stayed the same after changing how I memorize words.
-draft: true
+draft: false
 ---
 
 I've changed how I memorize words several times but never compared the results. This time I'm writing down what changed and what it did.

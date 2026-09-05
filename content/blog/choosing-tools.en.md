@@ -4,7 +4,7 @@ date: 2026-04-09
 category: think
 tags: [tools]
 summary: A list of the items I actually check when deciding whether to adopt a new tool.
-draft: true
+draft: false
 ---
 
 The things I check when looking at a new tool are mostly fixed. Fixing even the order helps — it cuts down on just counting up reasons to like it first.
