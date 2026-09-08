@@ -34,7 +34,7 @@ export const lifeCategoriesEn: Record<LifeCategoryKey, CategoryTranslation> = {
         ],
       },
     },
-    wish: { label: "Next up", entries: ["Finland", "Denmark", "Italy"] },
+    wish: { label: "Next up", entries: ["UK", "Finland", "Denmark", "Italy"] },
   },
   books: {
     label: "Books",
