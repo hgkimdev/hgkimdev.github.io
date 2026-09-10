@@ -148,6 +148,16 @@ export function LifeOverlay({
               // 띄우지 않는 건, 본문이 max-w-2xl이라 화면이 좁아질수록 오른쪽
               // 여백이 먼저 사라져서 어떤 % 값을 잡아도 md 언저리에서 글자
               // 위로 책이 올라타기 때문이다. 칸으로 두면 겹칠 수가 없다.
+              //
+              // 첫째·둘째 칸(목록·본문) 크기는 영상 카테고리(둘째 칸이 그냥
+              // 1fr인 기본 그리드)와 항상 똑같이 맞춘다 — 도크로 책 카테고리
+              // ↔ 영화 카테고리를 오갈 때 목록이 옆으로 튀면 훨씬 정신없다.
+              // 한때 셋째 칸을 책 폭만큼(auto)만 줄이고 그리드 전체를
+              // justify-center로 가운데 밀었더니 책 문제는 풀렸지만 그
+              // 대가로 목록·본문까지 같이 오른쪽으로 밀려 카테고리마다
+              // 자리가 달라졌다 — 목록 위치는 실측: 셋째 칸의 정렬만으로
+              // 풀어야 한다는 뜻. 아래 LifeCoverPlate를 담은 칸의
+              // justify-center 참고.
               <div
                 className={`flex min-h-0 flex-1 flex-col px-5 pb-32 sm:px-10 md:grid md:grid-cols-[minmax(11rem,15rem)_1fr] md:gap-12 md:pb-28 ${
                   item.media.kind === "cover"
@@ -273,16 +283,22 @@ export function LifeOverlay({
                 {/* 셋째 칸은 lg부터. 그보다 좁으면 본문이 이미 남는 폭을 다
                     쓰고 있어서, 책을 넣을 자리가 진짜로 없다.
 
-                    가운데가 아니라 왼쪽에 붙인다. 이 칸은 1fr이라 화면이 넓어질수록
-                    혼자 늘어나는데, 가운데 정렬이면 책이 본문에서 점점 멀어져
-                    1920px에서는 사이가 350px까지 벌어진다. 왼쪽에 붙여두면 폭과
-                    무관하게 본문에서 같은 거리에 선다 — 사이를 벌리는 건 그리드
-                    gap 하나로 충분하다.
+                    이 칸은 1fr이라 화면이 넓어질수록 혼자 늘어난다 — 그 늘어난
+                    공간 안에서 책을 justify-center로 가운데 둔다. 원래는
+                    justify-start(왼쪽 붙임)였다: 본문과의 거리를 항상 일정하게
+                    유지하려는 선택이었는데, 그 대가로 화면이 넓을수록 책
+                    오른쪽에만 거대한 빈 공간이 생겨 오히려 페이지 전체가
+                    왼쪽으로 쏠려 보였다(실측: 2560px에서 책 오른쪽 여백이
+                    왼쪽 여백의 30배). justify-center면 넓어진 칸 안에서
+                    좌우 여백이 똑같이 나뉜다 — 화면이 넓을수록 책이 본문에서
+                    조금씩 멀어지는 건 감수한다(예전 우려 그대로이지만, 목록
+                    위치를 카테고리마다 고정해야 해서 이 칸 하나로 풀 수 있는
+                    선택지 중 이쪽이 낫다).
 
                     좁은 폭(1024·1280)에서는 칸이 책 폭까지 줄어 여유가 0이므로
                     이 정렬은 아무것도 바꾸지 않는다. */}
                 {item.media.kind === "cover" ? (
-                  <div className="hidden items-center justify-start lg:flex">
+                  <div className="hidden items-center justify-center lg:flex">
                     <LifeCoverPlate
                       media={item.media}
                       title={item.title}
