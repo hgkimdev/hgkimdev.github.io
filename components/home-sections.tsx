@@ -14,6 +14,7 @@ import type { Locale } from "@/lib/i18n/config";
 import type { LifeCategory } from "@/content/life";
 import type { ProjectGroup } from "@/content/projects";
 import { LifeSection } from "@/components/life/life-section";
+import { LIFE_WALL_SLOT_ID } from "@/components/life/life-entrance";
 import { ProjectsEntrance } from "@/components/projects/projects-entrance";
 import {
   DRIFT_PX,
@@ -364,7 +365,19 @@ function SectionContent({
   const { Heading, Content } = useSlotFx();
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 [@media(max-height:620px)]:gap-3">
+    <div className="relative mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 [@media(max-height:620px)]:gap-3">
+      {/* Life 입구가 배경 벽을 포털로 꽂는 자리.
+          제목보다 **앞에** 있어야 한다 — 벽을 Content 안에 두면 제목을 덮어
+          버린다. Content는 슬롯 연출(transform/filter) 탓에 자기만의 쌓임
+          맥락이라, 그 안에서 음수 z-index를 줘도 맥락 밖의 제목보다 아래로
+          내려가지 못한다. 여기 두면 제목·번호와 형제가 되어 그 아래에 깔린다.
+          components/life/life-entrance.tsx 참고. */}
+      {section.life ? (
+        <div
+          id={LIFE_WALL_SLOT_ID}
+          className="pointer-events-none absolute inset-0 -z-10"
+        />
+      ) : null}
       <span className="font-mono text-sm text-muted-foreground">
         {String(index + 1).padStart(2, "0")} / {String(count).padStart(2, "0")}
       </span>

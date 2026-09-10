@@ -21,12 +21,14 @@ function subscribe(onChange: () => void) {
   };
 }
 
+// 스냅샷은 쿼리 문자열 전체다. 파라미터별로 따로 구독하면 스토어가 여럿이
+// 되므로, 한 번 읽고 여기서 갈라 쓴다.
 function getSnapshot() {
-  return new URLSearchParams(window.location.search).get(PARAM);
+  return window.location.search;
 }
 
-function getServerSnapshot(): string | null {
-  return null;
+function getServerSnapshot(): string {
+  return "";
 }
 
 /**
@@ -58,7 +60,9 @@ export function LifeSection({
   locale: Locale;
   animateIn?: boolean;
 }) {
-  const raw = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const search = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const params = new URLSearchParams(search);
+  const raw = params.get(PARAM);
   const openKey = categories.some((c) => c.key === raw)
     ? (raw as LifeCategoryKey)
     : null;
@@ -68,10 +72,15 @@ export function LifeSection({
   // has to rewrite the URL instead of stepping back out of the site.
   const pushedEntry = useRef(false);
 
-  const urlFor = (key: LifeCategoryKey | null) =>
-    key
-      ? `${window.location.pathname}?${PARAM}=${key}`
-      : window.location.pathname;
+  // `life` 말고 다른 쿼리는 건드리지 않는다 — 오버레이를 열고 닫는 것 때문에
+  // 남의 파라미터가 사라지면 안 된다.
+  const urlFor = (key: LifeCategoryKey | null) => {
+    const next = new URLSearchParams(window.location.search);
+    if (key) next.set(PARAM, key);
+    else next.delete(PARAM);
+    const query = next.toString();
+    return `${window.location.pathname}${query ? `?${query}` : ""}`;
+  };
 
   const changeOpen = (next: LifeCategoryKey | null) => {
     if (next === openKey) return;

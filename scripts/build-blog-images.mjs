@@ -29,6 +29,38 @@ const OUT_DIR = path.join(PUBLIC_DIR, "_blog");
 export const VARIANTS = { thumb: 480, body: 1280 };
 const THUMB_RATIO = 4 / 3;
 
+/**
+ * Life 입구의 배경 벽에 쓰는 폭.
+ *
+ * 벽은 한 열이 240px쯤이라 원본(여행 사진 1500~2000px, 최대 659KB)을 그대로
+ * 쓰면 폭으로 8배, 넓이로 69배짜리 그림을 매번 축소해 그리게 된다. 스무 장이면
+ * 원본 합계가 10MB고 디코드된 비트맵은 그 몇 배다 — 계속 흐르는 벽에서는 그
+ * 래스터화가 이따금 프레임을 잡아먹는다.
+ *
+ * 이름을 `-wall480`으로 따로 두는 건 thumb(=480)이 4:3으로 자르기 때문이다.
+ * 벽은 원본 비율이 그대로여야 해서 폭만 줄인다. 같은 사진이 블로그 글에도
+ * 쓰이면(travel-05가 그렇다) 한 이름에 성격이 다른 두 파일이 겹친다.
+ */
+export const WALL_WIDTH = 480;
+const LIFE_DIR = path.join(PUBLIC_DIR, "life");
+
+export function wallVariantPath(src) {
+  return `/_blog/${flattenKey(src)}-wall${WALL_WIDTH}.webp`;
+}
+
+/** public/life 아래의 모든 그림. 하위 폴더(travel)까지 훑는다. */
+function collectLifeSources(dir = LIFE_DIR) {
+  if (!existsSync(dir)) return [];
+  const out = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...collectLifeSources(full));
+    else if (/\.(jpe?g|png|webp)$/i.test(entry.name))
+      out.push("/" + path.relative(PUBLIC_DIR, full).split(path.sep).join("/"));
+  }
+  return out;
+}
+
 /** 원본 경로 하나가 항상 같은 출력 이름으로 가도록 평평하게 편다. */
 export function flattenKey(src) {
   return src.replace(/^\//, "").replace(/\.[^.]+$/, "").replace(/[/\\]/g, "__");
@@ -63,16 +95,39 @@ function collectSources() {
   return [...found].filter((src) => src.startsWith("/") && !src.startsWith("/_blog/"));
 }
 
+async function bakeWall(built, skipped) {
+  for (const src of collectLifeSources()) {
+    const input = path.join(PUBLIC_DIR, src.replace(/^\//, ""));
+    const outRel = wallVariantPath(src);
+    const output = path.join(PUBLIC_DIR, outRel.replace(/^\//, ""));
+    if (
+      existsSync(output) &&
+      statSync(output).mtimeMs >= statSync(input).mtimeMs
+    ) {
+      skipped++;
+      continue;
+    }
+    await sharp(input)
+      .resize({ width: WALL_WIDTH, withoutEnlargement: true })
+      .webp({ quality: 78 })
+      .toFile(output);
+    built++;
+  }
+  return [built, skipped];
+}
+
 async function main() {
   const sources = collectSources();
-  if (sources.length === 0) {
-    console.log("[blog-images] 참조된 로컬 이미지 없음");
-    return;
-  }
 
   mkdirSync(OUT_DIR, { recursive: true });
   let built = 0;
   let skipped = 0;
+  [built, skipped] = await bakeWall(built, skipped);
+
+  if (sources.length === 0) {
+    console.log(`[blog-images] 생성 ${built}개, 최신이라 건너뜀 ${skipped}개 (블로그 참조 이미지 없음)`);
+    return;
+  }
 
   for (const src of sources) {
     const input = path.join(PUBLIC_DIR, src.replace(/^\//, ""));
