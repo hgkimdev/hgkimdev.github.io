@@ -335,7 +335,9 @@ function useWallSlot() {
 }
 
 /**
- * 넓은 화면인지. 좁으면 벽은 배경이 아니라 목차 아래 띠가 된다.
+ * 넓은 화면인지. 벽은 어느 쪽에서든 배경이고, 이 값은 **글을 어떻게 지키느냐**만
+ * 가른다 — 넓으면 목차 왼쪽에 불투명한 판을 깔아 벽을 가리고, 좁으면 판 놓을
+ * 여백이 없으므로 벽 자체를 눌러 질감으로 만든다(FlowingWall 주석 참고).
  *
  * matchMedia를 useSyncExternalStore로 구독한다 — 정적 export라 서버에서는
  * 화면 폭을 모르므로 넓은 쪽으로 그리고, 마운트 뒤 좁으면 바뀐다.
@@ -387,30 +389,34 @@ function useWide() {
 function FlowingWall({
   shots,
   hover,
+  wide,
 }: {
   shots: Shot[];
   hover: LifeCategoryKey | null;
+  wide: boolean;
 }) {
-  const wide = useWide();
   const slot = useWallSlot();
 
   const columnCount = wide ? 6 : 3;
-  // 왼쪽 두 열은 목차 판이 얹히는 자리다 — spreadWall 주석 참고.
+  // 왼쪽 두 열은 목차 판이 얹히는 자리다 — spreadWall 주석 참고. 좁은 화면엔
+  // 판이 없으므로(벽 전체를 눌러 대신한다) 가려지는 열도 없다.
   const columns = spreadWall(shots, columnCount, wide ? 2 : 0);
   // 소수로 어긋나게 둬서 여섯 열이 다시 맞아떨어지는 순간이 오지 않게 한다.
   const periods = [68, 83, 59, 91, 74, 63];
 
   const body = (
-    <div
-      className={
-        wide
-          ? "absolute top-1/2 left-[calc(50%-50vw)] right-[calc(50%-50vw)] h-[118dvh] -translate-y-1/2"
-          : "relative mt-2"
-      }
-    >
+    <div className="absolute top-1/2 left-[calc(50%-50vw)] right-[calc(50%-50vw)] h-[118dvh] -translate-y-1/2">
       <div
-        className={`grid gap-1.5 overflow-hidden ${
-          wide ? "h-full grid-cols-6" : "h-44 grid-cols-3"
+        className={`grid h-full gap-1.5 overflow-hidden ${
+          wide
+            ? "grid-cols-6"
+            : // 좁은 화면의 "판"은 이 불투명도다 — 목차가 벽 위에 그대로 앉으므로
+              // 그림을 배경색 쪽으로 눌러 질감만 남긴다. 두 값이 다른 건 다크에서
+              // 각 그림이 이미 dark:opacity-55로 눌려 있기 때문이다: 0.4 × 0.55가
+              // 곧 밝은 쪽의 0.22라, 실제로 눌리는 정도는 양쪽이 같다.
+              // 여기서 목차 활자가 최악의 픽셀 위에서 4.6:1(밝은 쪽)·4.9:1(어두운
+              // 쪽)이다 — globals.css의 --life-index-muted 주석 참고.
+              "grid-cols-3 opacity-[0.22] dark:opacity-40"
         }`}
       >
         {columns.map((column, i) => (
@@ -441,37 +447,51 @@ function FlowingWall({
           벽 뒤가 늘 단색 배경이라 결과는 같다. */}
       <div
         aria-hidden
-        className={`pointer-events-none absolute inset-x-0 top-0 bg-gradient-to-b from-background to-transparent ${wide ? "h-24" : "h-6"}`}
+        className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-background to-transparent"
       />
       <div
         aria-hidden
-        className={`pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-background to-transparent ${wide ? "h-40" : "h-14"}`}
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background to-transparent"
       />
     </div>
   );
 
-  if (!wide) return body;
   if (!slot) return null;
 
   return createPortal(
     <>
       {body}
-      {/* 목차가 앉는 판.
+      {/* 목차가 앉는 판. **넓을 때만 있다.**
           처음에는 글 자리에 배경색을 반투명하게 얹었는데, 그림이 지워지지도
           보이지도 않는 중간 상태가 넓게 생겨 지저분했다. 반투명 겹은 어떻게
           조절해도 "흐릿한 그림"을 만들 뿐이다 — 알파를 낮추면 글이 안 읽히고
           올리면 그림이 유령이 된다. 판은 가장자리가 분명해 그 중간 지대가
-          아예 없다. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-8 -bottom-8 -left-8 z-20 w-[28rem] rounded-2xl bg-background shadow-[0_24px_60px_-24px_rgba(0,0,0,0.45)] ring-1 ring-border"
-      />
+          아예 없다.
+
+          좁은 화면에서는 그 선택지가 없다. 목차가 폭을 다 쓰므로 판도 폭을 다
+          덮게 되고, 그러면 벽이 판 밖으로 보일 자리가 좌우 16px씩밖에 안 남아
+          "배경 벽"이 아니라 화면 가장자리의 띠 두 줄이 된다. 그래서 좁을 때는
+          판을 걷고 벽 쪽을 눌러 위 문단이 말한 그 "유령"을 **일부러** 만든다 —
+          여기서는 그게 실패가 아니라 목적이다. 글 뒤에 그림이 하나도 없는
+          자리가 없으니, 흐릿함이 국소적인 얼룩이 아니라 고른 질감으로 읽힌다. */}
+      {wide ? (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-8 -bottom-8 -left-8 z-20 w-[28rem] rounded-2xl bg-background shadow-[0_24px_60px_-24px_rgba(0,0,0,0.45)] ring-1 ring-border"
+        />
+      ) : null}
     </>,
     slot,
   );
 }
 
-/** 사진 출처 표시. CC BY-SA 4.0 요건이라 판 안에 같이 둔다. */
+/**
+ * 사진 출처 표시. CC BY-SA 4.0 요건이라 판 안에 같이 둔다.
+ *
+ * 벽에 그 사진이 실제로 걸렸을 때만 낸다 — 좁은 화면 벽은 여행 사진만 싣기
+ * 때문이다(LifeEntrance의 shots 주석). 안 보이는 사진의 출처를 적어두면
+ * 라이선스 표시가 아니라 그냥 군더더기 한 줄이다.
+ */
 function PhotoCredit({ locale }: { locale: Locale }) {
   const dict = getDictionary(locale);
   return (
@@ -519,12 +539,16 @@ function IndexRow({
       onBlur={() => onHover(null)}
       className="group grid grid-cols-[auto_1fr_auto] items-baseline gap-3 rounded-md border-t border-border px-1.5 py-2.5 text-left transition-[padding,background-color] duration-200 last:border-b hover:bg-muted/60 hover:pl-3 focus-visible:bg-muted/60 motion-reduce:transition-none"
     >
-      <span className="font-mono text-[0.66rem] text-muted-foreground">
+      {/* 보조 활자(번호·티저·개수)만 좁은 화면에서 한 단계 진해진다 —
+          거기서는 목차가 사진 벽 위에 바로 앉기 때문이다. 이유와 실측값은
+          globals.css의 --life-index-muted 주석에 있다. 굵은 이름은 원래
+          --foreground라 벽 위에서도 7:1 아래로 안 내려간다(실측). */}
+      <span className="font-mono text-[0.66rem] text-[color:var(--life-index-muted)] md:text-muted-foreground">
         {String(index + 1).padStart(2, "0")}
       </span>
       <span className="text-lg font-semibold tracking-tight sm:text-xl">
         {category.label}
-        <span className="block text-xs font-normal break-keep text-muted-foreground">
+        <span className="block text-xs font-normal break-keep text-[color:var(--life-index-muted)] md:text-muted-foreground">
           {category.teaser}
         </span>
         {/* 닫힌 동안에는 높이만 0이라 접근성 트리에도 남는다 — hidden으로
@@ -542,7 +566,7 @@ function IndexRow({
           </span>
         </span>
       </span>
-      <span className="font-mono text-[0.66rem] text-muted-foreground">
+      <span className="font-mono text-[0.66rem] text-[color:var(--life-index-muted)] md:text-muted-foreground">
         {category.items.length}
       </span>
     </button>
@@ -563,6 +587,7 @@ export function LifeEntrance({
   animateIn?: boolean;
 }) {
   const [hover, setHover] = useState<LifeCategoryKey | null>(null);
+  const wide = useWide();
 
   const byKey = (key: LifeCategoryKey) => {
     const found = categories.find((category) => category.key === key);
@@ -570,11 +595,27 @@ export function LifeEntrance({
     return found;
   };
   const ordered = ORDER.map(byKey);
-  // 벽이 계속 흐르므로 같은 그림이 금방 다시 돌아온다 — 여행 사진을 16장까지
-  // 내서 한 바퀴가 길어지게 한다. 나머지는 넷이 합쳐 아홉 장이다.
-  const shots = interleave(
-    ordered.map((c) => shotsOf(c, c.key === "travel" ? 16 : 4)),
-  );
+  /**
+   * 벽에 걸 그림. 폭에 따라 **무엇을 거는지**가 다르다.
+   *
+   * 넓을 때는 다섯 카테고리를 섞는다. 벽이 계속 흐르므로 같은 그림이 금방 다시
+   * 돌아온다 — 여행 사진을 16장까지 내서 한 바퀴가 길어지게 한다. 나머지는 넷이
+   * 합쳐 아홉 장이다.
+   *
+   * 좁을 때는 **여행 사진만** 건다. spreadWall이 넓은 화면에서 가려지는 왼쪽 두
+   * 열에 사진만 까는 것과 같은 이유이고, 좁은 화면은 그 "가려지는 열"이 전부다 —
+   * 목차가 폭을 다 쓰므로 어느 열도 드러나지 않는다. 표지와 예고편 스틸은 큼직한
+   * 활자가 박힌 평평한 판이라, 불투명도를 15%까지 내려도 "ENGLISH GRAMMAR IN
+   * USE"가 목차 옆에서 그대로 읽혔다(실측). 흐림을 걸면 읽히지는 않지만 벽 전체가
+   * 뿌연 얼룩이 된다. 사진은 그런 활자가 없어 질감으로만 남으므로, 눌러도 지저분해
+   * 지지 않고 오히려 더 진하게 둘 수 있다.
+   *
+   * 카테고리 다섯이 벽에서 사라지는 건 손해가 아니다 — 대표는 원래 목차 줄이고,
+   * 좁은 화면에서 벽은 그 줄들이 앉는 바닥이다.
+   */
+  const shots = wide
+    ? interleave(ordered.map((c) => shotsOf(c, c.key === "travel" ? 16 : 4)))
+    : shotsOf(byKey("travel"), 24);
 
   const entrance = animateIn
     ? ({
@@ -599,8 +640,16 @@ export function LifeEntrance({
         ))}
       </div>
 
-      <FlowingWall shots={shots} hover={hover} />
-      <PhotoCredit locale={locale} />
+      {/* 좁을 때 hover를 넘기지 않는 이유: 벽에 여행 사진밖에 없어서 "책"에 손을
+          올리면 벽이 통째로 꺼지고 "여행"에 올리면 통째로 켜진다 — 카테고리와
+          그림을 잇는 신호가 아니라 그냥 깜빡임이다. 손가락으로 보는 화면이라
+          hover 자체가 거의 오지도 않는다. */}
+      <FlowingWall shots={shots} hover={wide ? hover : null} wide={wide} />
+      {shots.some(
+        (shot) => shot.kind === "img" && shot.src === BOOKS_HERO_SRC,
+      ) ? (
+        <PhotoCredit locale={locale} />
+      ) : null}
     </motion.div>
   );
 }

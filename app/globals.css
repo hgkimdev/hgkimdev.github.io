@@ -136,6 +136,15 @@
   --secondary-foreground: #2b2926;
   --muted: #f0ede7;
   --muted-foreground: #7a7368;
+  /* 좁은 화면 Life 목차의 보조 활자 — 티저·번호·개수.
+     거기서는 목차가 흐르는 사진 벽 위에 바로 앉는다(넓은 화면처럼 판을 깔
+     여백이 없다). --muted-foreground는 아무것도 없는 배경 위에서도 4.45:1로
+     이미 AA 경계라, 벽이 뒤에 깔리면 가장 어두운 사진 위에서 2.4:1까지
+     떨어진다(실측). 벽을 22%까지 눌러도 3.6을 못 넘으므로 — 벽이 보이지도
+     않을 만큼 눌러야 한다 — 활자 쪽을 올린다. 이 값이 그 벽 위에서 4.6:1이다.
+     넓은 화면에서는 판 덕분에 필요 없어 md: 이상에서 --muted-foreground로
+     돌아간다. */
+  --life-index-muted: #544e45;
   --accent: #f0ede7;
   --accent-foreground: #2b2926;
   --destructive: oklch(0.577 0.245 27.325);
@@ -182,6 +191,10 @@
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);
+  /* 밝은 쪽의 짝 — 위 주석 참고. 다크에서 벽을 누르면 사진의 밝은 부분이
+     중간 회색이 되는데, 하필 --muted-foreground(0.708)가 그 근처다. 같은
+     벽 위에서 4.8:1이 나오는 값. */
+  --life-index-muted: oklch(0.78 0 0);
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
