@@ -5,6 +5,7 @@ import "./globals.css";
 import { ScrollRestoration } from "@/components/scroll-restoration";
 import { defaultLocale, locales, localizedPaths } from "@/lib/i18n/config";
 import { openGraphFor, siteName, siteUrl } from "@/lib/seo";
+import { THEME_COLOR_DARK, THEME_COLOR_LIGHT } from "@/lib/theme";
 
 const geistSans = Geist({
   variable: "--font-sans",
@@ -81,6 +82,10 @@ const localeRedirectScript = `
 })();
 `;
 
+// 다크가 적용되는 바로 그 판단에서 meta[name=theme-color]도 같이 바꾼다 —
+// 페인트 전에 끝내야 모바일 브라우저 크롬이 라이트 배경으로 한 프레임
+// 스치지 않는다. 토글 버튼을 눌렀을 때는 theme-toggle.tsx가 같은 값으로
+// 다시 맞춘다.
 const themeInitScript = `
 (function () {
   var stored = null;
@@ -90,6 +95,8 @@ const themeInitScript = `
   var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
   if (stored ? stored === "dark" : prefersDark) {
     document.documentElement.classList.add("dark");
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", ${JSON.stringify(THEME_COLOR_DARK)});
   }
 })();
 `;
@@ -144,6 +151,9 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        {/* themeInitScript가 다크일 때 content를 덮어쓴다 — 스크립트가 이
+            태그를 찾을 수 있도록 반드시 그보다 앞에 와야 한다. */}
+        <meta name="theme-color" content={THEME_COLOR_LIGHT} />
         {/* 이 페이지를 떠날 수도 있으므로 다른 초기화보다 먼저 판단한다. */}
         <script dangerouslySetInnerHTML={{ __html: localeRedirectScript }} />
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />

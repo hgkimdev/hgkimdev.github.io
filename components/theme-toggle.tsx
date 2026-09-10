@@ -4,6 +4,7 @@ import { useSyncExternalStore } from "react";
 import { Moon, Sun } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { THEME_COLOR_DARK, THEME_COLOR_LIGHT } from "@/lib/theme";
 
 function subscribe(onChange: () => void) {
   const observer = new MutationObserver(onChange);
@@ -27,12 +28,19 @@ function getServerSnapshot() {
 let transitionId = 0;
 
 export function ThemeToggle({ label }: { label: string }) {
-  const isDark = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const isDark = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    getServerSnapshot,
+  );
 
   function applyTheme() {
     const next = !document.documentElement.classList.contains("dark");
     document.documentElement.classList.toggle("dark", next);
     localStorage.setItem("theme", next ? "dark" : "light");
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute("content", next ? THEME_COLOR_DARK : THEME_COLOR_LIGHT);
   }
 
   function toggle() {
