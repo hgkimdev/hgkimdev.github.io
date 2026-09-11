@@ -71,7 +71,8 @@ const HEADING_CLASS =
 // placeholder처럼 자식이 둘인 분기의 간격이 흔들리지 않는다.
 const CONTENT_CLASS = "flex flex-col gap-6 [@media(max-height:620px)]:gap-3";
 
-// Content-derived: one viewport of runway per paragraph. Life keeps weight 1
+// Content-derived: BODY_WEIGHT_PER_PARAGRAPH viewports of runway per paragraph.
+// Life keeps weight 1
 // on purpose: it is a one-screen map, and the exploring happens in a dialog
 // outside this scroll engine, not by scrolling through it.
 //
@@ -82,8 +83,15 @@ const CONTENT_CLASS = "flex flex-col gap-6 [@media(max-height:620px)]:gap-3";
 // runway (~0.7 viewport of dwell) without touching Life.
 const NO_BODY_WEIGHT = 1.4;
 
+// 문단당 1뷰포트는 과했다. 문단 3개 = 3뷰포트를 스크롤하는 동안 화면이 실제로
+// 바뀌는 건 리빌 창 두 번뿐이라, 제일 오래 스크롤하는 슬롯이 제일 안 움직이는
+// 슬롯이 됐다(Projects 1.4, Life 1.0인데 About만 3.0). 0.8로 낮추면 3문단이
+// 2.4뷰포트가 되고, 늘어난 REVEAL_DUR와 합쳐져 runway의 절반 이상이 움직인다.
+const BODY_WEIGHT_PER_PARAGRAPH = 0.8;
+
 function sectionWeight(section: Section): number {
-  if (section.body?.length) return section.body.length;
+  if (section.body?.length)
+    return section.body.length * BODY_WEIGHT_PER_PARAGRAPH;
   if (section.life) return 1;
   return NO_BODY_WEIGHT;
 }

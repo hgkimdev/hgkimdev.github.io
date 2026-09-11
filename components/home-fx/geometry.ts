@@ -34,9 +34,17 @@ export function easeOutCubic(t: number): number {
 // converts one viewport of scrolling into scrollYProgress.
 export const RAMP_VIEWPORTS = 0.35; // layer crossfade length
 export const DRIFT_PX = 16;
-export const REVEAL_LEAD_VIEWPORTS = 0.5; // beat after arrival before para 2 starts
-export const REVEAL_DUR_VIEWPORTS = 0.4; // one paragraph's fade-up
-export const REVEAL_DWELL_VIEWPORTS = 0.65; // all-revealed hold before the out-ramp
+// 이 셋은 "얼마나 많은 runway가 실제로 움직이는가"를 정한다. 실측(브라우저에서
+// 0.02씩 스크롤하며 문단 opacity를 찍었다) 결과, 예전 값(0.5 / 0.4 / 0.65)에서는
+// weight 3짜리 About 슬롯의 스크롤 거리 중 **약 73%가 완전 정지 화면**이었다 —
+// 리빌 창 두 개가 각각 0.4뷰포트뿐이고 나머지가 전부 대기였다. 섹션이 비어
+// 보인다는 체감의 정체는 여백이 아니라 이 정지 시간이었다.
+//
+// 그래서 리드/드웰을 줄이고 리빌 자체를 길게 늘였다. 같은 문단 수에서 움직이는
+// 구간이 runway의 27% -> 67%가 된다(재측정값).
+export const REVEAL_LEAD_VIEWPORTS = 0.35; // beat after arrival before para 2 starts
+export const REVEAL_DUR_VIEWPORTS = 0.7; // one paragraph's fade-up
+export const REVEAL_DWELL_VIEWPORTS = 0.35; // all-revealed hold before the out-ramp
 
 export type Slot = {
   start: number; // progress at which this slot is fully opaque
