@@ -17,6 +17,10 @@ import { LifeSection } from "@/components/life/life-section";
 import { LIFE_WALL_SLOT_ID } from "@/components/life/life-entrance";
 import { ProjectsEntrance } from "@/components/projects/projects-entrance";
 import {
+  HeroScrollCue,
+  PinnedHeroScrollCue,
+} from "@/components/home-fx/scroll-cue";
+import {
   DRIFT_PX,
   buildSlots,
   interpolateClamped,
@@ -151,6 +155,7 @@ function StackedSections({
     <div>
       <section className="relative left-1/2 flex min-h-[calc(100vh-var(--header-height))] w-screen -translate-x-1/2 flex-col justify-center overflow-hidden pb-[var(--header-height)]">
         {hero}
+        <HeroScrollCue />
       </section>
 
       {sections.map((section, index) => (
@@ -272,6 +277,14 @@ function PinnedSections({
             </PinnedLayer>
           </SlotFxProvider>
         ))}
+
+        {/* 레이어들 바깥. 안에 넣으면 DollyLayer의 transform이 컨테이닝 블록이 돼
+            프레임이 아니라 본문 높이에 붙고, 블러/스케일까지 같이 먹는다. */}
+        <PinnedHeroScrollCue
+          scrollYProgress={scrollYProgress}
+          slot={slots[0]}
+          ramp={ramp}
+        />
       </div>
     </div>
   );
