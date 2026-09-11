@@ -44,6 +44,37 @@ const THUMB_RATIO = 4 / 3;
 export const WALL_WIDTH = 480;
 const LIFE_DIR = path.join(PUBLIC_DIR, "life");
 
+/**
+ * Projects 입구의 프리뷰 상자에 쓰는 폭.
+ *
+ * 상자는 목록 옆에서 아무리 커도 465px이므로(바깥 칸이 68rem에서 멈춘다)
+ * 2배인 960이면 레티나까지 덮는다. 원본은 1920px짜리 스크린샷이라 그대로
+ * 내보내면 가장 큰 상자에서도 표시 폭의 4배를 받는다.
+ *
+ * 이름을 `-shot800`으로 따로 두는 이유는 wall480과 같다 — thumb/body는
+ * 블로그 글이 참조하는 이미지에만 붙는 이름이고, 여기 원본은 그 목록에
+ * 잡히지 않는다(글이 참조하지 않으므로).
+ */
+export const SHOT_WIDTH = 960;
+const PROJECTS_DIR = path.join(PUBLIC_DIR, "projects");
+
+export function shotVariantPath(src) {
+  return `/_blog/${flattenKey(src)}-shot${SHOT_WIDTH}.webp`;
+}
+
+/**
+ * public/projects 아래의 래스터 그림.
+ *
+ * svg는 뺀다 — Clawd 픽셀 아트가 그렇고, 벡터는 굽는 의미가 없을 뿐 아니라
+ * 래스터로 바꾸면 오히려 계단이 생긴다.
+ */
+function collectShotSources() {
+  if (!existsSync(PROJECTS_DIR)) return [];
+  return readdirSync(PROJECTS_DIR, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && /\.(jpe?g|png|webp)$/i.test(entry.name))
+    .map((entry) => `/projects/${entry.name}`);
+}
+
 export function wallVariantPath(src) {
   return `/_blog/${flattenKey(src)}-wall${WALL_WIDTH}.webp`;
 }
@@ -116,6 +147,30 @@ async function bakeWall(built, skipped) {
   return [built, skipped];
 }
 
+async function bakeShots(built, skipped) {
+  for (const src of collectShotSources()) {
+    const input = path.join(PUBLIC_DIR, src.replace(/^\//, ""));
+    const outRel = shotVariantPath(src);
+    const output = path.join(PUBLIC_DIR, outRel.replace(/^\//, ""));
+    if (
+      existsSync(output) &&
+      statSync(output).mtimeMs >= statSync(input).mtimeMs
+    ) {
+      skipped++;
+      continue;
+    }
+    // 폭만 줄인다. 상자가 16:10이고 그림마다 비율이 달라도 자르는 건 표시
+    // 시점의 object-fit이 한다 — 스크린샷은 어디를 남길지가 그림마다 달라
+    // 기계적으로 자르면 UI가 잘린다.
+    await sharp(input)
+      .resize({ width: SHOT_WIDTH, withoutEnlargement: true })
+      .webp({ quality: 80 })
+      .toFile(output);
+    built++;
+  }
+  return [built, skipped];
+}
+
 async function main() {
   const sources = collectSources();
 
@@ -123,6 +178,7 @@ async function main() {
   let built = 0;
   let skipped = 0;
   [built, skipped] = await bakeWall(built, skipped);
+  [built, skipped] = await bakeShots(built, skipped);
 
   if (sources.length === 0) {
     console.log(`[blog-images] 생성 ${built}개, 최신이라 건너뜀 ${skipped}개 (블로그 참조 이미지 없음)`);

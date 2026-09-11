@@ -14,6 +14,8 @@ type ProjectTranslation = {
 type GroupTranslation = {
   label: string;
   teaser: string;
+  /** content/projects.ts의 그룹 `status` 번역. 원본에 없으면 여기도 없다. */
+  status?: string;
   items: Record<string, ProjectTranslation>;
 };
 
@@ -21,6 +23,7 @@ export const projectGroupsEn: Record<ProjectGroupKey, GroupTranslation> = {
   claudocs: {
     label: "Claudocs",
     teaser: "Electronic-document workspace SaaS",
+    status: "Archived",
     items: {
       claudocs: {
         title: "Claudocs",
@@ -40,6 +43,7 @@ export const projectGroupsEn: Record<ProjectGroupKey, GroupTranslation> = {
   langport: {
     label: "Langport",
     teaser: "Finding your next language-exchange meetup.",
+    status: "Live",
     items: {
       langport: {
         title: "Langport",

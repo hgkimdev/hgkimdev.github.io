@@ -1,0 +1,60 @@
+<!--
+  Clawd — Claude Code의 마스코트.
+
+  네 자세 모두 Claude Code 실행 파일 안의 것이다. 픽셀을 내가 찍은 게 아니라,
+  거기 있는 pose 표(x6h)와 조립 규칙(G8)을 그대로 옮겼다:
+
+    default     r1L:' ▐'  r1E:'▛███▛█'  r1R:''   r2L:'▝▜'  r2R:'█▀'
+    look-left   r1L:' ▐'  r1E:'▟███▟█'  r1R:''   r2L:'▝▜'  r2R:'█▀'
+    look-right  r1L:' ▐'  r1E:'█▟███▟'  r1R:''   r2L:'▝▜'  r2R:'█▀'
+    arms-up     r1L:'▗▟'  r1E:'▛███▛█'  r1R:'▄'  r2L:' ▜'  r2R:'█▘'
+
+  터미널용이라 반블록 문자로 그려져 있다. 글자 하나가 2x2 사분면이므로 세 줄이
+  여섯 픽셀 행이 된다. **칸은 정사각형이 아니다** — 터미널 글자 칸이 세로로 두
+  배 길어(8x16 같은 식) 사분면도 그 비율을 물려받는다. 정사각형으로 펴면
+  캐릭터가 가로로 정확히 두 배 늘어나므로, 여기서도 8x16으로 그린다. 눈은 색이 아니라 **빈 사분면**이다 — 원본은 눈 구간에만
+  배경색을 깔아(clawd_background) 채워지지 않은 사분면이 눈으로 보이게 한다.
+  그래서 ▛(오른쪽 아래가 빈 글자)가 아래를 보는 눈, ▟(왼쪽 위가 빈 글자)가
+  위를 보는 눈이다. 색도 그쪽 값 그대로다 — clawd_body: rgb(215,119,87),
+  clawd_background: rgb(0,0,0).
+
+  **판을 칠하지 않는다.** 배경 사각형 없이 투명하게 두어 상자의 바탕색이 그대로
+  비치게 한다. svg는 <img>로 불리므로 문서의 .dark 클래스를 볼 수 없어서, 안에서
+  색을 칠하면 한쪽 테마에서 반드시 어긋난다.
+
+  움직임은 자세를 갈아 끼우는 것뿐이다. 한참 가만히 있다가 좌우를 한 번씩
+  살피고, 한 바퀴에 한 번 만세를 한다. 몸을 움직이는 동작(뜀·흔들기)은 원본에
+  없으므로 쓰지 않는다.
+
+  이름과 이미지는 Anthropic의 것이다. 이 사이트에서는 Claude Code용 도구를
+  가리키는 자리에만 쓴다.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" width="320" height="200" role="img" aria-label="" shape-rendering="crispEdges">
+<style>
+/* 네 자세 중 하나만 보인다. 사이 값이 없어야 하므로 steps(1)로 끊는다.
+   0~46%  기본 (한참 쉼)
+   47~59% 왼쪽 보기
+   60~70% 기본
+   71~83% 오른쪽 보기
+   84~89% 기본
+   90~97% 만세
+   98%~   기본 */
+@keyframes clawd-idle{0%,46%{opacity:1}47%,59%{opacity:0}60%,70%{opacity:1}71%,83%{opacity:0}84%,89%{opacity:1}90%,97%{opacity:0}98%,100%{opacity:1}}
+@keyframes clawd-left{0%,46%{opacity:0}47%,59%{opacity:1}60%,100%{opacity:0}}
+@keyframes clawd-right{0%,70%{opacity:0}71%,83%{opacity:1}84%,100%{opacity:0}}
+@keyframes clawd-arms{0%,89%{opacity:0}90%,97%{opacity:1}98%,100%{opacity:0}}
+.p0{animation:clawd-idle 8.2s steps(1,end) infinite}
+.p1{animation:clawd-left 8.2s steps(1,end) infinite;opacity:0}
+.p2{animation:clawd-right 8.2s steps(1,end) infinite;opacity:0}
+.p3{animation:clawd-arms 8.2s steps(1,end) infinite;opacity:0}
+/* 멈추면 기본 자세로 선다. */
+@media (prefers-reduced-motion:reduce){
+  .p0,.p1,.p2,.p3{animation:none}
+  .p0{opacity:1}.p1,.p2,.p3{opacity:0}
+}
+</style>
+<g class="p0"><rect x="112" y="60" width="104" height="16" fill="rgb(215,119,87)"/><rect x="112" y="76" width="16" height="16" fill="rgb(215,119,87)"/><rect x="128" y="76" width="8" height="16" fill="rgb(0,0,0)"/><rect x="136" y="76" width="56" height="16" fill="rgb(215,119,87)"/><rect x="192" y="76" width="8" height="16" fill="rgb(0,0,0)"/><rect x="200" y="76" width="16" height="16" fill="rgb(215,119,87)"/><rect x="96" y="92" width="136" height="16" fill="rgb(215,119,87)"/><rect x="112" y="108" width="104" height="16" fill="rgb(215,119,87)"/><rect x="128" y="124" width="8" height="16" fill="rgb(215,119,87)"/><rect x="144" y="124" width="8" height="16" fill="rgb(215,119,87)"/><rect x="176" y="124" width="8" height="16" fill="rgb(215,119,87)"/><rect x="192" y="124" width="8" height="16" fill="rgb(215,119,87)"/></g>
+<g class="p1"><rect x="112" y="60" width="8" height="16" fill="rgb(215,119,87)"/><rect x="120" y="60" width="8" height="16" fill="rgb(0,0,0)"/><rect x="128" y="60" width="56" height="16" fill="rgb(215,119,87)"/><rect x="184" y="60" width="8" height="16" fill="rgb(0,0,0)"/><rect x="192" y="60" width="24" height="16" fill="rgb(215,119,87)"/><rect x="112" y="76" width="104" height="16" fill="rgb(215,119,87)"/><rect x="96" y="92" width="136" height="16" fill="rgb(215,119,87)"/><rect x="112" y="108" width="104" height="16" fill="rgb(215,119,87)"/><rect x="128" y="124" width="8" height="16" fill="rgb(215,119,87)"/><rect x="144" y="124" width="8" height="16" fill="rgb(215,119,87)"/><rect x="176" y="124" width="8" height="16" fill="rgb(215,119,87)"/><rect x="192" y="124" width="8" height="16" fill="rgb(215,119,87)"/></g>
+<g class="p2"><rect x="112" y="60" width="24" height="16" fill="rgb(215,119,87)"/><rect x="136" y="60" width="8" height="16" fill="rgb(0,0,0)"/><rect x="144" y="60" width="56" height="16" fill="rgb(215,119,87)"/><rect x="200" y="60" width="8" height="16" fill="rgb(0,0,0)"/><rect x="208" y="60" width="8" height="16" fill="rgb(215,119,87)"/><rect x="112" y="76" width="104" height="16" fill="rgb(215,119,87)"/><rect x="96" y="92" width="136" height="16" fill="rgb(215,119,87)"/><rect x="112" y="108" width="104" height="16" fill="rgb(215,119,87)"/><rect x="128" y="124" width="8" height="16" fill="rgb(215,119,87)"/><rect x="144" y="124" width="8" height="16" fill="rgb(215,119,87)"/><rect x="176" y="124" width="8" height="16" fill="rgb(215,119,87)"/><rect x="192" y="124" width="8" height="16" fill="rgb(215,119,87)"/></g>
+<g class="p3"><rect x="112" y="60" width="104" height="16" fill="rgb(215,119,87)"/><rect x="96" y="76" width="32" height="16" fill="rgb(215,119,87)"/><rect x="128" y="76" width="8" height="16" fill="rgb(0,0,0)"/><rect x="136" y="76" width="56" height="16" fill="rgb(215,119,87)"/><rect x="192" y="76" width="8" height="16" fill="rgb(0,0,0)"/><rect x="200" y="76" width="32" height="16" fill="rgb(215,119,87)"/><rect x="104" y="92" width="120" height="16" fill="rgb(215,119,87)"/><rect x="112" y="108" width="104" height="16" fill="rgb(215,119,87)"/><rect x="128" y="124" width="8" height="16" fill="rgb(215,119,87)"/><rect x="144" y="124" width="8" height="16" fill="rgb(215,119,87)"/><rect x="176" y="124" width="8" height="16" fill="rgb(215,119,87)"/><rect x="192" y="124" width="8" height="16" fill="rgb(215,119,87)"/></g>
+</svg>

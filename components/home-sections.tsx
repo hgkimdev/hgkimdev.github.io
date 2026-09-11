@@ -365,7 +365,22 @@ function SectionContent({
   const { Heading, Content } = useSlotFx();
 
   return (
-    <div className="relative mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 [@media(max-height:620px)]:gap-3">
+    <div
+      className={`relative mx-auto flex w-full flex-col gap-6 px-4 [@media(max-height:620px)]:gap-3 ${
+        // Projects만 칸이 넓다. 본문이 "목록 + 그림 상자" 두 칸으로 갈라지는
+        // 유일한 섹션이라, 다른 섹션과 같은 max-w-4xl(896px) 안에 넣으면 둘
+        // 다 425/400px로 쪼그라든다.
+        //
+        // 제목까지 같이 넓어지는 게 핵심이다. 본문만 오른쪽으로 넓혀 봤더니
+        // 블록 전체가 오른쪽으로 쏠렸다(1440px에서 왼쪽 여백 288 / 오른쪽 96).
+        // 칸째로 넓히면 제목과 본문이 같은 상자를 쓰면서 가운데 정렬이 유지된다.
+        //
+        // 대신 이 섹션의 제목은 다른 섹션보다 96px 왼쪽에서 시작한다. 핀 고정
+        // 레이어끼리는 크로스페이드로 겹치므로 경계에서 두 제목의 x가 다르다 —
+        // 폭 차이를 이보다 키우면 그 어긋남이 눈에 띈다.
+        section.projects ? "max-w-[68rem]" : "max-w-4xl"
+      }`}
+    >
       {/* Life 입구가 배경 벽을 포털로 꽂는 자리.
           제목보다 **앞에** 있어야 한다 — 벽을 Content 안에 두면 제목을 덮어
           버린다. Content는 슬롯 연출(transform/filter) 탓에 자기만의 쌓임

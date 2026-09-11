@@ -42,6 +42,32 @@ export type ProjectGroup = {
   label: string;
   /** 입구 행 목록에 보이는 한 줄 */
   teaser: string;
+  /**
+   * Home 입구에서 목록 옆 상자에 걸리는 그림. 행에 손이 닿으면 이 그림으로
+   * 바뀐다(components/projects/projects-entrance.tsx).
+   *
+   * 항목(Project)이 아니라 **그룹**이 든다 — 상자는 목록의 한 줄과 짝이고,
+   * "Claude 도구"는 한 줄에 도구 두 개가 들어 있기 때문이다.
+   *
+   * alt는 없다. 이 상자는 바로 옆 줄이 이미 이름과 한 줄 소개로 말한 것을
+   * 그림으로 되풀이하는 자리라 스크린리더에는 같은 말이 두 번 들린다.
+   * 그래서 장식으로 두고 aria-hidden으로 감춘다 — Life의 사진들은 그 자체가
+   * 내용이라 alt를 붙이는 것과 반대 경우다.
+   */
+  preview: { src: string };
+  /**
+   * Home 입구 목록의 줄 끝에 붙는 **현재 상태**. 없으면 아무것도 안 붙는다.
+   *
+   * 항목의 `tags`와 일부러 따로 둔다. 둘은 다른 사실이다 — `tags`는 상세
+   * 페이지에서 "레포가 비공개다" 같은 사정을 설명하고(Langport에 GitHub
+   * 링크가 없는 이유가 그것이다), 여기 `status`는 훑고 지나가는 사람에게
+   * "이게 지금 살아 있나"만 말한다. 같은 필드로 묶으면 한쪽을 고칠 때마다
+   * 다른 쪽 문장이 따라 바뀐다.
+   *
+   * Claude 도구 2종에는 없다. 그 줄은 도구가 둘이라 하나의 상태로 묶이지
+   * 않고, 자잘한 CLI 도구라 상태를 물을 자리도 아니다.
+   */
+  status?: string;
   /** Claudocs·Langport는 1개, Claude 도구는 2개 */
   items: Project[];
 };
@@ -51,6 +77,9 @@ export const projectGroups: ProjectGroup[] = [
     key: "claudocs",
     label: "Claudocs",
     teaser: "전자 문서 워크스페이스 SaaS",
+    // README에 링크된 공식 데모 영상에서 받은 실제 화면(템플릿·문서 목록).
+    preview: { src: "/projects/claudocs.jpg" },
+    status: "아카이브",
     items: [
       {
         id: "claudocs",
@@ -76,6 +105,9 @@ export const projectGroups: ProjectGroup[] = [
     key: "langport",
     label: "Langport",
     teaser: "당신의 언어교환 모임을 찾아드립니다.",
+    // 운영 중인 langport.vercel.app을 띄워 찍은 첫 화면.
+    preview: { src: "/projects/langport.jpg" },
+    status: "운영 중",
     items: [
       {
         id: "langport",
@@ -106,6 +138,10 @@ export const projectGroups: ProjectGroup[] = [
     key: "claude-tools",
     label: "Claude Code tools",
     teaser: "클로드 코드를 더 즐겁게",
+    // 둘 다 CLI 도구라 보여줄 화면이 없다. 대신 Claude Code의 마스코트
+    // Clawd를 건다 — 픽셀 데이터·팔레트 모두 Claude Code 실행 파일 안의
+    // CLAWD_FRAMES/CLAWD_PAL 원본이다(public/projects/clawd.svg 주석 참고).
+    preview: { src: "/projects/clawd.svg" },
     items: [
       {
         id: "claude-rpg-statusline",

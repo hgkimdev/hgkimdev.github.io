@@ -19,6 +19,9 @@ export const getProjectGroups = cache((locale: Locale): ProjectGroup[] => {
       ...group,
       label: t.label,
       teaser: t.teaser,
+      // 원본에 status가 없는 그룹(Claude 도구)은 번역에도 없다. `??`가 아니라
+      // 그대로 넣는 이유 — 없음이 곧 "상태를 안 붙인다"는 뜻이라 되살리면 안 된다.
+      status: t.status,
       items: group.items.map((item) => {
         const it = t.items[item.id];
         return {
