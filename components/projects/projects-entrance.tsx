@@ -4,7 +4,7 @@ import { useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { ArrowRightIcon } from "lucide-react";
 
-import type { ProjectGroup } from "@/content/projects";
+import type { ProjectGroup, ProjectGroupKey } from "@/content/projects";
 import { localizeHref, type Locale } from "@/lib/i18n/config";
 import { useSlotFx } from "@/components/home-fx/effects";
 
@@ -56,7 +56,7 @@ function shotVariant(src: string) {
  *
  * 여기서는 **상자를 아예 그릴지 말지**를 가른다. 좁은 화면에는 목록 옆에
  * 상자를 세울 가로 여백이 없고, 손가락으로 보는 화면에는 hover도 오지 않아
- * 첫 항목의 그림만 붙박이로 남는다. `hidden md:block`으로 숨기는 것과 다르다 —
+ * 기본 항목(DEFAULT_PREVIEW_KEY)의 그림만 붙박이로 남는다. `hidden md:block`으로 숨기는 것과 다르다 —
  * display:none이어도 브라우저는 그림을 받아온다. 좁은 화면이 쓰지도 않을
  * 스크린샷을 받게 하지 않으려면 DOM에 넣지 않아야 한다.
  *
@@ -87,6 +87,22 @@ function useWide() {
   );
 }
 
+/**
+ * 손이 닿기 전 상자에 걸어 둘 줄.
+ *
+ * 상자를 비워두지 않는다는 원래 이유는 그대로고(아래 `active` 주석), 어느
+ * 줄로 시작할지만 목록 순서에서 떼어낸 값이다. 그래서 content/projects.ts의
+ * 배열 순서를 바꿔도 기본 그림은 따라 움직이지 않는다.
+ *
+ * 이 값이 정하는 것은 **상자에 걸리는 그림뿐**이다. 목록에서 그 줄이 활성으로
+ * 보이지는 않는다 — 들여쓰기는 손이 닿았다는 표시이므로, 아무도 닿지 않은
+ * 처음에는 어느 줄에도 붙지 않아야 한다.
+ *
+ * 키를 못 찾으면 첫 줄로 돌아간다 — 그룹 키를 지웠을 때 상자가 빈 채로
+ * 남지 않게.
+ */
+const DEFAULT_PREVIEW_KEY: ProjectGroupKey = "claude-tools";
+
 export function ProjectsEntrance({
   groups,
   locale,
@@ -99,9 +115,17 @@ export function ProjectsEntrance({
    * 맡으므로 reduced-motion 스택 경로에서만 켠다. */
   animateIn?: boolean;
 }) {
-  // 어느 줄의 그림이 상자에 걸려 있는지. 첫 줄로 시작한다 — 상자를 비워두면
-  // 손이 닿기 전까지 무엇을 하는 자리인지 알 수 없다.
-  const [active, setActive] = useState(0);
+  // 손이 닿은 줄. 아직 아무도 닿지 않았으면 null이고, 그동안 목록에는 활성
+  // 표시가 하나도 없다.
+  const [active, setActive] = useState<number | null>(null);
+
+  // 상자에 걸리는 줄. 상자를 비워두면 손이 닿기 전까지 무엇을 하는 자리인지
+  // 알 수 없으므로 활성 줄이 없을 때도 한 장은 걸어 둔다 — 어느 것인지는
+  // DEFAULT_PREVIEW_KEY가 정한다.
+  const fallback = groups.findIndex(
+    (group) => group.key === DEFAULT_PREVIEW_KEY,
+  );
+  const shown = active ?? (fallback === -1 ? 0 : fallback);
   const wide = useWide();
 
   return (
@@ -128,7 +152,7 @@ export function ProjectsEntrance({
         ))}
       </ul>
 
-      {wide ? <Preview groups={groups} active={active} /> : null}
+      {wide ? <Preview groups={groups} active={shown} /> : null}
     </div>
   );
 }
