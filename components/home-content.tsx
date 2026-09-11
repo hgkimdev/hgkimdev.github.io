@@ -6,6 +6,7 @@ import { getAboutContent } from "@/lib/content/about";
 import { getLifeCategories } from "@/lib/content/life";
 import { getProjectGroups } from "@/lib/content/projects";
 import { ContactSection } from "@/components/contact-section";
+import { CodeBackdrop } from "@/components/home-fx/code-backdrop";
 import ShinyText from "@/components/ShinyText";
 import TextType from "@/components/TextType";
 
@@ -28,7 +29,8 @@ export function HomeContent({ locale }: { locale: Locale }) {
     description: dict.nav[key].description,
     locale,
     body: key === "about" ? getAboutContent(locale).paragraphs : undefined,
-    life: key === "life" ? { categories: getLifeCategories(locale) } : undefined,
+    life:
+      key === "life" ? { categories: getLifeCategories(locale) } : undefined,
     projects:
       key === "projects" ? { groups: getProjectGroups(locale) } : undefined,
     // 연락 채널은 언어 중립이라 모든 로케일에서 실제 콘텐츠를 낸다.
@@ -36,6 +38,10 @@ export function HomeContent({ locale }: { locale: Locale }) {
     // 자식으로만 쓰여도 React가 "리스트 안에서 생성됨"으로 인식해 key를
     // 요구한다(SectionContent 렌더 시 "passed a child from HomeContent" 경고).
     content: key === "contact" ? <ContactSection key="contact" /> : undefined,
+    // ContactSection과 같은 이유로 여기서 만든다(위 주석). key prop도 같은
+    // 이유다 — map 콜백 안에서 만들어진 JSX라 React가 리스트 원소로 본다.
+    backdrop:
+      key === "about" ? <CodeBackdrop key="about-backdrop" /> : undefined,
   }));
 
   const hero = (

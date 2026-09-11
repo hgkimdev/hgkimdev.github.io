@@ -55,6 +55,10 @@ type Section = {
   // so importing the icon components directly here would ship them to the
   // Intro bundle for nothing.
   content?: ReactNode;
+  // About only, and built server-side for the same reason as `content`: the
+  // slot's background layer (code drifting downwards). 본문이 아니라 제목과
+  // 형제로 깔린다 — 아래 SectionContent의 배치 주석 참고.
+  backdrop?: ReactNode;
 };
 
 // break-keep is load-bearing for Korean: the default line-break rules let a
@@ -414,6 +418,12 @@ function SectionContent({
           className="pointer-events-none absolute inset-0 -z-10"
         />
       ) : null}
+      {/* About의 배경 코드. Life 벽이 포털로 찾아오는 그 자리와 같은 층이다 —
+          이유도 같다. Content 안에 두면 슬롯 연출의 transform/filter가 만든
+          쌓임 맥락에 갇혀서, 음수 z-index를 줘도 제목 위로 얹힌다. 이쪽은
+          제목과 형제라 그냥 아래로 내려간다(포털이 필요 없는 것도 그래서다:
+          Life의 벽은 목차와 hover 상태를 공유해야 해 Content 안에서 태어난다). */}
+      {section.backdrop}
       <span className="font-mono text-sm text-muted-foreground">
         {String(index + 1).padStart(2, "0")} / {String(count).padStart(2, "0")}
       </span>
