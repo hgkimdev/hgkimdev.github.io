@@ -191,7 +191,7 @@ export const lifeCategoriesEn: Record<LifeCategoryKey, CategoryTranslation> = {
       },
       japanese: {
         title: "Japanese",
-        meta: "Up next",
+        meta: "Up next · A1",
         levelStatus: "Up next",
         why: [
           "Every new language I learn",
