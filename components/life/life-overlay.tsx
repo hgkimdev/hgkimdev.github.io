@@ -652,7 +652,9 @@ function CategoryDock({
           e.stopPropagation();
         }
       }}
-      className={`pointer-events-auto relative touch-none rounded-full border border-border bg-muted/85 p-1 shadow-lg select-none ${
+      // max-w가 없으면 캡슐이 화면 양 끝에 딱 붙는다 — 둥근 끝이 잘려서
+      // 떠 있는 게 아니라 걸린 것처럼 보인다.
+      className={`pointer-events-auto relative max-w-[calc(100vw-2rem)] touch-none rounded-full border border-border bg-muted/85 p-1 shadow-lg select-none ${
         isDragging ? "cursor-grabbing" : "cursor-grab"
       }`}
     >
@@ -687,7 +689,17 @@ function CategoryDock({
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            {c.label}
+            {c.shortLabel ? (
+              <>
+                {/* 축약형은 자리가 없는 좁은 화면에서만. display:none 쪽은
+                    접근성 트리에서도 빠지므로, 읽히는 이름은 언제나 보이는
+                    글자 하나뿐이다. */}
+                <span className="sm:hidden">{c.shortLabel}</span>
+                <span className="hidden sm:inline">{c.label}</span>
+              </>
+            ) : (
+              c.label
+            )}
           </button>
         ))}
       </div>

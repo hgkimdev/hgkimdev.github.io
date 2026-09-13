@@ -22,6 +22,8 @@ type ItemTranslation = {
 
 type CategoryTranslation = {
   label: string;
+  /** 하단 캡슐 전용 축약형 — content/life.ts의 shortLabel 주석 참고. */
+  shortLabel?: string;
   teaser: string;
   items: Record<string, ItemTranslation>;
   wish?: { label: string; entries: string[] };
@@ -165,6 +167,7 @@ export const lifeCategoriesEn: Record<LifeCategoryKey, CategoryTranslation> = {
   },
   languages: {
     label: "Languages",
+    shortLabel: "Lang",
     teaser: "A lens that widens my world",
     items: {
       english: {

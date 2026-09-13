@@ -123,6 +123,13 @@ export type LifeItem = {
 export type LifeCategory = {
   key: LifeCategoryKey;
   label: string;
+  /**
+   * 하단 카테고리 캡슐에서만 쓰는 짧은 라벨. 캡슐은 칸이 균등해서 폭이
+   * "가장 긴 라벨 하나"로 정해지는데, 영어 "Languages"는 폰에서 칸 밖으로
+   * 삐져나온다. 브레드크럼·입구 타일·aria에는 항상 label(풀네임)이 나가므로
+   * 짧은 형태가 오타가 아니라 축약으로 읽힌다. 없으면 label을 그대로 쓴다.
+   */
+  shortLabel?: string;
   /** 입구 화면의 타일에 보이는 한 줄 */
   teaser: string;
   items: LifeItem[];

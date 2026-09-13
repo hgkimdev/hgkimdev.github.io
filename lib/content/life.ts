@@ -52,6 +52,7 @@ export const getLifeCategories = cache((locale: Locale): LifeCategory[] => {
     return {
       ...category,
       label: t.label,
+      shortLabel: t.shortLabel,
       teaser: t.teaser,
       wish:
         category.wish && t.wish
