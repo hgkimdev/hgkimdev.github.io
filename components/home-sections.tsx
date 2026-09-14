@@ -33,6 +33,10 @@ import {
   SlotFxProvider,
   useSlotFx,
 } from "@/components/home-fx/effects";
+import {
+  useReportActiveSlot,
+  useReportVisibleSection,
+} from "@/components/home-fx/active-section";
 
 type Section = {
   key: HomeSectionKey;
@@ -155,6 +159,10 @@ function StackedSections({
   sections: Section[];
   comingSoonText: string;
 }) {
+  // 여기서는 스크롤 진행도를 읽는 것이 하나도 없으므로(그게 이 경로의 목적이다)
+  // 현재 섹션도 IntersectionObserver로 따로 관찰한다.
+  useReportVisibleSection(sections.map((section) => section.key));
+
   return (
     <div>
       <section className="relative left-1/2 flex min-h-[calc(100vh-var(--header-height))] w-screen -translate-x-1/2 flex-col justify-center overflow-hidden pb-[var(--header-height)]">
@@ -205,6 +213,15 @@ function PinnedSections({
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
+  });
+
+  // 헤더 nav의 밑줄이 읽을 "지금 어느 섹션인가". 진행도가 아니라 인덱스가
+  // 바뀔 때만 상태를 올린다 — 자세한 건 useReportActiveSlot 주석.
+  useReportActiveSlot({
+    scrollYProgress,
+    slots,
+    ramp,
+    keys: sections.map((section) => section.key),
   });
 
   const revealFor = (slot: Slot): Reveal => ({
