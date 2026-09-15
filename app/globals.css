@@ -333,6 +333,9 @@
      쿼리가 아니라 클래스 선택자에 건다 — 토글 즉시 반영되도록. */
   color-scheme: light;
   --header-height: 65px;
+  /* 핀 고정 레이어가 본문을 위로 끌어올리는 광학 보정값. 헤더 한 줄과 같다.
+     `--header-height`를 직접 쓰지 않는 이유는 아래 두 줄짜리 헤더 주석 참고. */
+  --frame-pad: var(--header-height);
   --background: #faf9f6;
   --foreground: #2b2926;
   --card: #ffffff;
@@ -399,6 +402,31 @@
   --code-backdrop-number: #b15c00;
   --code-backdrop-type: #007197;
   --code-backdrop-gutter: #a1a6c5;
+}
+
+/* Intro 존은 sm 미만에서 헤더가 두 줄이다 — 첫 줄에 섹션 목록이 들어갈 자리가
+   없어 목록을 아래 줄로 내렸다(components/site-header.tsx).
+
+   `--header-height`는 핀 고정 프레임의 top과 높이, About 코드 배경, 블로그 읽기
+   진행바가 모두 읽는 값이라, 줄이 하나 늘면 이 값도 같이 늘어야 한다. 늘리지
+   않으면 프레임이 둘째 줄 뒤에 깔리고 아래로 정확히 그 높이만큼 넘친다.
+
+   존을 CSS로 알아내는 방법이 `:has()`뿐이다 — 존은 클라이언트에서 경로로
+   판별하고(getZone) html/body에는 그 표시가 없다. 이미 `main:has([data-zone-wide])`가
+   같은 방식으로 폭을 정하고 있다. 둘째 줄이 없는 Blog 존에서는 매치되지 않아
+   65px 그대로다.
+
+   44px(h-11) + 위 경계선 1px = 45px. */
+@media (max-width: 639.98px) {
+  :root:has(.site-section-bar) {
+    --header-height: 110px;
+    /* 보정값은 따라 늘리지 않는다. 늘리면 프레임이 45px 줄어드는 동시에 패딩이
+       45px 늘어 본문 자리가 90px 사라지고, 375×667(iPhone SE)에서 About 제목
+       윗부분이 15px 잘렸다(360×640은 29px). 보정의 목적은 "헤더에 가린 만큼
+       본문을 올려 눈에 가운데로 보이게" 하는 것인데, 둘째 줄까지 보정하면
+       본문이 바 쪽으로 너무 붙기도 한다. 그래서 첫 줄 높이에서 멈춘다. */
+    --frame-pad: 65px;
+  }
 }
 
 .dark {

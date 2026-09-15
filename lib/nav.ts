@@ -10,7 +10,7 @@ export const homeSectionKeys = [
 export type HomeSectionKey = (typeof homeSectionKeys)[number];
 export type PageNavKey = "blog";
 
-type NavItem =
+export type NavItem =
   | { key: HomeSectionKey; type: "anchor" }
   | { key: PageNavKey; type: "page"; path: string };
 

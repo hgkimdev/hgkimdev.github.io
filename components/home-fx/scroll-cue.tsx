@@ -28,7 +28,7 @@ import { interpolateClamped, type Slot } from "@/components/home-fx/geometry";
 // 본문과 붙어버려서 한 단계 줄인다.
 const CUE_CLASS =
   "pointer-events-none absolute bottom-[50px] left-1/2 -translate-x-1/2 " +
-  "text-muted-foreground [@media(max-height:620px)]:bottom-6";
+  "text-muted-foreground [@media(max-height:700px)]:bottom-6";
 
 function Chevrons() {
   return (

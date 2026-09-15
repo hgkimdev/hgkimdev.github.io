@@ -73,15 +73,15 @@ type Section = {
 const ESSAY_TEXT =
   "text-base leading-relaxed break-keep text-pretty text-foreground " +
   "sm:text-lg md:text-xl " +
-  "[@media(max-height:620px)]:text-base [@media(max-height:620px)]:leading-snug";
+  "[@media(max-height:700px)]:text-base [@media(max-height:700px)]:leading-snug";
 
 // 제목과 본문 래퍼의 클래스는 상수로 뺀다 — 연출이 붙든 안 붙든(스택 경로) 타이포와
 // 간격은 똑같아야 하고, 효과 컴포넌트는 그 위에 transform만 얹는다.
 const HEADING_CLASS =
-  "text-4xl font-bold tracking-tight sm:text-6xl [@media(max-height:620px)]:text-3xl";
+  "text-4xl font-bold tracking-tight sm:text-6xl [@media(max-height:700px)]:text-3xl";
 // 본문은 항상 이 래퍼 한 겹을 쓴다(효과가 없을 때도). DOM 깊이가 경로마다 같아야
 // placeholder처럼 자식이 둘인 분기의 간격이 흔들리지 않는다.
-const CONTENT_CLASS = "flex flex-col gap-6 [@media(max-height:620px)]:gap-3";
+const CONTENT_CLASS = "flex flex-col gap-6 [@media(max-height:700px)]:gap-3";
 
 // Content-derived: BODY_WEIGHT_PER_PARAGRAPH viewports of runway per paragraph.
 // Life keeps weight 1
@@ -165,7 +165,7 @@ function StackedSections({
 
   return (
     <div>
-      <section className="relative left-1/2 flex min-h-[calc(100vh-var(--header-height))] w-screen -translate-x-1/2 flex-col justify-center overflow-hidden pb-[var(--header-height)]">
+      <section className="relative left-1/2 flex min-h-[calc(100vh-var(--header-height))] w-screen -translate-x-1/2 flex-col justify-center overflow-hidden pb-[var(--frame-pad)]">
         {hero}
         <HeroScrollCue />
       </section>
@@ -178,7 +178,7 @@ function StackedSections({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.4 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="relative left-1/2 flex min-h-[calc(100vh-var(--header-height))] w-screen -translate-x-1/2 scroll-mt-20 flex-col justify-center border-t border-border/60 pb-[var(--header-height)]"
+          className="relative left-1/2 flex min-h-[calc(100vh-var(--header-height))] w-screen -translate-x-1/2 scroll-mt-20 flex-col justify-center border-t border-border/60 pb-[var(--frame-pad)]"
         >
           <SectionContent
             section={section}
@@ -380,10 +380,14 @@ function PinnedLayer({
   // the viewport, which also lands in the usual 3-5% upward optical bias for a
   // text block. Applied to the shared layer so every slot stays aligned
   // through the crossfade.
+  //
+  // `--frame-pad`이지 `--header-height`가 아니다 — sm 미만에서 헤더가 두 줄이
+  // 되면 프레임이 줄어드는 만큼 패딩까지 같이 늘어 본문 자리가 두 배로
+  // 깎인다(globals.css의 --frame-pad 주석).
   return (
     <motion.div
       style={{ opacity, y: drift, pointerEvents }}
-      className="absolute inset-0 flex flex-col justify-center pb-[var(--header-height)]"
+      className="absolute inset-0 flex flex-col justify-center pb-[var(--frame-pad)]"
     >
       <Layer>{children}</Layer>
     </motion.div>
@@ -408,7 +412,7 @@ function SectionContent({
 
   return (
     <div
-      className={`relative mx-auto flex w-full flex-col gap-6 px-4 [@media(max-height:620px)]:gap-3 ${
+      className={`relative mx-auto flex w-full flex-col gap-6 px-4 [@media(max-height:700px)]:gap-3 ${
         // Projects만 칸이 넓다. 본문이 "목록 + 그림 상자" 두 칸으로 갈라지는
         // 유일한 섹션이라, 다른 섹션과 같은 max-w-4xl(896px) 안에 넣으면 둘
         // 다 425/400px로 쪼그라든다.
@@ -492,7 +496,7 @@ function SectionBody({
     : null;
   return (
     <div
-      className={`flex flex-col gap-4 ${ESSAY_TEXT} [@media(max-height:620px)]:gap-2`}
+      className={`flex flex-col gap-4 ${ESSAY_TEXT} [@media(max-height:700px)]:gap-2`}
     >
       {paragraphs.map((paragraph, i) => {
         const revealWindow = windows?.[i];

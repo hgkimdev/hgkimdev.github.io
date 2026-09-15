@@ -273,7 +273,7 @@ function ProjectRow({
         href={localizeHref(`/projects/${group.key}`, locale)}
         onPointerEnter={onEnter}
         onFocus={onEnter}
-        className={`group flex items-start gap-4 border-b border-border/60 py-5 transition-[padding-left,border-color] duration-200 hover:border-foreground/40 hover:pl-2 focus-visible:border-foreground/40 focus-visible:pl-2 focus-visible:outline-none [@media(max-height:620px)]:py-3 ${
+        className={`group flex items-start gap-4 border-b border-border/60 py-5 transition-[padding-left,border-color] duration-200 hover:border-foreground/40 hover:pl-2 focus-visible:border-foreground/40 focus-visible:pl-2 focus-visible:outline-none [@media(max-height:700px)]:py-3 ${
           active ? "md:pl-2" : ""
         }`}
       >
@@ -293,7 +293,7 @@ function ProjectRow({
               펼치지 않나" 참고. 화면이 낮으면 줄바꿈 한 줄이 아쉬우므로
               숨긴다. */}
           {stack.length > 0 || status ? (
-            <span className="flex flex-wrap gap-1.5 [@media(max-height:620px)]:hidden">
+            <span className="flex flex-wrap gap-1.5 [@media(max-height:700px)]:hidden">
               {stack.map((tech) => (
                 <span
                   key={tech}

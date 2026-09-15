@@ -83,7 +83,7 @@ function ContactRow({
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <div
           style={marqueeStyle}
-          className="flex h-full w-fit items-center whitespace-nowrap text-4xl font-bold tracking-tight text-foreground/[0.05] transition-colors duration-300 group-hover:text-foreground/[0.1] motion-reduce:[animation-name:none] sm:text-5xl [@media(max-height:620px)]:text-3xl"
+          className="flex h-full w-fit items-center whitespace-nowrap text-4xl font-bold tracking-tight text-foreground/[0.05] transition-colors duration-300 group-hover:text-foreground/[0.1] motion-reduce:[animation-name:none] sm:text-5xl [@media(max-height:700px)]:text-3xl"
         >
           <span className="pr-8">{repeatedLabel}</span>
           <span className="pr-8">{repeatedLabel}</span>
@@ -91,7 +91,7 @@ function ContactRow({
       </div>
       <a
         href={href}
-        className="relative flex items-center gap-4 px-2 py-5 [@media(max-height:620px)]:py-3"
+        className="relative flex items-center gap-4 px-2 py-5 [@media(max-height:700px)]:py-3"
         {...(external ? { target: "_blank", rel: "noreferrer" } : {})}
       >
         <Icon size={18} color="currentColor" />
