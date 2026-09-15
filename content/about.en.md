@@ -2,14 +2,13 @@
 title: About
 ---
 
-I'm more interested in building services that people actually find useful or
-enjoyable — or that connect people to each other — than in building big,
-feature-heavy products. The sense that there's a real person using what I
-build, somewhere past the screen, is what keeps me writing code.
+I'm not after a big product packed with features. What I'd rather make is
+something people actually find useful and fun to use, or something that
+brings people together. The biggest reason I keep building is the sense that
+somewhere past the screen, someone is getting real use out of what I made.
 
-I believe shipping something quickly and seeing how people react gets you
-further than chasing a perfect plan. So when an idea comes to mind, I'd
-rather build it and run into reality than think it over for too long.
+I think building something fast and seeing how people react gets you further
+in the end than waiting on a perfect plan. So when an idea shows up, I tend to
+just build it and see what happens instead of turning it over in my head.
 
-These days, that's exactly what I'm doing — starting up several projects at
-once and trying things out.
+Lately I've been trying to keep as many projects going as I can.
