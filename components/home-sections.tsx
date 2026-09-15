@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, type ReactNode } from "react";
+import { Fragment, useRef, type ReactNode } from "react";
 import {
   motion,
   useReducedMotion,
@@ -520,8 +520,9 @@ function SectionBody({
   );
 }
 
-// A span per line, made block-level so each one starts fresh and wraps within
-// itself. Valid inside <p>: a span is phrasing content whatever its display is.
+// A span per line. md 이상에서는 블록이라 소스의 줄바꿈이 그대로 화면의 줄이 되고,
+// 그 아래에서는 인라인으로 흘러 문단 하나가 된다(effects.tsx의 LINE_CLASS).
+// Valid inside <p>: a span is phrasing content whatever its display is.
 // Lines within a paragraph sit one line-height apart while paragraphs keep their
 // gap-4, which is what groups them visually.
 //
@@ -532,9 +533,14 @@ function ParagraphLines({ lines }: { lines: string[] }) {
   return (
     <>
       {lines.map((line, i) => (
-        <Line key={i} index={i} count={lines.length}>
-          {line}
-        </Line>
+        <Fragment key={i}>
+          {/* 줄이 인라인으로 흐르는 폭에서 단어 사이를 띄우는 공백이다. 블록일
+              때는 줄 끝 공백이라 접혀 사라지므로 그 폭에서는 아무 일도 없다. */}
+          {i > 0 ? " " : null}
+          <Line index={i} count={lines.length}>
+            {line}
+          </Line>
+        </Fragment>
       ))}
     </>
   );

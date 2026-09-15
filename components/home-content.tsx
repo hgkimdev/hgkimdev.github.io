@@ -49,7 +49,10 @@ export function HomeContent({ locale }: { locale: Locale }) {
       <p className="text-sm font-medium text-muted-foreground">
         {dict.home.greeting}
       </p>
-      <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+      {/* break-keep: 기본 줄바꿈 규칙은 한글을 음절 사이 아무 데서나 끊는다 —
+          실측으로 "…엔지니어" / "입니다."로 갈라졌다. 본문(ESSAY_TEXT)이 같은
+          이유로 이미 break-keep을 쓴다. */}
+      <h1 className="text-3xl font-bold tracking-tight break-keep text-pretty sm:text-4xl">
         <TextType
           as="span"
           text={dict.home.heading}
@@ -59,11 +62,13 @@ export function HomeContent({ locale }: { locale: Locale }) {
           showCursor
         />
       </h1>
-      <p className="max-w-xl text-muted-foreground">
+      {/* 같은 이유. 여기서는 "있어" / "요."로 갈려 17px짜리 줄이 남았다. */}
+      <p className="max-w-xl break-keep text-pretty text-muted-foreground">
         {introParts ? (
           <>
             {introParts[0]}
-            <span className="rounded-full bg-foreground/5 px-2 py-0.5">
+            {/* 알약이 줄을 넘어 쪼개지면 배경만 두 조각으로 남는다. */}
+            <span className="rounded-full bg-foreground/5 px-2 py-0.5 whitespace-nowrap">
               <ShinyText
                 text={dict.home.aiAgentMarker}
                 className="font-medium"

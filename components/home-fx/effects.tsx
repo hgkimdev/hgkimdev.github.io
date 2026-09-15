@@ -154,6 +154,14 @@ export function ParagraphRevealProvider({
   );
 }
 
+// 줄의 표시 방식. md 이상에서는 소스의 줄바꿈이 곧 화면의 줄이지만(블록), 그
+// 아래에서는 소스 줄이 화면에 다 안 들어가 저마다 다시 접힌다 — 실측(390px,
+// 본문 폭 358px)으로 일곱 줄 중 다섯 줄이 접혔고 "있다는 감각이" 같은 87px짜리
+// 외톨이 줄이 남았다. 768px부터는 한 줄도 접히지 않는다. 그래서 그 아래에서는
+// 줄을 인라인으로 흘려 브라우저가 문단 하나로 다시 나누게 한다(같은 실측에서
+// 줄 폭이 304~349px로 고르게 찼다).
+const LINE_CLASS = "inline md:block";
+
 // ---------------------------------------------------------------- fx types
 
 export type LayerFxProps = { children: ReactNode };
@@ -193,7 +201,7 @@ function PlainItem({ index, count, ...rest }: ItemFxProps) {
 }
 
 function PlainLine({ children }: LineFxProps) {
-  return <span className="block">{children}</span>;
+  return <span className={LINE_CLASS}>{children}</span>;
 }
 
 const PLAIN_SECTION: SectionFx = {
@@ -286,7 +294,10 @@ function CascadeLine({ index, count, children }: LineFxProps) {
     rampBlur(e, x, (1 - itemProgress(v, index, count, 0.7)) * 4),
   );
   return (
-    <motion.span style={{ y, filter }} className="block">
+    // md 미만에서 이 span은 인라인이라 transform(y)이 먹지 않는다 — 그 폭에서
+    // 줄 캐스케이드는 블러만으로 진행된다. 흘러가는 문단에서는 줄마다 따로
+    // 올라오는 움직임이 애초에 읽히지 않으므로 잃는 것이 없다.
+    <motion.span style={{ y, filter }} className={LINE_CLASS}>
       {children}
     </motion.span>
   );
