@@ -62,8 +62,12 @@ export function HomeContent({ locale }: { locale: Locale }) {
           showCursor
         />
       </h1>
-      {/* 같은 이유. 여기서는 "있어" / "요."로 갈려 17px짜리 줄이 남았다. */}
-      <p className="max-w-xl break-keep text-pretty text-muted-foreground">
+      {/* break-keep은 제목과 같은 이유다 — 여기서는 "있어" / "요."로 갈렸다.
+          text-balance는 두 줄이 될 때의 배분 때문이다. 이 문장은 알약 패딩까지
+          370px이라 390px 화면의 본문 칸(358px)을 12px 넘겨서 두 줄이 되는데,
+          text-pretty는 첫 줄을 65%만 채우고 나머지를 내려보낸다(233/118).
+          balance는 160/191로 나눈다. 430px부터는 한 줄이라 아무 일도 없다. */}
+      <p className="max-w-xl break-keep text-balance text-muted-foreground">
         {introParts ? (
           <>
             {introParts[0]}
