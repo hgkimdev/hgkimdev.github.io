@@ -125,7 +125,14 @@ export function LifeOverlay({
             바탕 위에 어두운 글자를 유지하려면 그 흰 덮개가 반드시 진해야 하고,
             그래서 라이트 모드에서는 "덜 진하게"와 "읽히게"가 동시에 성립하지
             않았다. 방향을 뒤집으면 둘 다 성립한다. */}
-        <Dialog.Popup className="dark fixed inset-0 z-50 overflow-hidden bg-background text-foreground transition duration-200 data-ending-style:opacity-0 data-starting-style:opacity-0">
+        {/* 높이를 `inset-0`이 아니라 `100dvh`로 잡는다. 모바일 크롬에서
+            fixed 요소의 기준 상자(ICB)는 주소창이 **숨겨졌을 때**의 큰
+            뷰포트라, inset-0만 두면 오버레이가 화면보다 주소창 높이만큼
+            길어진다 — 화면 밖으로 밀려나는 건 정확히 아래쪽, 즉 하단 도크와
+            본문의 pb-32 자리다. dvh는 지금 실제로 보이는 높이라 그 어긋남이
+            없다. 여는 동안은 Dialog가 본문 스크롤을 잠그므로 주소창이
+            오르내리며 높이가 출렁일 일도 없다. */}
+        <Dialog.Popup className="dark fixed inset-0 z-50 h-[100dvh] overflow-hidden bg-background text-foreground transition duration-200 data-ending-style:opacity-0 data-starting-style:opacity-0">
           {item ? (
             <LifeMediaBackground media={item.media} muted={muted} />
           ) : null}
@@ -203,7 +210,17 @@ export function LifeOverlay({
                       순간 둘이 같은 transform을 두고 다툰다. */}
                   <div
                     ref={swipeLayerRef}
-                    className="my-auto"
+                    // 사진첩 항목은 폰에서만 이 겹이 칸을 꽉 채운다(max-md).
+                    // 높이가 정해져야 그 안에서 사진첩이 남는 만큼만 차지하도록
+                    // 줄어들 수 있다 — life-gallery.tsx의 주석 참고.
+                    //
+                    // md 이상은 손대지 않는다: 거기서는 본문이 칸보다 짧아
+                    // my-auto 가운데 정렬로 충분하고, 사진첩을 줄일 이유도 없다.
+                    className={`my-auto ${
+                      item.media.kind === "gallery"
+                        ? "max-md:flex max-md:min-h-0 max-md:flex-1 max-md:flex-col"
+                        : ""
+                    }`}
                     style={{
                       transform: "translateX(var(--swipe-x, 0px))",
                       transition:
@@ -228,7 +245,17 @@ export function LifeOverlay({
                           duration: swipeDir ? 0.2 : 0.28,
                           ease: "easeOut",
                         }}
-                        className="flex max-w-2xl flex-col gap-4 pb-6"
+                        // 채우는 쪽(사진첩)은 가운데 정렬을 `safe center`로
+                        // 되찾는다. 위 스크롤 칸의 주석이 경계한 "넘칠 때 위가
+                        // 잘리는" 함정은 `safe`가 막아준다 — 넘치는 순간에는
+                        // start로 물러나므로 제목부터 스크롤된다(사진첩이
+                        // 최소 높이에 닿는 아주 낮은 화면에서만 생기는 일이다).
+                        // 여백도 폰에서만 한 단계 좁힌다.
+                        className={`flex max-w-2xl flex-col gap-4 pb-6 ${
+                          item.media.kind === "gallery"
+                            ? "max-md:min-h-0 max-md:flex-1 max-md:justify-center-safe max-md:gap-3 max-md:pb-2"
+                            : ""
+                        }`}
                       >
                         <h3 className="text-3xl font-bold tracking-tight break-keep sm:text-5xl">
                           {item.title}
