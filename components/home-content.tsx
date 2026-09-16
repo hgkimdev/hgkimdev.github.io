@@ -45,23 +45,27 @@ export function HomeContent({ locale }: { locale: Locale }) {
   }));
 
   const hero = (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4">
-      <p className="text-sm font-medium text-muted-foreground">
-        {dict.home.greeting}
-      </p>
-      {/* break-keep: 기본 줄바꿈 규칙은 한글을 음절 사이 아무 데서나 끊는다 —
-          실측으로 "…엔지니어" / "입니다."로 갈라졌다. 본문(ESSAY_TEXT)이 같은
-          이유로 이미 break-keep을 쓴다. */}
-      <h1 className="text-3xl font-bold tracking-tight break-keep text-pretty sm:text-4xl">
-        <TextType
-          as="span"
-          text={dict.home.heading}
-          typingSpeed={60}
-          pauseDuration={4000}
-          loop={false}
-          showCursor
-        />
-      </h1>
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-4">
+      {/* 인사말은 제목의 머리말이라 제목에 더 바짝 붙인다(8px). 바깥 간격
+          16px은 제목과 아래 소개 문단 사이에만 남는다. */}
+      <div className="flex flex-col gap-2">
+        <p className="text-sm font-medium text-muted-foreground">
+          {dict.home.greeting}
+        </p>
+        {/* break-keep: 기본 줄바꿈 규칙은 한글을 음절 사이 아무 데서나 끊는다 —
+            실측으로 "…엔지니어" / "입니다."로 갈라졌다. 본문(ESSAY_TEXT)이 같은
+            이유로 이미 break-keep을 쓴다. */}
+        <h1 className="text-3xl font-bold tracking-tight break-keep text-pretty sm:text-4xl">
+          <TextType
+            as="span"
+            text={dict.home.heading}
+            typingSpeed={60}
+            pauseDuration={4000}
+            loop={false}
+            showCursor
+          />
+        </h1>
+      </div>
       {/* break-keep은 제목과 같은 이유다 — 여기서는 "있어" / "요."로 갈렸다.
           text-balance는 두 줄이 될 때의 배분 때문이다. 이 문장은 알약 패딩까지
           370px이라 390px 화면의 본문 칸(358px)을 12px 넘겨서 두 줄이 되는데,
