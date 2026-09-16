@@ -52,10 +52,7 @@ export function HomeContent({ locale }: { locale: Locale }) {
       {/* break-keep: 기본 줄바꿈 규칙은 한글을 음절 사이 아무 데서나 끊는다 —
           실측으로 "…엔지니어" / "입니다."로 갈라졌다. 본문(ESSAY_TEXT)이 같은
           이유로 이미 break-keep을 쓴다. */}
-      {/* 320px에서만 한 단계 작다. 그 폭에서는 "프로덕트 엔지니어입니다."(290px)가
-          본문 칸(288px)을 2px 넘겨서, 뒤따르는 타이핑 커서가 셋째 줄로 혼자
-          떨어진다(타이핑이 끝나도 남는 커서라 계속 그 상태로 있는다). */}
-      <h1 className="text-[1.625rem] font-bold tracking-tight break-keep text-pretty min-[360px]:text-3xl sm:text-4xl">
+      <h1 className="text-3xl font-bold tracking-tight break-keep text-pretty sm:text-4xl">
         <TextType
           as="span"
           text={dict.home.heading}
