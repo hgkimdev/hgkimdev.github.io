@@ -1,0 +1,22 @@
+<!-- 사이트 아이콘. 터미널 프롬프트 `>_` — 홈 About 배경으로 흐르는 코드,
+     히어로의 TextType 커서와 같은 어휘다.
+
+     색은 팔레트 그대로다(globals.css의 foreground #2b2926 = 잉크,
+     background #faf9f6 = 페이퍼). 판을 잉크로 채우는 건 밝은 탭 바와
+     어두운 탭 바에서 같은 대비를 내기 위해서다 — 페이퍼 판은 라이트
+     테마 탭에서 판이 배경에 녹아 글자만 떠 보인다.
+
+     글자가 아니라 path로 그린다: SVG 파비콘은 브라우저가 가진 폰트로
+     렌더하므로 font-family로 Geist를 지정해도 보장되지 않는다.
+     획 두께 8은 16px에서 고른 값이다(7은 흐려지고, 9는 꺾인 안쪽이 막힌다).
+
+     favicon.ico(16/32/48)와 apple-icon.png(180)는 이 파일을 래스터라이즈한
+     것이라, 이 도형을 고치면 둘도 같이 다시 만들어야 한다. 굽는 건 sharp고,
+     주의할 점 둘 — sharp는 .ico를 쓰지 못하므로 ICO 컨테이너(PNG 세 장을
+     품는 형식)는 직접 조립해야 하고, apple-icon은 iOS가 모서리를 직접
+     깎으므로 판을 꽉 채운 정사각형으로 둔다(글리프는 0.86배). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <rect width="64" height="64" rx="14" fill="#2b2926"/>
+  <path d="M17 21 L29 31 L17 41" fill="none" stroke="#faf9f6" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M36 43 H48" fill="none" stroke="#faf9f6" stroke-width="8" stroke-linecap="round"/>
+</svg>
