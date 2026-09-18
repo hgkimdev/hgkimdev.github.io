@@ -176,7 +176,7 @@ export const lifeCategoriesEn: Record<LifeCategoryKey, CategoryTranslation> = {
         levelStatus: "Learning",
         why: [
           "The de facto international language of business.",
-          "I keep at it, but it's never easy.",
+          "I keep at it every day, even if only a little.",
         ],
         alt: {
           "/life/egu.jpg":
@@ -200,6 +200,17 @@ export const lifeCategoriesEn: Record<LifeCategoryKey, CategoryTranslation> = {
           "Every new language I learn",
           "means more people I can reach.",
           "That's still my biggest motivation.",
+        ],
+      },
+      italian: {
+        title: "Italian",
+        // ko와 같이 배지 안을 비운다 — content/life.ts의 italian 주석 참고.
+        // levelStatus는 아예 두지 않는다(병합이 ko의 빈 status를 그대로 쓴다).
+        meta: "",
+        why: [
+          "I taught myself a little for a few months, as a hobby.",
+          "I'm not keeping it up,",
+          "and I've no plans to start again yet.",
         ],
       },
     },

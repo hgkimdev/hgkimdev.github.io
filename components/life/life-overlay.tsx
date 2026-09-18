@@ -749,8 +749,11 @@ const CEFR_LEVELS: CefrLevel[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
 
 /**
  * 언어 항목의 meta 대신 그리는 CEFR 배지. 6단계 중 현재 단계까지 채운
- * 점과 상태 문구를 CHIP 하나에 담는다. cefr이 null이면(다음 차례)
- * 점 6개가 전부 비어 "아직 0"으로 읽힌다.
+ * 점과 상태 문구를 CHIP 하나에 담는다. cefr이 null이면(레벨 미표기)
+ * 점 6개가 전부 빈 채로 그려지고 뒤의 `· 레벨`도 붙지 않는다. status까지
+ * 비면 문구 span 자체를 빼는데, 안 그러면 빈 span 앞의 gap만 남아 점 뒤에
+ * 설명 없는 여백이 생긴다. 배지를 통째로 빼지 않는 건 그래야 목록에서
+ * 줄이 어긋나지 않기 때문이다.
  */
 function LanguageLevelBadge({
   level,
@@ -776,10 +779,12 @@ function LanguageLevelBadge({
           />
         ))}
       </span>
-      <span className="text-muted-foreground">
-        {level.status}
-        {level.cefr ? ` · ${level.cefr}` : ""}
-      </span>
+      {level.status || level.cefr ? (
+        <span className="text-muted-foreground">
+          {level.status}
+          {level.cefr ? ` · ${level.cefr}` : ""}
+        </span>
+      ) : null}
     </span>
   );
 }
