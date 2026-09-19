@@ -30,6 +30,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # 타입 검사는 next build가 직접 한다(typescript.ignoreBuildErrors 기본값이
+      # false라 타입 에러면 빌드가 멈춘다). 하지만 Next 16에서 build의 lint
+      # 단계는 빠졌으므로, ESLint는 여기서 돌리지 않으면 아무 데서도 안 돈다.
+      # 빌드보다 훨씬 싸서 앞에 둔다 — 망가진 커밋이 몇 초 만에 걸린다.
+      - name: Lint
+        run: npm run lint
+
       - name: Build
         run: npm run build
 
