@@ -70,16 +70,6 @@ export const projectGroupsEn: Record<ProjectGroupKey, GroupTranslation> = {
           "See your token and context limits right in the statusline.",
         ],
       },
-      "personal-astrologer": {
-        title: "personal-astrologer",
-        meta: "2026.07 · Claude Code CLI tool",
-        why: [
-          "A personal-astrologer template that runs on top of Claude Code.",
-          "Fill in your birth chart data in a local file, and it answers questions based on that.",
-          "Fork it and fill in your own data, and anyone can run their own version.",
-        ],
-        tags: ["For fun & self-reflection"],
-      },
     },
   },
 };

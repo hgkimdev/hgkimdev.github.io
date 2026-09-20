@@ -2,7 +2,7 @@
 //
 // `why` 문단은 전부 각 레포 README에 본인이 이미 써둔 문장을 옮기거나(Langport는
 // 거의 그대로, Claudocs는 영문 원문을 한국어로 옮김) 사실(생성일·언어 통계)만
-// 조합한 것이다. Claude 관련 도구 2종은 README가 한두 줄뿐이라 "무엇을 하는
+// 조합한 것이다. claude-rpg-statusline은 README가 한두 줄뿐이라 "무엇을 하는
 // 도구인지"만 담고 왜 만들었는지는 의도적으로 비워뒀다 — 자잘한 CLI
 // 도구라 동기 서사까지 붙일 필요는 없다는 판단(본인 확인 완료).
 //
@@ -12,12 +12,11 @@
 // `app/(ko)/projects/[slug]/page.tsx`의 `generateStaticParams` 참고.
 //
 // 배경 그림: Claudocs만 유튜브 데모(README에 링크된 공식 데모 영상)가 있고, 상세
-// 페이지에 보통의(자동재생 없는) 임베드로 들어간다. 나머지 셋은 `kind: "none"`.
+// 페이지에 보통의(자동재생 없는) 임베드로 들어간다. 나머지 둘은 `kind: "none"`.
 
 import type { LifeMedia } from "@/content/life";
 
-export type ProjectId =
-  "claudocs" | "langport" | "claude-rpg-statusline" | "personal-astrologer";
+export type ProjectId = "claudocs" | "langport" | "claude-rpg-statusline";
 
 export type Project = {
   id: ProjectId;
@@ -138,7 +137,7 @@ export const projectGroups: ProjectGroup[] = [
     key: "claude-tools",
     label: "Claude Code tools",
     teaser: "클로드 코드를 더 즐겁게",
-    // 둘 다 CLI 도구라 보여줄 화면이 없다. 대신 Claude Code의 마스코트
+    // CLI 도구라 보여줄 화면이 없다. 대신 Claude Code의 마스코트
     // Clawd를 건다 — 픽셀 데이터·팔레트 모두 Claude Code 실행 파일 안의
     // CLAWD_FRAMES/CLAWD_PAL 원본이다(public/projects/clawd.svg 주석 참고).
     preview: { src: "/projects/clawd.svg" },
@@ -155,20 +154,6 @@ export const projectGroups: ProjectGroup[] = [
         links: {
           github: "https://github.com/hgkimdev/claude-rpg-statusline",
         },
-        media: { kind: "none" },
-      },
-      {
-        id: "personal-astrologer",
-        title: "personal-astrologer",
-        meta: "2026.07 · Claude Code CLI 도구",
-        why: [
-          "Claude Code 위에서 돌아가는 개인 점성술사 템플릿.",
-          "출생차트 데이터를 로컬 파일에 채워두면 그걸 근거로 질문에 답해드립니다.",
-          "포크해서 자기 데이터로 채우면 누구나 자기 버전으로 쓸 수 있습니다.",
-        ],
-        stack: ["Python", "Claude Code"],
-        tags: ["오락·자기 성찰용"],
-        links: { github: "https://github.com/hgkimdev/personal-astrologer" },
         media: { kind: "none" },
       },
     ],
