@@ -25,7 +25,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 Next.js · React · TypeScript · Tailwind CSS · shadcn/ui (Base UI primitives) · Motion
 
-`next.config.ts` sets `output: 'export'` — the site is a fully static export, deployed to GitHub Pages via `.github/workflows/deploy.yml` on every push to `main`.
+`next.config.ts` sets `output: 'export'` — the site is a fully static export, deployed to GitHub Pages via `.github/workflows/deploy.yml` on every push to `main`. The workflow lints before it builds: Next 16 dropped the lint step from `next build`, so CI is the only place ESLint runs (type checking still happens inside the build).
 
 ## Content
 

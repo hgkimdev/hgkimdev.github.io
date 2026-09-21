@@ -50,9 +50,19 @@ Contact는 두 존 헤더 nav 어디에도 없다. Blog nav 안에 텍스트 링
 - **책**: 가장 좋아하는 책 1~2권 + 왜 기억에 남는지
 - **영화**: 가장 좋아하는 영화 1~2편 + 왜 기억에 남는지
 - **게임**: 가장 좋아하는 게임 1~2개 + 왜 기억에 남는지
-- **언어**: 현재 배우는 영어·불어, 앞으로 배울 일본어 (Duolingo 연동은 비공식 API 리스크로 보류)
+- **언어**: 영어(학습 중 · B1) · 프랑스어(학습 중 · A1) · 일본어(다음 차례 · A1) · 이탈리아어. 이탈리아어만 레벨도 상태도 적지 않는다 — 몇 달 가볍게 독학하고 지금은 쉬는 중이라 CEFR로 말할 게 없는데, 이 항목만 배지가 빠지면 목록 줄이 어긋나 보여서 자리는 남기고 안을 비운다(`level: { status: "", cefr: null }`). Duolingo 연동은 비공식 API 리스크로 보류
 
 음악·운동·요리는 아직 "왜"가 명확하지 않아 이번 라운드에서는 보류. 나중에 구체적인 이야기가 생기면 카테고리로 추가 가능.
+
+### 매칭되지 않는 주소 (404)
+
+정적 export라 GitHub Pages는 매칭되지 않는 주소 **전부**에 `out/404.html` 한 파일을 내준다. `app/not-found.tsx`가 없던 동안에는 그게 Next 기본 화면(흰 판에 "404: This page could not be found." 한 줄)이라, 오타 하나로 사이트 밖으로 튕겨 나간 것처럼 보이고 돌아올 링크도 없었다. 지금은 `components/not-found-view.tsx`가 사이트가 이미 쓰는 어휘로 받는다 — mono로 `404 · /찾던/주소`와 깜박이는 커서(파비콘의 `>_`, About 배경으로 흐르는 코드, 히어로의 TextType 커서와 같은 계열), 그 아래 제목 한 줄과 Home·Blog 링크.
+
+- **문구는 로케일과 무관하게 영어 하나다.** 404.html 한 벌이 `/en/` 아래의 오타까지 다 받아내므로, 이 화면만은 자기 로케일을 빌드 타임에 알 수 없다. 한글·영어를 둘 다 실어 주소로 갈라 보이는 방식도 만들어 봤지만 번역 문구가 어색해서 영어로 통일했고, 주소에서 읽어낸 로케일은 **돌아가는 링크에만** 쓴다(`/` vs `/en`). 본문이 영어인데 `<html lang>`은 `langInitScript`가 주소를 따라 `ko`로 둘 수 있어서 `<main lang="en">`으로 이 구역만 덮는다 — 안 그러면 스크린리더가 영어 문장을 한국어로 읽는다
+- 주소는 `usePathname()`이 아니라 `useSyncExternalStore`로 읽는다. 구워진 HTML에는 주소가 없으므로 클라이언트 첫 렌더가 바로 반영하면 하이드레이션 문자열이 어긋난다. 이 훅은 하이드레이션 동안 서버 스냅샷(null)을 쓰고 그 뒤에 실제 값으로 갈아타므로 어긋날 구간 자체가 없다
+- 루트 `not-found`는 루트 레이아웃 안에서만 그려진다 — `(ko)`/`en` 레이아웃의 헤더·푸터는 이 아래에 있어서 닿지 않는다. 그래서 `<main>` 껍데기도 화면이 직접 쓰고, 세로 가운데도 뷰포트 기준이다
+- `notFound()`를 부르는 `__no-posts` 자리표시자도 같은 화면을 받는다
+- dev에서 `/blog/<없는 slug>`는 404가 아니라 500이다(`output: export` + `dynamicParams = false`가 "generateStaticParams에 없는 param"이라고 던진다). 배포에서는 그 경로의 파일 자체가 없어 Pages가 404.html을 내주므로 무관하다
 
 ## 콘텐츠 데이터 모델
 
@@ -69,21 +79,21 @@ velog·티스토리·워드프레스·네이버를 실제로 띄워 확인한 �
 
 여기서는 둘 다 쓴다 — **카테고리는 책의 장, 태그는 책 뒤 색인**.
 
-- **카테고리**: `공부`(study) / `일상`(daily) / `생각`(think). 한 글에 하나, 개수 고정. key가 곧 URL이라 바꾸면 링크가 깨진다
+- **카테고리**: `language`(언어공부) / `dev`(개발) / `reading`(독서) / `daily`(일상) / `think`(생각). 한 글에 하나, 개수 고정. key가 곧 URL이라 바꾸면 링크가 깨진다. 목록은 `lib/content/blog.ts`의 `blogCategories`가 한 벌로 들고 있고(로더가 이 목록에 없는 category를 만나면 파일 이름을 붙여 던진다), 화면에 나가는 라벨은 로케일을 타므로 `dictionaries.ts`의 `blog.categories`에서 꺼낸다
 - **태그**: 한 글에 여럿, 글에서 자유롭게 자란다. 실제로 쓰인 태그만 페이지가 생긴다
 - 사이드바 개수는 **언제나 전체 글 기준**이다. 걸러진 목록에서도 숫자가 흔들리면 목차 역할을 못 한다
 - 태그 slug는 공백·슬래시·**점**을 하이픈으로 바꾼다. `Next.js`를 그대로 두면 `next.js`가 되고 Next가 확장자 있는 파일 경로로 봐서 trailingSlash를 무시한 채 308로 튕긴다
 - 한글 태그는 그대로 쓴다. export가 `out/blog/tag/기록/index.html`을 만들고 정적 호스트가 퍼센트 인코딩을 풀어 찾아간다 — 실제로 확인함
 
-- **로그형** (`content/life/*.md` 또는 구조화 데이터, category: travel/books/movies/games/languages) — 카테고리당 1~2개 항목의 짧고 구체적인 기록. 여행 카테고리에 버킷리스트 성격 항목 포함. 항목이 짧아 구조화 데이터(YAML/JSON)가 markdown보다 적합할 수 있음
+- **로그형** (`content/life.ts`, category: travel/books/movies/games/languages) — 카테고리당 1~2개 항목의 짧고 구체적인 기록. 여행 카테고리에 버킷리스트 성격 항목 포함. markdown 파일이 아니라 **타입이 붙은 TypeScript 모듈**로 굳혔다 — 항목이 짧고 필드가 정해져 있어(제목·meta·why·media) 본문보다 구조가 많고, `media`가 사진/표지/YouTube/없음으로 갈리는 판별 유니온이라 오타가 빌드에서 잡히는 쪽이 낫다. 영어판은 `content/life.en.ts`가 항목 id로 텍스트만 덮어씌운다(§진행 방식 6)
 
 ## 기술 설정
 
 - 스택: Next.js (App Router) + React + TypeScript + Tailwind CSS + shadcn/ui(base 프리셋, Nova) + Motion(구 Framer Motion)
 - `next.config.ts`: `output: 'export'`, `images.unoptimized: true`, `trailingSlash: true` (유저 페이지 루트 배포라 `basePath` 불필요)
-- 배포: GitHub Pages, GitHub Actions로 자동 배포 (`actions/configure-pages` → `next build` → `actions/upload-pages-artifact` → `actions/deploy-pages`), 레포 Settings → Pages → Source = "GitHub Actions"
+- 배포: GitHub Pages, GitHub Actions로 자동 배포 (`npm ci` → `npm run lint` → `next build` → `actions/configure-pages` → `actions/upload-pages-artifact` → `actions/deploy-pages`), 레포 Settings → Pages → Source = "GitHub Actions"
 - URL: `https://hgkimdev.github.io` (유저 페이지, 레포 `hgkimdev/hgkimdev.github.io`, public 전환 완료)
-- 기존 블로그는 `hgkimdev/blog` 레포로 이전됨 (콘텐츠 보존, 별도 주소로 재배포 필요)
+- 기존 블로그는 `hgkimdev/blog` 레포로 이전됨(콘텐츠 보존). **이 레포는 Pages 사이트가 없는 상태(private)로 두어야 한다** — GitHub Pages는 `hgkimdev.github.io/blog/*`를 이름이 `blog`인 레포에 먼저 내주고, 프로젝트 사이트가 유저 사이트의 하위 경로를 이긴다. 2026-08-08에 private으로 돌려 `/blog`를 되찾았다. Settings → Pages의 "Unpublish site" 버튼만으로는 부족하다 — 배포만 지우고 `has_pages: true`가 남아 경로를 계속 물고 있다(그 상태에서는 GitHub의 "Site not found"가 뜬다). 다시 공개하려면 `/blog`가 아닌 별도 주소가 필요하다
 - 인터랙션: 스크롤/마우스 기반 연출 (예: Framer Motion). Intro 존은 "탐험하는 재미"를 적극적으로 살려 인터랙티브 효과 비중을 크게 가져간다. Blog 존은 콘텐츠 가독성이 우선이라 절제된 인터랙션만 사용한다.
 - 다크모드: 헤더 토글, `prefers-color-scheme` 초기값 존중 + `localStorage` 저장. 전환 시 View Transitions API로 크로스페이드(`document.startViewTransition`)
 - Intro/Blog 존 전환: React `ViewTransition`(`next.config.ts`의 `experimental.viewTransition`)으로 메인 콘텐츠 크로스페이드
@@ -141,13 +151,19 @@ Blog 존의 절제된 인터랙션은 구체적으로 세 가지다 — 목록 �
 
 **다른 글로 가는 길은 상단 목록 하나로 모았다**(`components/blog/post-pager.tsx`). 제목만 다섯 개씩 보여주고 `‹ 1 2 3 ›` 로 넘긴다(양 끝에서 화살표는 disabled — 눌러도 아무 일이 없는 버튼을 살려 두면 마지막 페이지인지가 눌러 봐야만 알 수 있다). **기본값은 접힌 상태**이고 `글 목록` 행을 눌러 편다 — 글을 읽으러 들어온 사람에게 제목 다섯 줄을 먼저 들이밀 이유가 없다. 모양은 **본문 폭을 다 쓰는 아코디언 행**(위아래 hairline, 왼쪽 라벨 오른쪽 셰브론, 행 전체가 클릭 영역)이다. 알약 버튼도 만들어 봤지만 테두리 상자가 조용한 읽기 화면에 비해 무거웠다. 펼쳤을 때는 이 행의 아래 테두리를 끈다 — 목록이 자기 위 테두리를 그리므로 가로선 두 줄이 나란히 서면 유독 무거워 보인다(hover에서 border-color를 다시 칠하므로 `hover:border-b-transparent`도 같이 필요하다). 접혀 있을 때는 숨기는 게 아니라 아예 그리지 않는다(숨기기만 하면 링크가 접근성 트리와 탭 순서에 남는다). 본문 아래에 있던 이전/다음 링크는 지웠다 — Projects의 이전/다음은 항목이 셋으로 고정된 순환이라 뜻이 통하지만, 계속 쌓이는 블로그에서 "이전 글"은 그냥 하루 먼저 쓴 글이라 이어서 읽을 이유가 없다. 페이지 넘김은 라우트가 아니라 클라이언트 상태다(읽던 글을 벗어나지 않고 훑어보라고 있는 물건이고, 정적 export에서 페이지 수만큼 라우트를 만들 필요도 없다). 처음 열릴 때는 지금 보고 있는 글이 든 쪽을 편다.
 
+**파비콘은 터미널 프롬프트(`>_`)다.** 개인 개발자 사이트 13곳의 파비콘을 받아보니 축이 다섯으로 갈렸다 — 이니셜 모노그램, 터미널 프롬프트, 얼굴 사진, 이모지, 추상 그라디언트. 사진은 쓸 인물 사진이 없고 그라디언트는 모노크롬 페이퍼 팔레트와 어긋나서, 남은 축에서 프롬프트를 골랐다. About 배경으로 흐르는 코드, 히어로의 TextType 커서, 404 화면과 같은 어휘다.
+
+- 판을 잉크(`#2b2926`)로 채운 건 밝은 탭 바와 어두운 탭 바에서 같은 대비를 내기 위해서다. 페이퍼 판은 사이트 배경색 그대로라 예쁘지만 라이트 테마 탭에서 판이 녹아 글리프만 떠 보인다(헤어라인을 넣어도 16px에서는 사라진다)
+- 글리프는 텍스트가 아니라 path다. SVG 파비콘은 브라우저가 가진 폰트로 렌더하므로 `font-family`로 Geist를 지정해도 보장되지 않는다. 획 두께 8/64는 16px로 실제 래스터라이즈해 고른 값이다 — 7은 흐려지고 9는 꺾인 안쪽이 막힌다
+- 파일 셋: 벡터 원본 `app/icon.svg`, 구형 브라우저와 `/favicon.ico` 직접 요청을 받는 `app/favicon.ico`(16/32/48), 홈 화면 추가용 `app/apple-icon.png`(180). 조사한 13곳 중 ico 8곳, apple-touch-icon 8곳으로 셋 다 보편적이다. ICO는 sharp가 쓰지 못해 PNG 세 장을 품는 컨테이너로 직접 조립했다. `apple-icon`만 모서리를 안 깎은 건 iOS가 마스크를 직접 씌우기 때문이고, 그만큼 글리프를 0.86배로 줄였다
+
 ## 진행 방식
 
 1. 공통 레이아웃/네비게이션 (헤더, 푸터, 다크모드, 다국어) + Home(앵커 섹션) + Blog 목록 페이지 골격(placeholder) — 완료
-2. 각 섹션·페이지에 실제 콘텐츠 채우기 (About 완료, Life는 입구 포스터 월 + 전체화면 오버레이까지 구현 완료 — 콘텐츠 문장은 교체 필요. Projects도 구현 완료 — 다만 Life와는 다른 골격을 쓴다: 입구는 사진 벤토 그리드가 아니라 텍스트 행 목록(Claudocs·Langport·Claude 관련 도구 2종), 클릭하면 Life식 전체화면 오버레이가 아니라 진짜 라우트(`/projects/[slug]`, 뒤로가기 가능, 헤더·푸터 정상 노출, 이전/다음 프로젝트 링크가 있는 케이스 스터디 페이지)로 이동한다. 첫 시도는 Life의 UI를 그대로 재사용했다가 Home을 한 번에 스크롤할 때 사진 카드 그리드가 반복돼 단조롭다는 피드백을 받아 이렇게 바꿨다 — About=에세이, Life=사진 벤토, Projects=텍스트 목록, Contact=마퀴 목록으로 네 섹션이 각자 다른 시각 언어를 갖는다. 콘텐츠는 각 레포 README 기반이고 Claudocs·Langport는 본인 문장으로 교체 완료 — Claude 도구 2종은 자잘한 CLI 도구라 "왜 만들었는지" 서사 없이 최소 사실 기반으로 두기로 함)
+2. 각 섹션·페이지에 실제 콘텐츠 채우기 (About 완료, Life는 입구 포스터 월 + 전체화면 오버레이까지 구현 완료 — 콘텐츠 문장은 교체 필요. Projects도 구현 완료 — 다만 Life와는 다른 골격을 쓴다: 입구는 사진 벤토 그리드가 아니라 텍스트 행 목록(Claudocs·Langport·Claude Code tools), 클릭하면 Life식 전체화면 오버레이가 아니라 진짜 라우트(`/projects/[slug]`, 뒤로가기 가능, 헤더·푸터 정상 노출, 이전/다음 프로젝트 링크가 있는 케이스 스터디 페이지)로 이동한다. 첫 시도는 Life의 UI를 그대로 재사용했다가 Home을 한 번에 스크롤할 때 사진 카드 그리드가 반복돼 단조롭다는 피드백을 받아 이렇게 바꿨다 — About=에세이, Life=사진 벤토, Projects=텍스트 목록, Contact=마퀴 목록으로 네 섹션이 각자 다른 시각 언어를 갖는다. 콘텐츠는 각 레포 README 기반이고 Claudocs·Langport는 본인 문장으로 교체 완료 — `Claude Code tools` 그룹은 자잘한 CLI 도구라 "왜 만들었는지" 서사 없이 최소 사실 기반으로 두기로 함 — 한때 두 개였으나 `personal-astrologer`를 걷어내고 지금은 `claude-rpg-statusline` 하나다)
 3. Blog 구조·파이프라인 — 완료. 마크다운은 `@next/mdx` 대신 `gray-matter` + `unified`(remark-parse/gfm/rehype + rehype-slug/stringify)로 빌드 타임에 HTML로 굽는다. `@next/mdx`는 frontmatter를 기본 지원하지 않고 파일 기반 라우팅이라 `content/blog/*.md`를 수집하는 방식과 결이 안 맞았다. 클라이언트 번들 증가는 0이고, 본문에 raw HTML은 통과시키지 않는다. 라우트는 `/blog`(목록) · `/blog/[slug]`(P3형 상세: 읽기 진행바 + 상단 글 목록 + 메타 줄. Projects와 달리 `← Blog` 백링크는 없다 — 헤더의 `hgkim /blog`가 이미 같은 일을 한다) · `/blog/category/[category]` · `/blog/tag/[tag]`이고 전부 `/projects/[slug]`의 패턴(`generateStaticParams`, `dynamicParams = false`, `@footer` 병렬 슬롯)을 따른다. 슬롯은 경로가 정확히 맞아야 해서 하위 라우트마다 자기 `@footer` 파일이 필요하다. 코드 하이라이팅은 `@shikijs/rehype`(shiki) 듀얼 테마다 — 라이트 **Tokyo Night Light**(#e6e7ed) / 다크 **Tokyo Night**(#1a1b26). 라이트 쪽은 shiki 번들에 없어서 원본 VS Code 테마([enkia/tokyo-night-vscode-theme](https://github.com/enkia/tokyo-night-vscode-theme), MIT)를 `lib/content/themes/`에 벤더링했다 — JSONC를 엄격한 JSON으로 바꾸고, 원본의 오기(`"type": "dark"`)를 고치고, shiki가 안 쓰는 에디터 전용 키를 지웠다(자세한 건 그 폴더의 README). 빌드 타임에 토큰마다 색을 인라인 style로 박으므로 클라이언트에 하이라이터도 테마 CSS도 실리지 않는다. 두 테마 중 라이트를 인라인 style에 넣고 다크는 `--shiki-dark` 변수로 함께 실어 보내며, globals.css의 `.dark .blog-prose .shiki` 규칙이 변수를 꺼내 쓴다(인라인 style을 이겨야 해서 `!important`가 필요하다 — shiki가 안내하는 클래스 기반 다크 모드 방식이다). 테마 토글이 `prefers-color-scheme`가 아니라 클래스로 갈리는 이 사이트에서는 이 방식이라야 전환이 즉시 반영된다. 코드 블록의 배경색은 shiki가 인라인으로 넣으므로 globals.css에서는 상자 모양만 정한다 — 거기서 배경을 또 선언하면 인라인 style에 져서 죽은 규칙이 된다. 댓글은 giscus(아래 참고). **남은 것은 첫 글을 쓰는 일뿐이다.** `content/blog/`의 샘플 5편(`choosing-tools`·`font-loading-static-export`·`language-study-notes`·`travel-packing-notes`·`workspace-notes`)은 전부 `draft: true`인 자리표시자이므로 실제 글이 생기면 지울 것. 공개 글이 0편이라 지금 배포되는 사이트에는 `__no-posts` 자리표시자 경로만 나간다
 4. Blog 다국어 — 완료. Home 인트로(`dict.home`)는 ko 원문을 en으로 직역해 맞췄다. Blog는 Life·Projects와 다른 길을 탔다: `/en/blog`가 `PagePlaceholder` 대신 실제 `BlogShell`/`BlogList`/`BlogSidebar`를 쓰고, `/blog/[slug]`·`/blog/category/[category]`·`/blog/tag/[tag]`도 로케일마다 자기 라우트(및 `@footer` 슬롯)를 갖는다. Blog 존 UI 문구(카테고리/태그/전체글/댓글/페이지네이션)는 컴포넌트에 박아 두는 대신 `dictionaries.ts`의 `blog` 항목으로 옮겼다 — 카테고리 라벨도 `lib/content/blog.ts`의 `blogCategories`(key만 남음) 대신 사전에서 로케일별로 가져온다. 페이지 번호 라벨은 `(n) => string` 함수가 아니라 `"{n}페이지"` 같은 템플릿 문자열이다 — 함수를 클라이언트 컴포넌트(`TaxonomySection`/`Pagination`) props로 넘기면 "Functions cannot be passed directly to Client Components" 빌드 에러가 난다. 글 콘텐츠는 `content/blog/<slug>.md`(ko 원문)와 `<slug>.<locale>.md`(번역) 파일로 나란히 두고, 번역이 없는 글은 그 로케일 목록에 그냥 나타나지 않는다(한국어와 번역이 섞여 보이는 것보다 낫다는 판단) — 샘플 5편 중 `travel-packing-notes`만 en 번역이 없어서 이 동작이 실제로 걸리는 예시가 된다. sitemap·hreflang은 손대지 않았다: `pageAlternates`는 여전히 `/`·`/blog`에만 붙고, 글 상세·카테고리·태그는 자기 자신을 가리키는 canonical만 가진다(§SEO 메타데이터 참고) — 번역이 생겼다고 해서 이 부분을 넓히지는 않았다. (2026-08-28: 불어·일본어 지원을 걷어내고 한국어·영어만 남기기로 결정 — `app/fr/`·`app/ja/`와 `*.fr.md`/`*.ja.md` 번역 파일을 삭제했다)
-5. GitHub Pages 배포 파이프라인 구성 — 완료. `.github/workflows/deploy.yml`이 `main` push(+ `workflow_dispatch`)마다 `npm ci` → `npm run build` → `actions/upload-pages-artifact`(`./out`) → `actions/deploy-pages`를 돌린다. `concurrency: pages`에 `cancel-in-progress: false`를 준 건 배포가 겹칠 때 앞선 것을 죽이지 않고 줄을 세우기 위해서다 — Pages 배포는 중간에 끊기면 어떤 버전이 살아남는지 불분명해진다. 별도 브랜치(`gh-pages`)에 산출물을 커밋하는 옛 방식이 아니라 아티팩트 업로드 방식이라 레포에 빌드 결과가 쌓이지 않는다
+5. GitHub Pages 배포 파이프라인 구성 — 완료. `.github/workflows/deploy.yml`이 `main` push(+ `workflow_dispatch`)마다 `npm ci` → `npm run lint` → `npm run build` → `actions/upload-pages-artifact`(`./out`) → `actions/deploy-pages`를 돌린다. **lint 단계는 CI에만 있다** — Next 16에서 `next build`의 lint 단계가 빠져서, 여기서 돌리지 않으면 파이프라인 어디에서도 ESLint가 안 돈다(타입 검사는 여전히 build가 한다 — `typescript.ignoreBuildErrors` 기본값이 false라 타입 에러면 빌드가 멈춘다). 빌드보다 훨씬 싸서 앞에 둔다. `concurrency: pages`에 `cancel-in-progress: false`를 준 건 배포가 겹칠 때 앞선 것을 죽이지 않고 줄을 세우기 위해서다 — Pages 배포는 중간에 끊기면 어떤 버전이 살아남는지 불분명해진다. 별도 브랜치(`gh-pages`)에 산출물을 커밋하는 옛 방식이 아니라 아티팩트 업로드 방식이라 레포에 빌드 결과가 쌓이지 않는다
 6. Home 나머지 존 영어화 — 완료 (2026-08-29). About(`content/about.en.md`)·Life(`content/life.en.ts`)·Projects(`content/projects.en.ts`)를 항목 id로 매칭하는 텍스트 번역 파일로 추가하고, `lib/content/{life,projects}.ts`의 `getLifeCategories(locale)`/`getProjectGroups(locale)`가 ko 원본(media·id 등 언어 무관 필드)에 번역 텍스트만 덮어씌워 돌려준다 — media·photo 배열을 로케일마다 중복시키지 않기 위해서다. `components/home-content.tsx`의 `locale === "ko"` 게이트를 걷어냈고, Life 오버레이·Projects 상세에 박혀 있던 하드코딩 한국어 UI 문구(닫기·소리 켜기/끄기·목록 aria·책장 사진 라벨·교보문고 미리보기 aria·데모 영상 title) 6곳은 `dictionaries.ts`의 `life`/`projects` 항목으로 옮겼다. `/projects/[slug]`도 `app/en/projects/[slug]`로 영어 버전을 냈다(SPEC상 원래는 한국어 전용이었지만 요청으로 확장) — sitemap은 블로그 상세와 같은 기존 규칙대로 ko canonical URL만 유지하고 손대지 않았다. 사진·표지 이미지의 `alt` 텍스트도 뒤이어 영어화했다(2026-09-09) — `life.en.ts`의 항목마다 `alt?: Record<string, string>`을 두고 `lib/content/life.ts`의 `translateMediaAlt`가 media 구조는 ko 원본을 그대로 재사용한 채 alt 문자열만 갈아끼운다. 키를 배열 인덱스가 아니라 `src`로 잡은 건 사진을 중간에 끼워 넣어도 짝이 조용히 어긋나지 않게 하기 위해서고, 번역이 없는 `src`는 원문 alt를 남긴다(영어 화면에서 alt가 비는 것보다 낫다). 실제로 alt가 화면에 나가는 곳은 여행 갤러리(`LifeGalleryPhoto`, `components/life/life-gallery.tsx`)뿐이다 — 책·문법서 표지(`LifeCoverMedia.alt`)는 타입에는 있지만 `LifeCoverPlate`가 `alt=""`로 그리므로 지금은 쓰이지 않는 값이다(옆에 제목·저자 텍스트가 이미 있어 장식 이미지로 둔 것).
 
 ## 댓글 (giscus)
