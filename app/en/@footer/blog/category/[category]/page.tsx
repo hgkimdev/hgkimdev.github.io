@@ -7,5 +7,8 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 // 푸터가 사라진다.
 export default function BlogSubpageFooter() {
   const dict = getDictionary("en");
-  return <SiteFooter footerText={dict.footer(new Date().getFullYear())} />;
+  return <SiteFooter
+      footerText={dict.footer(new Date().getFullYear())}
+      locale="en"
+    />;
 }

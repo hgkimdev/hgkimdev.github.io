@@ -1,3 +1,5 @@
+import { Rss } from "lucide-react";
+
 import {
   TaxonomySection,
   type TaxonomyItem,
@@ -92,6 +94,24 @@ export function BlogSidebar({
         pageSize={TAG_PAGE_SIZE}
         paginationLabels={paginationLabels}
       />
+
+      {/* 분류 축의 꼬리. 헤딩과 같은 mono 활자를 쓰되 밑줄을 위로 돌려서
+          "세 번째 축"이 아니라 목록의 끝으로 읽히게 한다.
+
+          좁은 화면에서는 아예 빼고 푸터 쪽 아이콘 하나에 맡긴다. 900px
+          아래에서 사이드바는 가로로 스크롤하는 칩 한 줄이 되는데, 거기
+          한 줄을 더 만들면 높이를 항목 수와 무관하게 유지하려고 가로
+          스크롤을 고른 이유가 무너진다(taxonomy-section.tsx 참고).
+
+          next/link가 아니라 <a>다 — /feed.xml은 라우트가 아니라 빌드 때
+          구워지는 정적 파일이라 클라이언트 내비게이션의 대상이 아니다. */}
+      <a
+        href={localizeHref("/feed.xml", locale)}
+        className="hidden items-center gap-1.5 border-t border-border/60 pt-3.5 font-mono text-xs tracking-[0.06em] text-muted-foreground transition-colors hover:text-foreground min-[900px]:flex"
+      >
+        <Rss size={13} aria-hidden />
+        RSS
+      </a>
     </aside>
   );
 }

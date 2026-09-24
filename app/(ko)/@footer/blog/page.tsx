@@ -7,5 +7,8 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 // 없고, 홈 쪽 산출물에는 푸터가 JS로도 페이로드로도 들어가지 않는다.
 export default function BlogFooter() {
   const dict = getDictionary("ko");
-  return <SiteFooter footerText={dict.footer(new Date().getFullYear())} />;
+  return <SiteFooter
+      footerText={dict.footer(new Date().getFullYear())}
+      locale="ko"
+    />;
 }

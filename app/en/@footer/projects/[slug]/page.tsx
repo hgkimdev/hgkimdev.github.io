@@ -7,5 +7,8 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 // 푸터가 안 보인다.
 export default function ProjectFooter() {
   const dict = getDictionary("en");
-  return <SiteFooter footerText={dict.footer(new Date().getFullYear())} />;
+  return <SiteFooter
+      footerText={dict.footer(new Date().getFullYear())}
+      locale="en"
+    />;
 }

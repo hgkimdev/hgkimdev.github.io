@@ -6,5 +6,8 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 // 자기 슬롯 파일이 필요하다 — 없으면 default.tsx(null)로 떨어져 푸터가 사라진다.
 export default function BlogPagePageFooter() {
   const dict = getDictionary("ko");
-  return <SiteFooter footerText={dict.footer(new Date().getFullYear())} />;
+  return <SiteFooter
+      footerText={dict.footer(new Date().getFullYear())}
+      locale="ko"
+    />;
 }
