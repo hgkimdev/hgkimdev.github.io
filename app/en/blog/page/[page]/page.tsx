@@ -12,7 +12,7 @@ import {
 } from "@/lib/content/blog";
 import { localizeHref } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
-import { absoluteUrl } from "@/lib/seo";
+import { blogAlternates } from "@/lib/seo";
 
 // 페이지 1은 /blog 자신이 맡으므로 여기서는 2쪽부터만 만든다. 글이
 // POSTS_PAGE_SIZE개 이하라 둘째 쪽이 없으면 EMPTY_ROUTE_PARAM 자리표시자를
@@ -43,9 +43,7 @@ export async function generateMetadata({
   const page = parsePageParam(pageParam, pageCount);
   return {
     title: page ? `Blog · ${page}` : "Blog",
-    alternates: page
-      ? { canonical: absoluteUrl(localizeHref(`/blog/page/${page}`, "en")) }
-      : undefined,
+    alternates: page ? blogAlternates(`/blog/page/${page}`, "en") : undefined,
   };
 }
 

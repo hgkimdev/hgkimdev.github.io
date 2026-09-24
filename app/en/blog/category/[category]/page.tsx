@@ -9,8 +9,7 @@ import {
   getAllPosts,
   type BlogCategory,
 } from "@/lib/content/blog";
-import { localizeHref } from "@/lib/i18n/config";
-import { absoluteUrl } from "@/lib/seo";
+import { blogAlternates } from "@/lib/seo";
 
 // 카테고리는 개수가 고정(언어공부·개발·독서·일상·생각)이라 글이 없는 카테고리까지 미리
 // 만들어 둔다. 사이드바에서는 0인 카테고리가 숨겨지지만, 예전에 공유된
@@ -33,11 +32,7 @@ export async function generateMetadata({
       ? `${categoryLabel(category as BlogCategory, "en")} · Blog`
       : "Blog",
     alternates: known
-      ? {
-          canonical: absoluteUrl(
-            localizeHref(`/blog/category/${category}`, "en"),
-          ),
-        }
+      ? blogAlternates(`/blog/category/${category}`, "en")
       : undefined,
   };
 }

@@ -9,7 +9,7 @@ import {
   getTagCounts,
   tagSlug,
 } from "@/lib/content/blog";
-import { absoluteUrl } from "@/lib/seo";
+import { blogAlternates } from "@/lib/seo";
 
 // 카테고리와 달리 태그는 글에서 자라난다 — 실제로 쓰인 태그만 페이지가
 // 생긴다. 태그를 지우면 그 페이지도 다음 빌드에서 사라진다.
@@ -35,7 +35,7 @@ export async function generateMetadata({
   const label = findTagLabel(slug);
   return {
     title: label ? `${label} · Blog` : "Blog",
-    alternates: label ? { canonical: absoluteUrl(`/blog/tag/${slug}`) } : undefined,
+    alternates: label ? blogAlternates(`/blog/tag/${slug}`, "ko") : undefined,
   };
 }
 

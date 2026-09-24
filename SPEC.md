@@ -177,6 +177,20 @@ GitHub Discussions를 저장소로 쓰는 임베드라 정적 사이트에서도
 - 테마: 사이트가 `prefers-color-scheme`가 아니라 `<html>.dark` 클래스로 갈리므로 giscus의 `preferred_color_scheme`을 쓸 수 없다. MutationObserver로 클래스를 보고 `postMessage`로 giscus에 넘긴다. 다크는 `dark`(#0d1117)가 아니라 `dark_dimmed` — giscus의 dark가 이 사이트 다크 배경보다 훨씬 검어서 댓글창만 구멍처럼 파인다
 - **전제 조건**: giscus GitHub App이 이 레포에 설치돼 있어야 한다(<https://github.com/apps/giscus>). 설치 전에는 임베드가 "giscus is not installed on this repository"를 표시한다
 
+## 피드 (RSS)
+
+`/feed.xml`(ko)·`/en/feed.xml`(en). 이 사이트에는 구독 수단이 이것 하나뿐이다 — 정적 GitHub Pages라 메일도 푸시도 없다. 글이 0편일 때 먼저 깔아 둔 건 **피드 주소는 한 번 정하면 못 바꾸기 때문**이다. 구독자가 등록한 뒤에 경로를 옮기면 에러 없이 조용히 끊긴다. `app/feed.xml/route.ts`가 로케일별 래퍼이고 XML을 만드는 건 `lib/feed.ts`의 `buildFeed(locale)`이다.
+
+- **요약만 싣고 전문은 안 싣는다**: 본문 HTML은 shiki가 토큰마다 색을 인라인 style로 박고 다크 색은 `--shiki-dark` 변수로만 실려 있는데, 그 변수를 꺼내 쓰는 주체가 globals.css다. 피드 리더에는 그 CSS가 없으니 다크 리더에서 코드블록만 라이트 색으로 뜬다. 본문 이미지 경로도 전부 상대경로라 절대화가 따로 필요하다. 요약+링크는 이 둘을 다 피하고, 댓글이 있는 본 사이트로 읽는 사람을 보낸다
+- **RSS 2.0을 골랐다**: 리더의 "피드 추가"가 실제로 넘겨짚는 형식이다. Atom 1.0이 규격은 더 엄밀하지만(날짜가 RFC 3339) 텍스트 블로그에서 실질 차이는 날짜 형식뿐이다. `pubDate`는 RFC 822여야 해서 `YYYY-MM-DD`를 UTC 자정으로 읽고 `toUTCString()`에 넘긴다
+- **`trailingSlash: true`가 안 건드린다**: 확장자가 붙은 경로는 예외라고 trailingSlash 문서에 명시돼 있다(`/file.txt` 등). 그래서 피드 주소만 `absoluteUrl`을 거치지 않는다 — 거치면 `/feed.xml/`이 되어 존재하지 않는 주소를 가리킨다
+- **로케일마다 따로 낸다**: `getAllPosts(locale)`이 번역 없는 글을 애초에 빼 주므로 한 피드 안에서 두 언어가 섞이지 않는다. 실제로 `travel-packing-notes`는 en 번역이 없어 en 피드에만 빠진다
+- **초고 필터는 공짜로 따라온다**: `getAllPosts`가 프로덕션 빌드에서 `draft: true`를 이미 걸러낸다(`includeDrafts`). dev에서는 초고까지 보이므로 항목 렌더링을 확인할 수 있다
+- **`guid`는 글 주소다**: 항목의 정체성이 경로에 묶여 있다는 뜻이라, **공개한 뒤 slug를 바꾸면 리더가 같은 글을 새 글로 다시 띄운다**. giscus의 `pathname` 매핑이 댓글 연결을 잃는 것과 같은 뿌리의 제약이고, 개명 한 번이 두 군데를 친다
+- **`lastBuildDate`는 빌드 시각이 아니라 최신 글의 날짜다**: 빌드 시각을 쓰면 글이 하나도 안 바뀐 재배포마다 피드가 달라졌다고 주장하게 된다. 글이 0편이면 요소 자체를 뺀다
+- **`<atom:link rel="self">`**: 피드 자신의 주소를 피드 안에 적어 두는 관례. RSS 2.0에는 대응 요소가 없어 Atom 네임스페이스에서 빌려 오며, 없으면 W3C Feed Validator가 경고한다
+- **발견 경로**: `<link rel="alternate" type="application/rss+xml">`를 `/`와 Blog 존 전체에 붙인다. Next의 메타데이터 얕은 병합은 `openGraph`뿐 아니라 **`alternates`에도 걸리므로**, 루트 레이아웃에 한 번 적어 두면 자기 canonical을 선언하는 블로그 하위 페이지에서 통째로 지워진다. 그래서 `lib/seo.ts`에서 alternates 객체를 만드는 `pageAlternates`/`blogAlternates` 양쪽에 넣는다 — 후자는 글 상세·카테고리·태그·페이지네이션이 쓰던 `{ canonical: absoluteUrl(localizeHref(...)) }` 여덟 벌을 대신한다
+
 ## SEO 메타데이터
 
 `lib/seo.ts`에 사이트 URL·OG 기본값·hreflang 헬퍼를 모아 뒀다. 레이아웃·페이지·`sitemap.ts`가 전부 여기서 가져다 쓴다 — 로직이 세 곳 이상에서 반복되길래 뽑았다.
@@ -185,6 +199,6 @@ GitHub Discussions를 저장소로 쓰는 임베드라 정적 사이트에서도
 - **타이틀 템플릿**: 루트가 `title: { default: "hgkim", template: "%s · hgkim" }`을 잡아 두면 자식이 문자열 타이틀만 적어도(`"Blog"`, `"${post.title} · Blog"`) 자동으로 `"... · hgkim"`이 붙는다. 그래서 en 레이아웃의 `title: "hgkim"` 중복 선언은 지웠다 — 남겨 두면 템플릿이 한 번 더 감싸 `"hgkim · hgkim"`이 됐을 것
 - **`openGraph`는 항상 통째로 다시 적어야 한다**: Next의 메타데이터 병합은 얕은 병합이라, 자식이 `openGraph`를 선언하면 부모 쪽 `openGraph`는 필드 단위로 합쳐지지 않고 객체째로 교체된다(`node_modules/next/dist/docs`의 generate-metadata.md에서 확인). 그래서 로케일 레이아웃마다 `locale`만 다르게 주고 싶어도 `siteName`·`type`까지 매번 같이 넣어야 한다 — `lib/seo.ts`의 `openGraphFor(locale)`이 그 전체 객체를 만들어 준다
 - **OG 이미지**: `app/opengraph-image.tsx`가 `next/og`의 `ImageResponse`로 빌드 타임에 정적 PNG를 굽는다(모든 라우트의 기본값). 이미지 안 문구는 이미 배포된 루트 메타데이터 문구(`hgkim`, `나라는 사람을 소개하는 공간`)를 그대로 재사용했다 — 이미지용으로 새 카피를 지어내지 않았다. 별도 `twitter-image`는 안 만든다: `twitter:image`가 없으면 트위터 카드 파서가 `og:image`로 떨어지는 게 표준 동작이라 굳이 같은 그림을 두 벌 관리할 이유가 없다
-- **`output: 'export'`의 숨은 요구사항**: `sitemap.ts`·`robots.ts`·`opengraph-image.tsx`는 전부 Route Handler 취급이라, `export const dynamic = "force-static"`을 안 적으면 "정적 export인데 이 라우트는 정적으로 설정 안 됐다"고 빌드가 죽는다. 세 파일 모두 이 줄이 있어야 한다
+- **`output: 'export'`의 숨은 요구사항**: `sitemap.ts`·`robots.ts`·`opengraph-image.tsx`·`feed.xml/route.ts`(로케일별로 둘)는 전부 Route Handler 취급이라, `export const dynamic = "force-static"`을 안 적으면 "정적 export인데 이 라우트는 정적으로 설정 안 됐다"고 빌드가 죽는다. 이 파일들 모두 이 줄이 있어야 한다
 - **hreflang은 `/`·`/blog`에만 붙인다**: 로케일이 실제로 대응하는 페이지는 이 둘뿐이다. 글 상세·카테고리·태그는 일부(번역이 있는 글)는 en 대응판이 있지만, 번역이 없는 글도 있을 수 있어 페이지 단위로 존재를 보장할 수 없다 — 그래서 이 라우트들은 여전히 hreflang을 넣지 않고 자기 자신을 가리키는 `alternates.canonical`만 붙인다(프로젝트 상세는 그대로 한국어 전용). `lib/seo.ts`의 `pageAlternates(path, locale)`이 canonical + 로케일별 alternate + `x-default`(ko) 묶음을 만드는 건 `/`·`/blog`에서만 쓴다
 - **`sitemap.ts`**: `trailingSlash: true`라 URL 끝에 `/`를 붙여야 실제로 서빙되는 주소와 일치한다(`lib/seo.ts`의 `absoluteUrl`이 처리). 카테고리·태그는 글이 0편이면(`getCategoryCounts`/`getTagCounts`가 count>0만 남기므로) 사이트맵에서 자동으로 빠진다 — 라우트 자체는 예전 링크를 위해 미리 만들어 두지만(`generateStaticParams`), 빈 페이지를 검색엔진에 알릴 이유는 없다

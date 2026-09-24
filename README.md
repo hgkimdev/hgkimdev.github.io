@@ -5,6 +5,7 @@ Personal site built with Next.js (App Router), statically exported to GitHub Pag
 - **Intro zone** (`/`): a single pinned-scroll page (About / Projects / Life / Contact)
 - **Blog zone** (`/blog`): a Markdown-backed blog with categories, tags, and comments (giscus)
 - **Locales**: `/` (Korean, default), `/en` — see `lib/i18n/`
+- **Feed**: `/feed.xml` (Korean), `/en/feed.xml` — summary-only RSS 2.0, built by `lib/feed.ts`
 
 See [`SPEC.md`](./SPEC.md) for the reasoning behind the site's structure and design decisions, and [`docs/bug-audit-2026-07-15.md`](./docs/bug-audit-2026-07-15.md) for a point-in-time audit of the codebase.
 
