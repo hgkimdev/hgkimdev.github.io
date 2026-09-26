@@ -7,8 +7,8 @@ import { getLifeCategories } from "@/lib/content/life";
 import { getProjectGroups } from "@/lib/content/projects";
 import { ContactSection } from "@/components/contact-section";
 import { CodeBackdrop } from "@/components/home-fx/code-backdrop";
-import ShinyText from "@/components/ShinyText";
-import TextType from "@/components/TextType";
+import ShinyText from "@/components/shiny-text";
+import TextType from "@/components/text-type";
 
 export function HomeContent({ locale }: { locale: Locale }) {
   const dict = getDictionary(locale);
