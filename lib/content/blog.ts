@@ -54,6 +54,8 @@ export type BlogPost = {
   summary: string;
   /** 목록 썸네일. frontmatter의 cover가 없으면 본문 첫 이미지를 쓴다. */
   cover?: string;
+  /** 본문 맨 위에 띄울 YouTube 영상 ID. frontmatter의 video에서 온다. */
+  video?: string;
   draft: boolean;
 };
 
@@ -102,6 +104,22 @@ function findCover(data: Record<string, unknown>, body: string): string | undefi
 // 점도 하이픈으로 바꾼다 — "Next.js"를 그대로 두면 next.js가 되고, Next가
 // 확장자 있는 파일 경로로 보고 trailingSlash 설정을 무시한 채 리다이렉트한다
 // (실제로 /blog/tag/next.js/ 가 308로 튕겼다).
+/**
+ * frontmatter의 video를 YouTube 영상 ID로 정규화한다. 주소를 통째로 붙여넣든
+ * ID만 적든 받는다 — 매번 ID를 잘라내게 하면 안 그래도 손이 가는 일이 는다.
+ *
+ * ID는 11자리 [A-Za-z0-9_-]다. 그 꼴이 아니면 조용히 무시한다(빈 값으로
+ * 둔다) — 오타 하나로 빌드를 멈출 만한 값이 아니고, 화면에서 바로 보인다.
+ */
+function youtubeId(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const raw = value.trim();
+  if (!raw) return undefined;
+  const fromUrl = raw.match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{11})/);
+  const id = fromUrl?.[1] ?? raw;
+  return /^[A-Za-z0-9_-]{11}$/.test(id) ? id : undefined;
+}
+
 export function tagSlug(tag: string): string {
   return tag.trim().toLowerCase().replace(/[\s/.]+/g, "-");
 }
@@ -178,6 +196,7 @@ function parsePost(fileName: string, locale: Locale): BlogPost | null {
     tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
     summary: String(data.summary ?? ""),
     cover: blogImage(findCover(data, content), "thumb"),
+    video: youtubeId(data.video),
     draft: data.draft === true,
   };
 }

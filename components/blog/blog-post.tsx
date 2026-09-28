@@ -79,6 +79,24 @@ export function BlogPostView({
         </div>
       </div>
 
+      {/* frontmatter에 video가 있으면 본문 맨 위에 플레이어를 띄운다.
+          마크다운 안에 iframe을 적을 수는 없다 — 파이프라인이 raw HTML을
+          통과시키지 않기 때문이고, 그 결정은 그대로 두는 편이 낫다.
+
+          nocookie 도메인을 쓰고 loading="lazy"를 건다. 정적 사이트라
+          플레이어 스크립트는 YouTube 쪽에서 오는데, 화면에 들어오기 전에
+          받아올 이유가 없다. */}
+      {post.video ? (
+        <iframe
+          src={`https://www.youtube-nocookie.com/embed/${post.video}`}
+          title={post.title}
+          loading="lazy"
+          allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+          className="aspect-video w-full rounded-lg border border-border/60"
+        />
+      ) : null}
+
       {/* 빌드 타임에 remark/rehype가 구운 HTML. 원본은 전부 이 저장소 안의
           로컬 마크다운이고 raw HTML은 파이프라인에서 통과시키지 않는다. */}
       <div className="blog-prose" dangerouslySetInnerHTML={{ __html: html }} />
