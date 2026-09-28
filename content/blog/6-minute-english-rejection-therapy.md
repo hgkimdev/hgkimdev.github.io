@@ -5,7 +5,7 @@ category: language
 tags: [영어, 리스닝, 6 Minute English, BBC podcast]
 video: https://www.youtube.com/watch?v=rCIs5x0SGTY
 summary: "Rejection therapy 유행을 다룬 회차."
-draft: true
+draft: false
 ---
 
 [6 Minute English · Is rejection good for us?](https://www.bbc.co.uk/learningenglish/english/features/6-minute-english_2026/ep-260917) · 2026년 9월 17일
