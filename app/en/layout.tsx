@@ -5,6 +5,7 @@ import { LocaleHtmlLang } from "@/components/locale-html-lang";
 import { PageTransition } from "@/components/page-transition";
 import { SiteHeader } from "@/components/site-header";
 import { getDictionary, getNavLabels } from "@/lib/i18n/dictionaries";
+import { pathsInLocale } from "@/lib/i18n/counterparts";
 import { openGraphFor } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -31,6 +32,7 @@ export default function EnLayout({
         <LocaleHtmlLang locale="en" />
         <SiteHeader
           locale="en"
+          counterpartPaths={pathsInLocale("ko")}
           brand={dict.brand}
           navLabels={getNavLabels("en")}
           zoneLabels={dict.zoneLabels}

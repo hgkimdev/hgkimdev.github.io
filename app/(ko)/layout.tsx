@@ -3,6 +3,7 @@ import { LocaleHtmlLang } from "@/components/locale-html-lang";
 import { PageTransition } from "@/components/page-transition";
 import { SiteHeader } from "@/components/site-header";
 import { getDictionary, getNavLabels } from "@/lib/i18n/dictionaries";
+import { pathsInLocale } from "@/lib/i18n/counterparts";
 
 export default function KoLayout({
   children,
@@ -23,6 +24,7 @@ export default function KoLayout({
         <LocaleHtmlLang locale="ko" />
         <SiteHeader
           locale="ko"
+          counterpartPaths={pathsInLocale("en")}
           brand={dict.brand}
           navLabels={getNavLabels("ko")}
           zoneLabels={dict.zoneLabels}

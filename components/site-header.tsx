@@ -28,12 +28,15 @@ export function SiteHeader({
   navLabels,
   zoneLabels,
   themeToggleLabel,
+  counterpartPaths,
 }: {
   locale: Locale;
   brand: string;
   navLabels: Record<NavKey, string>;
   zoneLabels: Record<Zone, string>;
   themeToggleLabel: string;
+  /** 다른 로케일에 있는 경로들. LanguageSwitcher에 그대로 넘긴다. */
+  counterpartPaths: string[];
 }) {
   const pathname = usePathname();
   const zone = getZone(pathname, locale);
@@ -79,7 +82,7 @@ export function SiteHeader({
 
         <div className="flex items-center gap-2 sm:gap-3">
           <ZoneSwitcher locale={locale} labels={zoneLabels} />
-          <LanguageSwitcher />
+          <LanguageSwitcher counterpartPaths={counterpartPaths} />
           <ThemeToggle label={themeToggleLabel} />
         </div>
       </div>
