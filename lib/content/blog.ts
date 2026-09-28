@@ -19,6 +19,7 @@ import { unified } from "unified";
 
 import type { Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { siteUrl } from "@/lib/seo";
 
 // 카테고리는 큰 축(한 글에 하나), 태그는 세부 축(한 글에 여럿)이다. 이
 // 구분이 흐려지면 사이드바가 태그 수십 개짜리 목록으로 무너진다 — velog가
@@ -265,6 +266,7 @@ export async function getPostHtml(
     // 두 테마 모두 Tokyo Night 계열이라 라이트/다크를 오갈 때 색 이름이
     // 그대로 이어진다(키워드는 보라, 문자열은 초록 …).
     .use(rehypeBlogImages)
+    .use(rehypeExternalLinks)
     .use(rehypeShiki, {
       themes: {
         // JSON import는 type을 string으로 추론한다. shiki는 "light" | "dark"만
@@ -306,6 +308,44 @@ function rehypeBlogImages() {
       };
       if (el.type === "element" && el.tagName === "img" && el.properties?.src) {
         el.properties.src = blogImage(String(el.properties.src), "body");
+      }
+      el.children?.forEach(walk);
+    };
+    walk(tree);
+  };
+}
+
+/**
+ * 본문의 외부 링크만 새 탭으로 연다.
+ *
+ * 내부 링크는 그대로 둔다 — 같은 사이트 안에서 탭이 늘어나면 뒤로가기가
+ * 끊기고, next/link가 아닌 <a>라도 정적 호스팅에서는 그냥 이동이면 된다.
+ * 판단 기준은 "http(s)로 시작하면서 우리 호스트가 아닌 것"이다. `/`로
+ * 시작하는 경로와 `#` 앵커는 자연히 걸러진다.
+ *
+ * rel은 noopener noreferrer다. target="_blank"면 요즘 브라우저가 noopener를
+ * 알아서 붙이지만, 마크다운에서 나온 링크라 눈에 보이는 곳에 적어 둔다.
+ */
+function rehypeExternalLinks() {
+  return (tree: unknown) => {
+    const walk = (node: unknown): void => {
+      if (!node || typeof node !== "object") return;
+      const el = node as {
+        type?: string;
+        tagName?: string;
+        properties?: Record<string, unknown>;
+        children?: unknown[];
+      };
+      const href = el.properties?.href;
+      if (
+        el.type === "element" &&
+        el.tagName === "a" &&
+        typeof href === "string" &&
+        /^https?:\/\//i.test(href) &&
+        !href.startsWith(siteUrl)
+      ) {
+        el.properties!.target = "_blank";
+        el.properties!.rel = "noopener noreferrer";
       }
       el.children?.forEach(walk);
     };

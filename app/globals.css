@@ -716,6 +716,25 @@ main:has([data-zone-wide]) {
 .dark .blog-prose a {
   color: #93c5fd;
 }
+
+/* 새 탭으로 열리는 링크에만 붙는 표시. rehypeExternalLinks가 외부 링크에만
+   target="_blank"를 달므로 이 선택자가 곧 "여기서 나간다"는 뜻이다. 누르기
+   전에 알 수 있어야 한다는 관례를 마크다운은 그대로 둔 채 지킨다.
+
+   inline-block인 건 밑줄을 끊기 위해서다 — 텍스트 장식은 원자적 인라인
+   박스 안으로 전파되지 않으므로, 링크의 밑줄이 화살표 밑을 지나가지 않는다.
+
+   content를 두 번 적는 건 대체 텍스트("/" 뒤) 문법을 모르는 브라우저 때문이다.
+   지원하면 두 번째가 이겨서 스크린리더가 화살표를 읽지 않고, 모르면 그 줄만
+   버려져 첫 번째가 남는다. */
+.blog-prose a[target="_blank"]::after {
+  content: "↗";
+  content: "↗" / "";
+  display: inline-block;
+  margin-left: 0.15em;
+  font-size: 0.8em;
+  opacity: 0.6;
+}
 .blog-prose code {
   font-family: var(--font-mono);
   font-size: 0.85em;
@@ -792,3 +811,4 @@ main:has([data-zone-wide]) {
   border: 0;
   border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
 }
+
