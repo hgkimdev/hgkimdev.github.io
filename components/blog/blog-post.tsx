@@ -47,7 +47,7 @@ export function BlogPostView({
       />
 
       <div className="flex flex-col gap-4">
-        <h1 className="text-4xl font-bold tracking-tight break-keep sm:text-6xl">
+        <h1 className="text-4xl font-bold tracking-tight break-keep sm:text-5xl">
           {post.title}
         </h1>
 
@@ -81,10 +81,7 @@ export function BlogPostView({
 
       {/* 빌드 타임에 remark/rehype가 구운 HTML. 원본은 전부 이 저장소 안의
           로컬 마크다운이고 raw HTML은 파이프라인에서 통과시키지 않는다. */}
-      <div
-        className="blog-prose"
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
+      <div className="blog-prose" dangerouslySetInnerHTML={{ __html: html }} />
 
       <GiscusComments locale={locale} />
     </div>
