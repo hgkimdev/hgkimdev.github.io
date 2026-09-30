@@ -30,4 +30,4 @@ Next.js · React · TypeScript · Tailwind CSS · shadcn/ui (Base UI primitives)
 
 ## Content
 
-Blog posts live in `content/blog/*.md` (frontmatter: `title`, `date`, `category`, `tags`, `summary`, optional `cover`, `draft`). Files starting with `_` are excluded from the list; `_template.md` is the starting point for a new post.
+Blog posts live in `content/blog/*.md` (frontmatter: `title`, `date`, `category`, `tags`, `summary`, optional `cover`, `video`, `draft`). Files starting with `_` are excluded from the list; `_template.md` is the starting point for a new post, `_template-english.md` for an English listening note.
