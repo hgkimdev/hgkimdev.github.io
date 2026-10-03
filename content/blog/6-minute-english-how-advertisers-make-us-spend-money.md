@@ -5,7 +5,7 @@ category: language
 tags: [영어, 리스닝, 6 Minute English, BBC podcast]
 video: https://www.youtube.com/watch?v=vOuhs1mA0xo
 summary: "광고와 행동과학이 사람들의 소비를 어떻게 움직이는지 다룬 회차."
-draft: true
+draft: false
 ---
 
 [6 Minute English · How advertisers make us spend money](https://www.bbc.co.uk/learningenglish/english/features/6-minute-english_2026/ep-260611) · 2026년 6월 11일
