@@ -1,6 +1,6 @@
 ---
 title: "6 Minute English: How advertisers make us spend money"
-date: 2026-06-11
+date: 2026-10-03
 category: language
 tags: [영어, 리스닝, 6 Minute English, BBC podcast]
 video: https://www.youtube.com/watch?v=vOuhs1mA0xo
