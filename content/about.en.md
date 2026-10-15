@@ -11,4 +11,6 @@ I think building something fast and seeing how people react gets you further
 in the end than waiting on a perfect plan. So when an idea shows up, I tend to
 just build it and see what happens instead of turning it over in my head.
 
-Lately I've been trying to keep as many projects going as I can.
+I once tried going solo as an indie developer, but I couldn't overcome the
+uncertainty, and now I'm preparing to become a police officer. Still, I plan
+to keep developing as a hobby.

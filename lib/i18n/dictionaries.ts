@@ -71,7 +71,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
     },
     home: {
       greeting: "안녕하세요 👋",
-      heading: "호기심 많은 프로덕트 엔지니어입니다.",
+      heading: "호기심 많은 취미 개발자입니다.",
       // `\u00a0`(줄바꿈 없는 공백)은 오타가 아니다. 모바일에서 이 문장은 두 줄이
       // 되는데(390px 화면의 본문 칸이 358px, 문장은 알약 패딩까지 370px),
       // 그냥 두면 "여러" / "서비스들을"로 수식어와 피수식어가 갈린다. 붙여두면
@@ -135,8 +135,8 @@ export const dictionaries: Record<Locale, Dictionary> = {
     home: {
       greeting: "Hi, I'm hgkim 👋",
       // ko와 같은 처리. 역할 이름이 통째로 둘째 줄로 내려가 "I'm a curious" /
-      // "product engineer."가 된다.
-      heading: "I'm a curious product\u00a0engineer.",
+      // "hobbyist developer."가 된다.
+      heading: "I'm a curious hobbyist\u00a0developer.",
       intro: "I'm building various services together with AI agents.",
       aiAgentMarker: "AI agents",
     },
